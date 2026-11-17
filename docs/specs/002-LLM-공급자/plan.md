@@ -75,8 +75,8 @@ lib/llm/
 - [x] 실패 확인 → 구현 → 통과. 공급자 고르기 판단은 시험하기 쉽게 순수 함수 `lib/llm/select.ts`로 뺐다(`registry.server.ts`는 이것을 부른다)
 
 ### 2단계 작업
-- [ ] 0007 SQL을 보여 주고 적용, DB 타입 옮기기
-- [ ] 공급자 3개(가짜 fetch·SDK로 시험), 고르기, 공통 길, 호출 기록
+- [x] 0007 SQL을 보여 주고 적용(사용자 승인), DB 타입 옮기기
+- [x] 공급자 3개(가짜 fetch·SDK로 시험), 고르기, 공통 길, 호출 기록. 공통 길의 판단은 순수 `lib/llm/call.ts`(sleep·시계·기록을 인자로), DB·환경변수는 `call.server.ts`. 공급자 이름 목록은 `types.ts` PROVIDER_NAMES 한 곳
 - [ ] `mask`에 `GEMINI_API_KEY`·`ANTHROPIC_API_KEY` 더하기
 
 ### 3단계 작업

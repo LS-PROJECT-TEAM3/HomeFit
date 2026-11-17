@@ -1,6 +1,4 @@
-import type { ProviderName } from "@/lib/llm/types";
-
-const KNOWN: readonly ProviderName[] = ["gemini", "claude", "mock"];
+import { PROVIDER_NAMES, type ProviderName } from "@/lib/llm/types";
 
 export type Selection = { ok: true; name: ProviderName } | { ok: false; message: string };
 
@@ -11,6 +9,6 @@ export type Selection = { ok: true; name: ProviderName } | { ok: false; message:
 export function selectProvider({ value, isProduction }: { value: string | undefined; isProduction: boolean }): Selection {
   const name = (value ?? "").trim().toLowerCase();
   if (name === "") return isProduction ? { ok: false, message: "AI 설정 없음" } : { ok: true, name: "mock" };
-  if ((KNOWN as readonly string[]).includes(name)) return { ok: true, name: name as ProviderName };
+  if ((PROVIDER_NAMES as readonly string[]).includes(name)) return { ok: true, name: name as ProviderName };
   return { ok: false, message: `모르는 AI 공급자: ${name}` };
 }

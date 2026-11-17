@@ -1,4 +1,4 @@
-// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0006 기준)을 짧게 옮긴 것.
+// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0007 기준)을 짧게 옮긴 것.
 // 표를 바꾸면 Supabase 도구의 "generate TypeScript types"로 다시 만들어 이 파일을 바꾼다.
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -75,6 +75,13 @@ type NotificationRow = {
   last_error: string | null; sent_at: string | null; created_at: string;
 };
 
+// 0007: AI 호출 기록 (ERD v1.3, spec 002)
+type LlmCallRow = {
+  id: string; run_id: string | null; provider: string; model: string | null; purpose: string; ok: boolean;
+  error_kind: string | null; attempts: number; latency_ms: number; input_tokens: number | null;
+  output_tokens: number | null; created_at: string;
+};
+
 // 기본값이 있는 칸은 넣을 때 빼도 된다
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -128,6 +135,10 @@ export type Database = {
       notification_settings: Table<
         NotificationSettingRow,
         Optional<NotificationSettingRow, "slack_email" | "slack_user_id" | "enabled" | "enabled_at" | "updated_at">
+      >;
+      llm_calls: Table<
+        LlmCallRow,
+        Optional<LlmCallRow, "id" | "run_id" | "model" | "error_kind" | "input_tokens" | "output_tokens" | "created_at">
       >;
       notifications: Table<
         NotificationRow,

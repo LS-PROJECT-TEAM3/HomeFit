@@ -1,7 +1,11 @@
 // FR-002 (spec 002): 어느 공급자든 같은 모양으로 요청하고 같은 모양으로 답을 받는다
 
-/** 지금 쓰는 공급자. 새 공급자(groq, openrouter 등)는 여기와 registry.server.ts에 한 줄씩 */
-export type ProviderName = "gemini" | "claude" | "mock";
+/**
+ * 지금 쓰는 공급자. 새 공급자(groq, openrouter 등)를 더하려면 (1) 여기 이름 하나 (2) providers/에 파일 하나
+ * (3) registry.server.ts에 한 줄 (4) DB llm_calls.provider 허용 값(마이그레이션)을 더한다 (spec 002 SC-007)
+ */
+export const PROVIDER_NAMES = ["gemini", "claude", "mock"] as const;
+export type ProviderName = (typeof PROVIDER_NAMES)[number];
 
 /** ERD llm_calls.error_kind */
 export type LlmErrorKind =
