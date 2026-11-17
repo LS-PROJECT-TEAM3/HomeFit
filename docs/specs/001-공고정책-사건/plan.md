@@ -2,7 +2,7 @@
 
 - 기능 ID: 001
 - 상태: 승인됨 (2026-11-17, 새 의존성 포함)
-- 버전: v0.4
+- 버전: v0.5
 - 작성일 / 최종 갱신: 2026-11-17 / 2026-11-17
 - 기준 spec: ./spec.md (v0.1, 승인됨)
 - 근거 문서: docs/ERD.md v1.0, docs/IA.md v1.0, docs/journeys/critical/CUJ-01-명세.md, docs/journeys/edge-cases/거절과-수집오류.md, docs/Intent.md v0.2, CLAUDE.md
@@ -150,10 +150,10 @@ ERD v1.0의 표 중 첫 기능에 필요한 11개만 만든다. 칸 이름과 �
 - [ ] 계정 A·B 권한 확인 (DB·익명 API는 확인, 두 번째 실제 계정으로 화면·API 확인 남음)
 
 ### 4단계 작업
-- [ ] `collect.server.ts`(실행 기록·단계 기록·공고 저장·사건 만들기), 실패 처리와 키 가리기
-- [ ] cron 입구(`CRON_SECRET` 확인, `force-dynamic`), `vercel.json` crons(하루 1번, Q16)
-- [ ] `scripts/collect-fixture.ts`로 가짜 응답 수집
-- [ ] 중복·바뀜·실패 확인
+- [x] `watch/collect.server.ts`(흐름) + `run-log.server.ts`·`source-items.server.ts`·`incident/create.server.ts`·`incident/detect.ts`(순수, 시험 먼저), 실패 처리와 키 가리기
+- [x] cron 입구 `app/api/cron/myhome/route.ts`(`CRON_SECRET` 확인, Next.js 16이라 `force-dynamic` 대신 `connection()`), `vercel.json` 매일 00:00 UTC = 한국 9시대(Q16)
+- [x] 가짜 응답 수집: 새 도구 없이 cron 입구에 `?fixture=`(개발 환경만)로. 묶음은 `watch/sim-fixtures.ts`(sample·changed·malformed·failure·bulk)
+- [x] 중복·바뀜·실패 확인 + 실제 API 수집 2회
 
 ### 5단계 작업
 - [ ] (시작 때) `claude-api` 문서로 모델·비용 확인 후 사용자에게 알림
@@ -291,6 +291,7 @@ C·H 번호는 [qa.md](qa.md)에 있다.
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성 |
+| 2026-11-17 | v0.5 | 4단계 끝: 수집 흐름. 계획한 `scripts/collect-fixture.ts`는 TypeScript 실행 도구가 더 필요해 빼고 cron 입구의 `?fixture=`로 대신. 겹친 줄 제거 추가. 사건마다 기본 신청 준비 계획을 함께 만듦(AI는 5단계) |
 | 2026-11-17 | v0.4 | 3단계 진행: Supabase 연결, 표·RLS, 로그인·조건 화면. 승인·거절을 DB 함수로(한 번에 처리, 본인만). `/my` 이동은 next.config redirects. 브라우저용 Supabase client는 쓸 곳이 없어 뺌 |
 | 2026-11-17 | v0.3 | 2단계 끝: 순수 함수 5묶음. 실제 응답 확인으로 `Notice.announcementId`(공고 ID) 추가, 사건 중복은 공고 ID로. 시도 이름→코드 표 `watch/sido.ts` 추가 |
 | 2026-11-17 | v0.2 | 1단계 끝: 실제 설치 버전 반영(React 19.3.0, TypeScript 5.9.3, @types/node 24.19.2, Pretendard v1.3.9), 화면 확인 서버 이름 `homefit-web` |

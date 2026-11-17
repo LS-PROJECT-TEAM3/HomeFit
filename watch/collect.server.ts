@@ -1,0 +1,88 @@
+import { planNewIncidents } from "@/incident/detect";
+import {
+  insertIncidents,
+  loadConditionOwners,
+  loadExistingKeys,
+  markUpdatedIncidents,
+} from "@/incident/create.server";
+import type { AdminClient } from "@/lib/supabase/admin";
+import { toKstDate } from "@/watch/kst";
+import { maskSecrets } from "@/watch/mask";
+import { fetchAllMyhomeNotices, type PageFetcher } from "@/watch/myhome.server";
+import { finishRun, recordStep, startRun, type RunTrigger } from "@/watch/run-log.server";
+import { saveSourceItems, type SavedItems } from "@/watch/source-items.server";
+import type { Notice } from "@/watch/notice";
+
+export const MYHOME_SOURCE = "myhome_notice";
+
+export type CollectSummary = {
+  runId: string;
+  status: "succeeded" | "failed";
+  notices: number;
+  newIncidents: number;
+  updatedIncidents: number;
+  error?: string;
+};
+
+type CollectInput = { db: AdminClient; fetchPage: PageFetcher; trigger: RunTrigger; now: Date };
+
+// 오류 메시지에서 가릴 키들 (FR-004, PRD FR-27)
+function secretsToMask(): string[] {
+  return [process.env.DATA_GO_KR_SERVICE_KEY ?? "", process.env.SUPABASE_SECRET_KEY ?? ""];
+}
+
+async function saveObservations(db: AdminClient, runId: string, notices: Notice[], saved: SavedItems, isSimulated: boolean) {
+  if (notices.length === 0) return;
+  const observedAt = new Date().toISOString();
+  const rows = notices.map((notice) => {
+    const id = saved.idByExternalId.get(notice.externalId) ?? null;
+    const changed = id === null || saved.newIds.has(id) ? null : saved.changedIds.has(id) ? 1 : 0;
+    return {
+      run_id: runId, source_code: MYHOME_SOURCE, observed_at: observedAt, target: notice.externalId,
+      metric: "notice", value_text: notice.title, value_numeric: notice.monthlyRent,
+      change_amount: changed, source_item_id: id, is_simulated: isSimulated,
+    };
+  });
+  const { error } = await db.from("observations").insert(rows);
+  if (error) throw new Error(`모은 값을 저장하지 못했습니다: ${error.message}`);
+}
+
+async function runSteps(input: CollectInput, runId: string): Promise<Omit<CollectSummary, "runId" | "status">> {
+  const { db, fetchPage, trigger, now } = input;
+  const isSimulated = trigger === "simulation";
+  const collected = await fetchAllMyhomeNotices(fetchPage);
+  await recordStep(db, runId, { name: "collect", status: "succeeded", itemsIn: collected.rawCount, itemsOut: collected.notices.length, detail: { skipped: collected.skipped, duplicates: collected.duplicates } });
+
+  const saved = await saveSourceItems(db, MYHOME_SOURCE, collected.notices);
+  await saveObservations(db, runId, collected.notices, saved, isSimulated);
+  await recordStep(db, runId, { name: "compare", status: "succeeded", itemsIn: collected.notices.length, itemsOut: saved.newIds.size + saved.changedIds.size, detail: { new: saved.newIds.size, changed: saved.changedIds.size } });
+
+  const planned = planNewIncidents({
+    notices: collected.notices, owners: await loadConditionOwners(db), existingKeys: await loadExistingKeys(db),
+    today: toKstDate(now), sourceCode: MYHOME_SOURCE,
+  });
+  const newIncidents = await insertIncidents({ db, planned, runId, sourceItemIds: saved.idByExternalId, isSimulated });
+  const updatedIncidents = await markUpdatedIncidents(db, saved.changedIds);
+  await recordStep(db, runId, { name: "detect", status: "succeeded", itemsIn: collected.notices.length, itemsOut: newIncidents, detail: { updated: updatedIncidents } });
+  await recordStep(db, runId, { name: "draft_plan", status: newIncidents ? "succeeded" : "skipped", itemsIn: newIncidents, itemsOut: newIncidents, detail: { ai: "5단계에서 붙임" } });
+  await recordStep(db, runId, { name: "await_approval", status: newIncidents ? "waiting" : "skipped", itemsOut: newIncidents });
+  return { notices: collected.notices.length, newIncidents, updatedIncidents };
+}
+
+/**
+ * FR-003~006 (spec 001): 마이홈 수집 한 번. 실패해도 "변화 없음"으로 끝내지 않고 실행 기록을 실패로 남긴다.
+ */
+export async function collectMyhome(input: CollectInput): Promise<CollectSummary> {
+  const runId = await startRun(input.db, MYHOME_SOURCE, input.trigger);
+  try {
+    const result = await runSteps(input, runId);
+    await finishRun(input.db, runId, null);
+    return { runId, status: "succeeded", ...result };
+  } catch (cause) {
+    const message = maskSecrets(cause instanceof Error ? cause.message : String(cause), secretsToMask());
+    // 실패 단계 기록이 또 실패해도 아래 finishRun으로 실행 기록은 "실패"로 남긴다. 그 오류만 버린다
+    await recordStep(input.db, runId, { name: "collect", status: "failed", detail: { error: message } }).catch(() => undefined);
+    await finishRun(input.db, runId, message);
+    return { runId, status: "failed", notices: 0, newIncidents: 0, updatedIncidents: 0, error: message };
+  }
+}

@@ -1,0 +1,103 @@
+import { buildDefaultChecklist } from "@/incident/checklist";
+import type { ConditionOwner, PlannedIncident } from "@/incident/detect";
+import type { AdminClient } from "@/lib/supabase/admin";
+import type { Json } from "@/lib/supabase/database.types";
+
+/** 조건을 넣은 모든 사용자 (FR-005). 수집은 사용자 없이 돌아 secret 키로 읽는다 */
+export async function loadConditionOwners(db: AdminClient): Promise<ConditionOwner[]> {
+  const { data, error } = await db
+    .from("policy_conditions")
+    .select("user_id, sido_code, sigungu_code, supply_types, max_monthly_rent, age");
+  if (error) throw new Error(`사용자 조건을 읽지 못했습니다: ${error.message}`);
+  return data.map((row) => ({
+    userId: row.user_id,
+    condition: {
+      sidoCode: row.sido_code,
+      sigunguCode: row.sigungu_code,
+      supplyTypes: row.supply_types,
+      maxMonthlyRent: row.max_monthly_rent,
+      age: row.age,
+    },
+  }));
+}
+
+/** 이미 있는 공고 사건 "userId|dedupKey" (FR-006) */
+export async function loadExistingKeys(db: AdminClient): Promise<Set<string>> {
+  const { data, error } = await db
+    .from("incidents")
+    .select("user_id, dedup_key")
+    .eq("incident_type", "housing_support");
+  if (error) throw new Error(`기존 사건을 읽지 못했습니다: ${error.message}`);
+  return new Set(data.map((row) => `${row.user_id}|${row.dedup_key}`));
+}
+
+type InsertInput = {
+  db: AdminClient;
+  planned: PlannedIncident[];
+  runId: string;
+  sourceItemIds: Map<string, string>;
+  isSimulated: boolean;
+};
+
+/**
+ * FR-005, FR-010 (spec 001): 사건과 기본 신청 준비 계획을 만든다.
+ * 같은 키가 동시에 들어오면 DB 유일 조건이 막고 건너뛴다(Vercel이 같은 실행을 두 번 보낼 수 있음).
+ * AI 요약은 5단계에서 붙인다. 지금은 기본 체크리스트만 두고 generation_status를 failed로 표시한다.
+ */
+export async function insertIncidents({ db, planned, runId, sourceItemIds, isSimulated }: InsertInput): Promise<number> {
+  if (planned.length === 0) return 0;
+  const rows = planned.map((plan) => ({
+    user_id: plan.userId,
+    incident_type: "housing_support",
+    target_kind: "condition",
+    source_item_id: sourceItemIds.get(plan.externalId) ?? null,
+    run_id: runId,
+    dedup_key: plan.dedupKey,
+    facts: plan.facts as unknown as Json, // Notice는 JSON으로 바꿀 수 있는 값만 가진다
+    is_simulated: isSimulated,
+  }));
+  const { data, error } = await db
+    .from("incidents")
+    .upsert(rows, { onConflict: "user_id,dedup_key", ignoreDuplicates: true })
+    .select("id, facts");
+  if (error) throw new Error(`사건을 만들지 못했습니다: ${error.message}`);
+  await insertDefaultPlans(db, data);
+  return data.length;
+}
+
+async function insertDefaultPlans(db: AdminClient, incidents: { id: string; facts: Json }[]) {
+  if (incidents.length === 0) return;
+  const plans = incidents.map((incident) => {
+    const facts = incident.facts as unknown as PlannedIncident["facts"];
+    return {
+      incident_id: incident.id,
+      plan_type: "application_prep",
+      checklist: buildDefaultChecklist(facts) as unknown as Json,
+      citations: (facts.url ? [{ kind: "notice", url: facts.url }] : []) as Json,
+      generation_status: "failed",
+    };
+  });
+  const { error } = await db.from("response_plans").insert(plans);
+  if (error) throw new Error(`신청 준비 계획을 만들지 못했습니다: ${error.message}`);
+}
+
+/** FR-006 (spec 001): 신청 기간·조건이 바뀐 공고의 기존 사건에 "바뀜"을 표시하고 원문 값을 새로 쓴다 */
+export async function markUpdatedIncidents(db: AdminClient, changedItemIds: Set<string>): Promise<number> {
+  if (changedItemIds.size === 0) return 0;
+  const { data: items, error: readError } = await db
+    .from("source_items")
+    .select("id, raw")
+    .in("id", [...changedItemIds]);
+  if (readError) throw new Error(`바뀐 공고를 읽지 못했습니다: ${readError.message}`);
+  let updated = 0;
+  for (const item of items) {
+    const { data, error } = await db
+      .from("incidents")
+      .update({ is_updated: true, facts: item.raw })
+      .eq("source_item_id", item.id)
+      .select("id");
+    if (error) throw new Error(`바뀐 사건을 갱신하지 못했습니다: ${error.message}`);
+    updated += data.length;
+  }
+  return updated;
+}

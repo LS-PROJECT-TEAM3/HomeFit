@@ -19,3 +19,13 @@ export type Notice = {
   applyEnd: string | null;
   url: string | null;
 };
+
+/**
+ * 한 번 수집에 같은 줄 ID가 여러 번 오면 마지막 것만 남긴다(자리는 처음 나온 곳).
+ * 실제 마이홈 응답에서 겹친 줄이 와서 한 번에 저장하다 실패했다 (2026-11-17)
+ */
+export function uniqueByExternalId(notices: readonly Notice[]): Notice[] {
+  const byId = new Map<string, Notice>();
+  for (const notice of notices) byId.set(notice.externalId, notice);
+  return [...byId.values()];
+}
