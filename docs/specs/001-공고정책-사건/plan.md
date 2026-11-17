@@ -2,7 +2,7 @@
 
 - 기능 ID: 001
 - 상태: 승인됨 (2026-11-17, 새 의존성 포함)
-- 버전: v0.2
+- 버전: v0.3
 - 작성일 / 최종 갱신: 2026-11-17 / 2026-11-17
 - 기준 spec: ./spec.md (v0.1, 승인됨)
 - 근거 문서: docs/ERD.md v1.0, docs/IA.md v1.0, docs/journeys/critical/CUJ-01-명세.md, docs/journeys/edge-cases/거절과-수집오류.md, docs/Intent.md v0.2, CLAUDE.md
@@ -31,7 +31,7 @@ spec 001의 FR-001~015를 6단계로 만든다. Next.js(App Router) 한 프로�
 | 배포 | Vercel | | CLAUDE.md. 실제 배포는 "배포해줘" 뒤 | |
 
 **실행 환경:** 데스크톱 Chrome·Edge 최신, 휴대폰 폭 375px(가로 스크롤 없음). 개발 PC Windows 11.
-**환경변수 이름(값은 `.env.local`에만, 저장소에 올리지 않음):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`(공개 가능, RLS를 따름), `SUPABASE_SECRET_KEY`(서버 전용, RLS 우회), `MYHOME_SERVICE_KEY`, `ANTHROPIC_API_KEY`, `CRON_SECRET`(16자 이상). [https://supabase.com/docs/guides/api/api-keys] [https://vercel.com/docs/cron-jobs/manage-cron-jobs]
+**환경변수 이름(값은 `.env.local`에만, 저장소에 올리지 않음):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`(공개 가능, RLS를 따름), `SUPABASE_SECRET_KEY`(서버 전용, RLS 우회), `DATA_GO_KR_SERVICE_KEY`(공공데이터포털 계정 인증키, 네 API 공통), `ANTHROPIC_API_KEY`, `CRON_SECRET`(16자 이상). [https://supabase.com/docs/guides/api/api-keys] [https://vercel.com/docs/cron-jobs/manage-cron-jobs]
 
 ## 2. 구조와 파일
 Next.js가 구조를 강제하지 않아 "코드를 `app` 밖에 두고 `app`은 주소 연결에만" 전략을 쓴다 [https://nextjs.org/docs/app/getting-started/project-structure]. 바깥 폴더는 안내서 이름(CLAUDE.md 폴더)이고, 각 폴더 안에서 순수 함수(`*.ts`)와 DB·API를 부르는 코드(`*.server.ts`)를 나눈다.
@@ -138,9 +138,9 @@ ERD v1.0의 표 중 첫 기능에 필요한 11개만 만든다. 칸 이름과 �
 - [x] 실제 설치 버전을 1절에 다시 적기
 
 ### 2단계 작업
-- [ ] 마이홈 API 샘플 1건 받아 `watch/fixtures/`에 저장(키가 있을 때). 칸 이름을 spec 6절 Q6에 기록
-- [ ] 시험 먼저: `myhome`, `mask`, `match`, `dedup`, `checklist` (4절 표)
-- [ ] 실패 확인 → 구현 → 통과
+- [x] 마이홈 API 샘플 받아 `watch/fixtures/myhome-sample.json`에 3건 저장. 칸 이름을 spec 6절 Q6에 기록
+- [x] 시험 먼저: `myhome`, `mask`, `match`, `dedup`, `checklist` (4절 표). 지역 이름→코드(`watch/sido.ts`) 시험 추가
+- [x] 실패 확인 → 구현 → 통과 (시험 66개)
 
 ### 3단계 작업
 - [ ] (승인 뒤) Supabase 무료 프로젝트 만들기, 키를 `.env.local`에
@@ -291,4 +291,5 @@ C·H 번호는 [qa.md](qa.md)에 있다.
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성 |
+| 2026-11-17 | v0.3 | 2단계 끝: 순수 함수 5묶음. 실제 응답 확인으로 `Notice.announcementId`(공고 ID) 추가, 사건 중복은 공고 ID로. 시도 이름→코드 표 `watch/sido.ts` 추가 |
 | 2026-11-17 | v0.2 | 1단계 끝: 실제 설치 버전 반영(React 19.3.0, TypeScript 5.9.3, @types/node 24.19.2, Pretendard v1.3.9), 화면 확인 서버 이름 `homefit-web` |
