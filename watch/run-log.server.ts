@@ -3,7 +3,7 @@ import type { Json } from "@/lib/supabase/database.types";
 
 // ERD runs·run_steps: 흐름 화면(P3-08)과 수집 현황(FR-021)이 이 기록으로 그린다
 export type RunTrigger = "scheduled" | "manual" | "simulation";
-export type StepName = "collect" | "compare" | "detect" | "draft_plan" | "await_approval" | "record";
+export type StepName = "collect" | "compare" | "detect" | "draft_plan" | "notify" | "await_approval" | "record";
 export type StepStatus = "succeeded" | "failed" | "waiting" | "skipped";
 
 export type StepRecord = {
@@ -15,7 +15,8 @@ export type StepRecord = {
 };
 
 const STEP_ORDER: Record<StepName, number> = {
-  collect: 1, compare: 2, detect: 3, draft_plan: 4, await_approval: 5, record: 6,
+  // ERD run_steps: 알림(notify)은 초안 다음, 승인 대기 앞 (spec 001 v0.3)
+  collect: 1, compare: 2, detect: 3, draft_plan: 4, notify: 5, await_approval: 6, record: 7,
 };
 
 export async function startRun(db: AdminClient, sourceCode: string, trigger: RunTrigger): Promise<string> {

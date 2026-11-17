@@ -58,7 +58,7 @@ export async function insertIncidents({ db, planned, runId, sourceItemIds, isSim
   const { data, error } = await db
     .from("incidents")
     .upsert(rows, { onConflict: "user_id,dedup_key", ignoreDuplicates: true })
-    .select("id, facts");
+    .select("id, facts, user_id, detected_at");
   if (error) throw new Error(`사건을 만들지 못했습니다: ${error.message}`);
   return data;
 }

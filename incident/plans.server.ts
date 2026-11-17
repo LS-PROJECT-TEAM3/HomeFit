@@ -6,7 +6,7 @@ import type { AdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
 import type { Notice } from "@/watch/notice";
 
-export type CreatedIncident = { id: string; facts: Json };
+export type CreatedIncident = { id: string; facts: Json; user_id: string; detected_at: string };
 /** failureReasons: 초안 실패 이유(중복 없이). 실행 기록에 남겨 원인을 바로 찾게 한다 (FR-004) */
 export type PlanStats = { drafted: number; failed: number; skipped: number; failureReasons: string[] };
 

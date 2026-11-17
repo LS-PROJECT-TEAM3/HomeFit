@@ -3,6 +3,9 @@ import { insertIncidents, loadConditionOwners, loadExistingKeys } from "@/incide
 import { findNoticeChanges } from "@/incident/notice-change";
 import { draftPlans, insertPlans } from "@/incident/plans.server";
 import { newCallContext } from "@/lib/llm/call.server";
+import type { IncidentFacts } from "@/incident/detect";
+import { notifyIncidents } from "@/incident/notify.server";
+import type { CreatedIncident } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import { toKstDate } from "@/watch/kst";
 import { maskSecrets } from "@/watch/mask";
@@ -29,6 +32,7 @@ function secretsToMask(): string[] {
   return [
     process.env.DATA_GO_KR_SERVICE_KEY ?? "", process.env.SUPABASE_SECRET_KEY ?? "",
     process.env.GEMINI_API_KEY ?? "", process.env.ANTHROPIC_API_KEY ?? "", // spec 002 FR-008
+    process.env.SLACK_BOT_TOKEN ?? "", // spec 001 v0.3 FR-019
   ];
 }
 
@@ -46,6 +50,19 @@ async function saveObservations(db: AdminClient, runId: string, notices: Notice[
   });
   const { error } = await db.from("observations").insert(rows);
   if (error) throw new Error(`모은 값을 저장하지 못했습니다: ${error.message}`);
+}
+
+/** FR-019 (spec 001 v0.3): 슬랙 알림. 실패해도 수집은 성공으로 끝내고 실행 기록에만 남긴다 */
+async function runNotifyStep(db: AdminClient, runId: string, created: CreatedIncident[]) {
+  try {
+    const candidates = created.map((c) => ({ incidentId: c.id, userId: c.user_id, detectedAt: c.detected_at, facts: c.facts as unknown as IncidentFacts }));
+    const stats = await notifyIncidents(db, candidates);
+    const status = stats.sent + stats.failed === 0 ? "skipped" : "succeeded";
+    await recordStep(db, runId, { name: "notify", status, itemsIn: created.length, itemsOut: stats.sent, detail: stats });
+  } catch (cause) {
+    const message = maskSecrets(cause instanceof Error ? cause.message : String(cause), secretsToMask());
+    await recordStep(db, runId, { name: "notify", status: "failed", detail: { error: message } });
+  }
 }
 
 async function runSteps(input: CollectInput, runId: string): Promise<Omit<CollectSummary, "runId" | "status">> {
@@ -74,6 +91,7 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
   const byKind = Object.fromEntries(["changed", "correction", "relaxed"].map((kind) => [kind, changes.filter((c) => c.kind === kind).length]));
   await recordStep(db, runId, { name: "detect", status: "succeeded", itemsIn: collected.notices.length, itemsOut: newIncidents, detail: { changes: byKind } });
   await recordStep(db, runId, { name: "draft_plan", status: newIncidents ? "succeeded" : "skipped", itemsIn: newIncidents, itemsOut: newIncidents, detail: { ai_provider: process.env.AI_PROVIDER || "(비어 있음)", ai_drafted: plans.drafted, ai_failed: plans.failed, ai_skipped_by_limit: plans.skipped, ai_failure_reasons: plans.failureReasons } });
+  await runNotifyStep(db, runId, created);
   await recordStep(db, runId, { name: "await_approval", status: newIncidents ? "waiting" : "skipped", itemsOut: newIncidents });
   return { notices: collected.notices.length, newIncidents, updatedIncidents };
 }
