@@ -24,10 +24,10 @@ async function Item({ params }: { params: PageProps<"/schedule/[id]">["params"] 
     <>
       <h1 className={styles.title}>{item.title}</h1>
       <p className={styles.meta}>
-        마감: {item.dueDate ?? "공고문 확인"} {describeDeadline(item.dueDate, toKstDate(new Date())) ? `· ${describeDeadline(item.dueDate, toKstDate(new Date()))}` : ""}
+        마감: {item.dueDate ?? "마감일 없음"} {describeDeadline(item.dueDate, toKstDate(new Date())) ? `· ${describeDeadline(item.dueDate, toKstDate(new Date()))}` : ""}
       </p>
       <Checklist scheduleId={item.id} items={item.checklist} />
-      <p><Link href={`/incidents/${item.incidentId}`}>출처 사건 보기</Link></p>
+      <p><Link href={`/incidents/${item.incidentId}`}>출처 알림 보기</Link></p>
     </>
   );
 }

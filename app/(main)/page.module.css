@@ -12,7 +12,8 @@
 /* 대시보드만 벤토 카드 (CLAUDE.md 디자인) */
 .bento {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  /* 휴대폰(375px)에서는 한 줄에 카드 하나: 금액이 중간에 끊기지 않게 (spec 003 5단계 화면 확인) */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--space-1);
 }
 
@@ -50,6 +51,7 @@ a.card:hover {
 }
 
 .number {
+  white-space: nowrap;
   font-size: var(--font-size-number);
   font-weight: 700;
   color: var(--color-primary);

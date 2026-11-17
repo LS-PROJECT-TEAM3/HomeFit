@@ -1,5 +1,6 @@
 import { describeChange } from "@/incident/change-text";
 import type { IncidentFacts } from "@/incident/detect";
+import type { HumidityFacts } from "@/incident/humidity-detect";
 
 // FR-018, FR-019 (spec 001 v0.3): 슬랙 알림의 판단. 순수 함수 (보내기는 notify.server.ts)
 
@@ -29,14 +30,30 @@ export function readLookupResult(body: unknown): { ok: true; slackUserId: string
   return { ok: false, message: "슬랙에서 사람을 찾지 못했습니다. 잠시 뒤 다시 해 주세요." };
 }
 
-export type NotifyIncident = { incidentId: string; facts: IncidentFacts };
+/** 공고 변화(주거 기회) 또는 습도·결로(위험, spec 003 FR-009) */
+export type NotifyIncident = { incidentId: string; facts: IncidentFacts | HumidityFacts };
 export type OutgoingMessage = { incidentIds: string[]; text: string };
+
+function isHumidity(facts: IncidentFacts | HumidityFacts): facts is HumidityFacts {
+  return (facts as HumidityFacts).kind === "humidity";
+}
+
+/** spec 003 FR-009: 측정값·추정 숫자와 할 날·링크만. 집 위치(시군구)와 AI 요약은 넣지 않는다 */
+function humidityText(incidentId: string, facts: HumidityFacts, baseUrl: string): string {
+  return [
+    `[HomeFit] 위험: ${facts.title}`,
+    `창 표면 ${facts.surfaceC.toFixed(1)}°C(추정) · 이슬점 ${facts.dewPointC.toFixed(1)}°C · 바깥 ${facts.outdoorC}°C`,
+    `할 날 ${facts.dueDate} · 환기·제습 대응 계획을 확인해 주세요`,
+    `${baseUrl}/incidents/${incidentId}`,
+  ].join("\n");
+}
 
 /** 이름·조건·AI 요약은 넣지 않는다. facts의 공고 원문 값과 변화만 쓴다 (FR-019) */
 function incidentText({ incidentId, facts }: NotifyIncident, baseUrl: string): string {
+  if (isHumidity(facts)) return humidityText(incidentId, facts, baseUrl);
   const change = describeChange(facts.change);
   return [
-    `[HomeFit] 공고 변화: ${facts.title}`,
+    `[HomeFit] 주거 기회: ${facts.title}`,
     ...(change?.lines ?? []),
     ...(change?.note ? [change.note] : []),
     `마감 ${facts.applyEnd ?? "공고문 확인"}`,
@@ -49,7 +66,7 @@ export function buildMessages(incidents: readonly NotifyIncident[], baseUrl: str
   if (incidents.length >= BUNDLE_THRESHOLD) {
     return [{
       incidentIds: incidents.map((i) => i.incidentId),
-      text: `[HomeFit] 맞는 공고에 사건 ${incidents.length}건이 생겼습니다. 홈에서 확인해 주세요.\n${baseUrl}/incidents`,
+      text: `[HomeFit] 새 위험·기회 알림 ${incidents.length}건이 생겼습니다. 홈에서 확인해 주세요.\n${baseUrl}/incidents`,
     }];
   }
   return incidents.map((incident) => ({ incidentIds: [incident.incidentId], text: incidentText(incident, baseUrl) }));

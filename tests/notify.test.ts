@@ -57,6 +57,7 @@ describe("buildMessages", () => {
 
   it("message: 제목·전 → 후·마감·상세 링크만", () => {
     const [message] = buildMessages(one, "https://homefit.test");
+    expect(message.text).toMatch(/^\[HomeFit\] 주거 기회: /);
     expect(message.incidentIds).toEqual(["i-1"]);
     expect(message.text).toContain("가짜 행복주택 모집");
     expect(message.text).toContain("접수 마감 2026-11-30 → 2026-12-07");
@@ -76,7 +77,7 @@ describe("buildMessages", () => {
     const bundled = buildMessages(six, "https://homefit.test");
     expect(bundled).toHaveLength(1);
     expect(bundled[0].incidentIds).toHaveLength(6);
-    expect(bundled[0].text).toContain("사건 6건");
+    expect(bundled[0].text).toContain("위험·기회 알림 6건"); // spec 003 FR-012 화면 이름
     expect(bundled[0].text).toContain("https://homefit.test/incidents");
   });
 });
@@ -116,5 +117,26 @@ describe("selectToNotify", () => {
 describe("mask.secrets 봇 토큰", () => {
   it("xoxb- 토큰은 목록에 없어도 가린다", () => {
     expect(maskSecrets("slack error token=xoxb-123-456-abcDEF failed", [])).toBe("slack error token=*** failed");
+  });
+});
+
+// spec 003 FR-009: 습도·결로 위험 슬랙 알림. 측정값·추정 숫자와 할 날·링크만, 집 위치(시군구)는 넣지 않는다
+describe("buildMessages 습도·결로", () => {
+  const humidity = {
+    kind: "humidity" as const, title: "결로 위험: 11월 19일 02시", dueDate: "2026-11-18", riskAt: "2026-11-18T17:00:00.000Z",
+    windowStart: "2026-11-18T17:00:00.000Z", condition: "surface" as const, windowType: "unknown" as const, sigunguCode: "26350",
+    measurement: { temperatureC: 20, humidityPct: 60, measuredAt: "2026-11-17T12:00:00.000Z" },
+    outdoorC: -5, outdoorHumidity: 60, surfaceC: 1.16, dewPointC: 12.04, marginC: -10.88, forecastHours: 48, humidHours: 0,
+  };
+
+  it("위험: 제목, 추정 숫자, 할 날, 링크", () => {
+    const [message] = buildMessages([{ incidentId: "h-1", facts: humidity }], "https://homefit.test");
+    expect(message.text).toBe([
+      "[HomeFit] 위험: 결로 위험: 11월 19일 02시",
+      "창 표면 1.2°C(추정) · 이슬점 12.0°C · 바깥 -5°C",
+      "할 날 2026-11-18 · 환기·제습 대응 계획을 확인해 주세요",
+      "https://homefit.test/incidents/h-1",
+    ].join("\n"));
+    expect(message.text).not.toContain("26350");
   });
 });

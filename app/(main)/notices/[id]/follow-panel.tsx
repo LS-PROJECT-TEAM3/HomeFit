@@ -7,7 +7,7 @@ import styles from "../../incidents/[id]/detail.module.css";
 
 const LABEL: Record<FollowDecision | "new", string> = {
   new: "아직 정하지 않았습니다",
-  follow: "팔로우 중: 이 공고가 바뀌면 사건과 알림으로 알려 드립니다",
+  follow: "팔로우 중: 이 공고가 바뀌면 주거 기회 알림으로 알려 드립니다",
   ignore: "관심 없음: 이 공고가 바뀌어도 알리지 않습니다",
 };
 
@@ -48,7 +48,7 @@ export function FollowPanel({ announcementId, initial }: { announcementId: strin
       </div>
       <dialog ref={dialog} className={styles.dialog} aria-labelledby="ignore-title">
         <h2 id="ignore-title">이 공고를 관심 없음으로 할까요?</h2>
-        <p>이 공고가 바뀌어도 사건과 알림이 생기지 않습니다. 나중에 다시 팔로우할 수 있습니다.</p>
+        <p>이 공고가 바뀌어도 알림이 생기지 않습니다. 나중에 다시 팔로우할 수 있습니다.</p>
         <label htmlFor="ignore-reason">사유 (선택)</label>
         <input id="ignore-reason" className={styles.input} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="예: 지역이 멀다" />
         <div className={styles.dialogButtons}>

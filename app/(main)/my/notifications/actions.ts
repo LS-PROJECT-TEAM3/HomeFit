@@ -44,7 +44,7 @@ export async function setNotifications(enabled: boolean): Promise<NotifyState> {
     .not("slack_user_id", "is", null)
     .select("user_id");
   if (error || !data?.length) return { error: "먼저 슬랙 이메일을 저장해 주세요." };
-  return { done: enabled ? "알림을 켰습니다. 이제부터 생기는 사건을 슬랙으로 보냅니다." : "알림을 껐습니다." };
+  return { done: enabled ? "슬랙 알림을 켰습니다. 이제부터 생기는 위험·기회 알림을 슬랙으로 보냅니다." : "슬랙 알림을 껐습니다." };
 }
 
 /** FR-018 수용 기준 4: 시험 메시지 */
@@ -53,6 +53,6 @@ export async function sendTestMessage(): Promise<NotifyState> {
   const supabase = await createClient();
   const { data } = await supabase.from("notification_settings").select("slack_user_id").eq("user_id", userId).maybeSingle();
   if (!data?.slack_user_id) return { error: "먼저 슬랙 이메일을 저장해 주세요." };
-  const result = await postSlackMessage(data.slack_user_id, "[HomeFit] 시험 메시지입니다. 이 메시지가 보이면 사건 알림을 받을 수 있습니다.");
+  const result = await postSlackMessage(data.slack_user_id, "[HomeFit] 시험 메시지입니다. 이 메시지가 보이면 위험·기회 알림을 받을 수 있습니다.");
   return result.ok ? { done: "보냈습니다. 슬랙 DM을 확인해 주세요." } : { error: "보내지 못했습니다. 잠시 뒤 다시 해 주세요." };
 }

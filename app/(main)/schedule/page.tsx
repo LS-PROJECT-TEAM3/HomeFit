@@ -17,7 +17,7 @@ async function ScheduleList() {
   } catch {
     return <LoadError>내 일정을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
-  if (items.length === 0) return <Empty>아직 일정이 없습니다. 사건에서 신청 준비 계획을 승인하면 여기에 생깁니다.</Empty>;
+  if (items.length === 0) return <Empty>아직 일정이 없습니다. 위험·기회 알림에서 계획을 승인하면 여기에 생깁니다.</Empty>;
   const today = toKstDate(new Date());
   return (
     <ul className={styles.list}>
@@ -28,7 +28,7 @@ async function ScheduleList() {
             <Link href={`/schedule/${item.id}`} className={styles.item}>
               <span className={styles.itemTitle}>{item.title}</span>
               <span className={styles.meta}>
-                {describeDeadline(item.dueDate, today) ?? "마감일: 공고문 확인"} · 할 일 {done}/{item.checklist.length}
+                {describeDeadline(item.dueDate, today) ?? "마감일 없음"} · 할 일 {done}/{item.checklist.length}
               </span>
             </Link>
           </li>

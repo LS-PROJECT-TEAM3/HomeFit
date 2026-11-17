@@ -2,13 +2,19 @@ import { describe, expect, it } from "vitest";
 import { parseHomeForm, parseMeasurementForm } from "@/incident/home-form";
 
 // FR-001, FR-002 (spec 003): 내 집·측정값 입력 검사. 오류 문구는 "무엇이 안 됐는지 + 할 일"
-const home = { sidoCode: "30", sigunguCode: "30200", housingType: "officetel", exclusiveArea: "20", areaUnit: "m2", windowType: "unknown" };
+const home = {
+  sidoCode: "30", sigunguCode: "30200", housingType: "officetel", exclusiveArea: "20", areaUnit: "m2", windowType: "unknown",
+  contractType: "", deposit: "", monthlyRent: "", maintenanceFee: "", contractEndDate: "",
+};
 
 describe("parseHomeForm", () => {
   it("네 칸만 넣어도 저장할 값이 된다. 창 '모름' 허용", () => {
     expect(parseHomeForm(home)).toEqual({
       ok: true,
-      value: { sigunguCode: "30200", housingType: "officetel", exclusiveAreaM2: 20, windowType: "unknown" },
+      value: {
+        sigunguCode: "30200", housingType: "officetel", exclusiveAreaM2: 20, windowType: "unknown",
+        contractType: null, deposit: null, monthlyRent: null, maintenanceFee: null, contractEndDate: null,
+      },
     });
   });
 
@@ -98,5 +104,40 @@ describe("parseMeasurementForm", () => {
     const broken = parseMeasurementForm({ ...input, measuredAt: "어제" }, now);
     expect(broken.ok).toBe(false);
     if (!broken.ok) expect(broken.errors.measuredAt).toBe("측정 시각 형식이 맞지 않습니다. 2026-11-18 08:30처럼 입력해 주세요.");
+  });
+});
+
+// spec 003 v0.2 FR-001 수용 기준 6·7: 계약·관리비 칸(선택)
+describe("parseHomeForm 계약·관리비", () => {
+  const contract = { ...home, contractType: "monthly", deposit: "5,000,000", monthlyRent: "450,000", maintenanceFee: "70000", contractEndDate: "2027-08-31" };
+
+  it("월세 계약 값을 쉼표 없이 숫자로", () => {
+    const result = parseHomeForm(contract);
+    expect(result.ok && result.value).toMatchObject({ contractType: "monthly", deposit: 5000000, monthlyRent: 450000, maintenanceFee: 70000, contractEndDate: "2027-08-31" });
+  });
+
+  it("전세면 월세는 0으로 저장", () => {
+    const result = parseHomeForm({ ...contract, contractType: "jeonse", monthlyRent: "300000" });
+    expect(result.ok && result.value.monthlyRent).toBe(0);
+  });
+
+  it("금액이 음수·글자·10억 원 초과면 거부하고 할 일을 알려 준다", () => {
+    for (const [field, value] of [["deposit", "-1"], ["monthlyRent", "사십만"], ["maintenanceFee", "1000000001"]] as const) {
+      const result = parseHomeForm({ ...contract, [field]: value });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.errors[field]).toBe("0 이상 숫자로 입력해 주세요. 예: 450000");
+    }
+  });
+
+  it("만료일 형식이 틀리면 거부, 비우면 null", () => {
+    const bad = parseHomeForm({ ...contract, contractEndDate: "내년 여름" });
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) expect(bad.errors.contractEndDate).toBe("계약 만료일 형식이 맞지 않습니다. 2027-08-31처럼 입력해 주세요.");
+    const empty = parseHomeForm({ ...contract, contractEndDate: "" });
+    expect(empty.ok && empty.value.contractEndDate).toBeNull();
+  });
+
+  it("목록에 없는 계약 형태는 거부", () => {
+    expect(parseHomeForm({ ...contract, contractType: "half" }).ok).toBe(false);
   });
 });

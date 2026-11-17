@@ -1,6 +1,6 @@
-import type { IncidentFacts } from "@/incident/detect";
 import {
   buildMessages,
+  type NotifyIncident,
   readLookupResult,
   selectToNotify,
   type NotifyRecord,
@@ -53,7 +53,7 @@ export async function postSlackMessage(slackUserId: string, text: string): Promi
   return answer.ok ? { ok: true } : { ok: false, error: maskSecrets(String(answer.error ?? "unknown"), [process.env.SLACK_BOT_TOKEN ?? ""]) };
 }
 
-export type NotifyCandidate = { incidentId: string; userId: string; detectedAt: string; facts: IncidentFacts };
+export type NotifyCandidate = { incidentId: string; userId: string; detectedAt: string; facts: NotifyIncident["facts"] };
 export type NotifyStats = { sent: number; failed: number; retried: number };
 
 async function loadSettings(db: AdminClient, userIds: string[]): Promise<Map<string, NotifySetting>> {
@@ -71,7 +71,7 @@ async function loadRetries(db: AdminClient): Promise<{ candidates: NotifyCandida
   if (records.size === 0) return { candidates: [], records };
   const { data: incidents, error: readError } = await db.from("incidents").select("id, user_id, detected_at, facts").in("id", [...records.keys()]);
   if (readError) throw new Error(`다시 보낼 사건을 읽지 못했습니다: ${readError.message}`);
-  const candidates = incidents.map((row) => ({ incidentId: row.id, userId: row.user_id, detectedAt: row.detected_at, facts: row.facts as unknown as IncidentFacts }));
+  const candidates = incidents.map((row) => ({ incidentId: row.id, userId: row.user_id, detectedAt: row.detected_at, facts: row.facts as unknown as NotifyIncident["facts"] }));
   return { candidates, records };
 }
 

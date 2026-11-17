@@ -10,7 +10,7 @@ export default function MyLayout({ children }: LayoutProps<"/my">) {
       <nav aria-label="내 정보 메뉴" className={styles.tabs}>
         <Link href="/my/home" className={styles.tab}>내 집</Link>
         <Link href="/my/conditions" className={styles.tab}>공고·정책 조건</Link>
-        <Link href="/my/notifications" className={styles.tab}>알림</Link>
+        <Link href="/my/notifications" className={styles.tab}>슬랙 알림</Link>
         <Link href="/my/account" className={styles.tab}>계정</Link>
       </nav>
       {children}

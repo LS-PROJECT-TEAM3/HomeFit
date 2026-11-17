@@ -4,7 +4,7 @@ import styles from "./status.module.css";
 export type IncidentStatus = "new" | "pending" | "approved" | "rejected";
 
 const LABELS: Record<IncidentStatus, string> = {
-  new: "새 사건",
+  new: "새 알림",
   pending: "승인 대기",
   approved: "승인",
   rejected: "거절",

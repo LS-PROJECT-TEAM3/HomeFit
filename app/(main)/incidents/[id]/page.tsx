@@ -12,7 +12,7 @@ import { DecisionPanel } from "./decision-panel";
 import { HumidityFactsView } from "./humidity-facts";
 import styles from "./detail.module.css";
 
-export const metadata = { title: "사건 상세 | HomeFit AI" };
+export const metadata = { title: "알림 상세 | HomeFit AI" };
 
 function Facts({ detail, today }: { detail: IncidentDetail; today: string }) {
   const facts = detail.facts;
@@ -92,7 +92,7 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
       detail = { ...detail, status: "pending" };
     }
   } catch {
-    return <LoadError>사건을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
+    return <LoadError>알림을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
   if (!detail) return <LoadError>볼 수 없는 페이지입니다. <Link href="/">홈으로</Link></LoadError>;
   const open = detail.status === "new" || detail.status === "pending";
@@ -114,7 +114,7 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
       )}
       <Plan detail={detail} />
       {/* FR-011: 관리자도 남의 사건은 승인·거절하지 못한다 */}
-      {detail.isMine && open ? <DecisionPanel incidentId={detail.id} /> : null}
+      {detail.isMine && open ? <DecisionPanel incidentId={detail.id} planName={detail.humidity ? "대응 계획" : "신청 준비 계획"} /> : null}
       {detail.status === "approved" && detail.scheduleId ? (
         <p className={styles.success} role="status">
           내 일정에 넣었습니다. <Link href={`/schedule/${detail.scheduleId}`}>일정 보기</Link>
@@ -134,7 +134,7 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
 export default function IncidentDetailPage({ params }: PageProps<"/incidents/[id]">) {
   return (
     <main className={styles.main}>
-      <p><Link href="/incidents">← 사건 목록</Link></p>
+      <p><Link href="/incidents">← 위험·기회 알림</Link></p>
       <Suspense fallback={<Loading />}>
         <Detail params={params} />
       </Suspense>

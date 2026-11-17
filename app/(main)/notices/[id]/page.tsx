@@ -56,7 +56,7 @@ async function Detail({ params }: { params: PageProps<"/notices/[id]">["params"]
   } catch {
     return <LoadError>공고를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
-  if (!detail) return <LoadError>공고를 찾을 수 없습니다. <Link href="/notices">맞는 공고로</Link></LoadError>;
+  if (!detail) return <LoadError>공고를 찾을 수 없습니다. <Link href="/notices">맞춤 공고로</Link></LoadError>;
   const today = toKstDate(new Date());
   const [notice] = detail.notices;
   const deadline = describeDeadline(notice.applyEnd, today);
@@ -99,14 +99,14 @@ async function Detail({ params }: { params: PageProps<"/notices/[id]">["params"]
       </Suspense>
       <FollowPanel announcementId={announcementId} initial={detail.myDecision} />
       <section className={styles.card} aria-labelledby="watch-title">
-        <h2 id="watch-title" className={styles.sectionTitle}>이 공고로 생긴 내 사건</h2>
+        <h2 id="watch-title" className={styles.sectionTitle}>이 공고로 생긴 내 알림</h2>
         {detail.myIncidents.length === 0 ? (
-          <p className={styles.notice}>아직 없습니다. 팔로우하면 이 공고의 접수 기간·임대료가 바뀌거나 정정공고가 올라올 때 사건으로 알려 드립니다.</p>
+          <p className={styles.notice}>아직 없습니다. 팔로우하면 이 공고의 접수 기간·임대료가 바뀌거나 정정공고가 올라올 때 주거 기회 알림으로 알려 드립니다.</p>
         ) : (
           <ul className={styles.checklist}>
             {detail.myIncidents.map((incident) => (
               <li key={incident.id}>
-                <Link href={`/incidents/${incident.id}`}>사건 보기</Link>{" "}
+                <Link href={`/incidents/${incident.id}`}>알림 보기</Link>{" "}
                 {isIncidentStatus(incident.status) ? <StatusBadge status={incident.status} /> : null}
               </li>
             ))}
@@ -121,7 +121,7 @@ async function Detail({ params }: { params: PageProps<"/notices/[id]">["params"]
 export default function NoticeDetailPage({ params }: PageProps<"/notices/[id]">) {
   return (
     <main className={styles.main}>
-      <p><Link href="/notices">← 맞는 공고</Link></p>
+      <p><Link href="/notices">← 맞춤 공고</Link></p>
       <Suspense fallback={<Loading />}>
         <Detail params={params} />
       </Suspense>

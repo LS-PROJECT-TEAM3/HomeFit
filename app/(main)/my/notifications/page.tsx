@@ -7,7 +7,7 @@ import { createClient, currentUserId } from "@/lib/supabase/server";
 import styles from "../my.module.css";
 import { NotifyForm } from "./notify-form";
 
-export const metadata = { title: "알림 | HomeFit AI" };
+export const metadata = { title: "슬랙 알림 | HomeFit AI" };
 
 async function Settings() {
   await connection(); // 로그인한 사람마다 다르다
@@ -30,8 +30,8 @@ async function Settings() {
 export default function NotificationsPage() {
   return (
     <section className={styles.section} aria-labelledby="notify-title">
-      <h2 id="notify-title">알림</h2>
-      <p>공고에 변화가 생겨 사건이 만들어지면 팀 슬랙의 HomeFit 봇이 개인 메시지로 알려 드립니다. 알림을 켜는 것이 알림을 받겠다는 승인입니다. 사건에 대한 대응은 지금처럼 하나씩 승인합니다.</p>
+      <h2 id="notify-title">슬랙 알림</h2>
+      <p>내 집에 결로 위험이 생기거나 팔로우한 공고가 바뀌어 위험·기회 알림이 만들어지면 팀 슬랙의 HomeFit 봇이 개인 메시지로 알려 드립니다. 슬랙 알림을 켜는 것이 알림을 받겠다는 승인입니다. 대응 계획은 지금처럼 하나씩 승인합니다.</p>
       <Suspense fallback={<Loading />}>
         <Settings />
       </Suspense>

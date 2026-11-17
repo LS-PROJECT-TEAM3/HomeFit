@@ -11,10 +11,10 @@ import { listIncidents, myhomeCollectionStatus } from "@/incident/queries.server
 import { toKstDate } from "@/watch/kst";
 import styles from "./incidents.module.css";
 
-export const metadata = { title: "사건 | HomeFit AI" };
+export const metadata = { title: "위험·기회 알림 | HomeFit AI" };
 
 const STATUS_OPTIONS = [
-  ["all", "전체"], ["new", "새 사건"], ["pending", "승인 대기"], ["approved", "승인"], ["rejected", "거절"],
+  ["all", "전체"], ["new", "새 알림"], ["pending", "승인 대기"], ["approved", "승인"], ["rejected", "거절"],
 ] as const;
 const PERIOD_OPTIONS = [["all", "전체 기간"], ["7d", "최근 7일"], ["30d", "최근 30일"]] as const;
 
@@ -42,7 +42,7 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
     const now = new Date();
     result = { incidents: await listIncidents(filter, now), status: await myhomeCollectionStatus(), today: toKstDate(now) };
   } catch {
-    return <LoadError>사건을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
+    return <LoadError>알림을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
   const { incidents, status, today } = result;
   return (
@@ -55,11 +55,11 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
           {filter.status === "all" && filter.period === "all" ? (
             <>
               {/* FR-015 (spec 001 v0.2): 처음 보이는 공고는 사건이 아니라 맞는 공고에 있다 */}
-              맞는 공고에 아직 변화가 없습니다. 마지막 확인: {formatTime(status.lastSuccessAt)}.{" "}
-              <Link href="/notices">맞는 공고 보기</Link>
+              팔로우한 맞춤 공고와 내 집에 아직 새 알림이 없습니다. 마지막 확인: {formatTime(status.lastSuccessAt)}.{" "}
+              <Link href="/notices">맞춤 공고 보기</Link>
             </>
           ) : (
-            "거른 조건에 맞는 사건이 없습니다."
+            "거른 조건에 맞는 알림이 없습니다."
           )}
         </Empty>
       ) : (
@@ -124,7 +124,7 @@ async function Filtered({ searchParams }: { searchParams: PageProps<"/incidents"
 export default function IncidentsPage({ searchParams }: PageProps<"/incidents">) {
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>사건</h1>
+      <h1 className={styles.title}>위험·기회 알림</h1>
       <Suspense fallback={<Loading />}>
         <Filtered searchParams={searchParams} />
       </Suspense>

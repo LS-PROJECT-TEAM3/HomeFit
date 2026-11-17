@@ -21,7 +21,7 @@ export default function OnboardingPage() {
     <main className={styles.page}>
       <section className={styles.card}>
         <h1 className={styles.title}>공고를 받을 조건</h1>
-        <p className={styles.lead}>조건에 맞는 공공임대 공고가 새로 올라오면 사건으로 알려 드립니다.</p>
+        <p className={styles.lead}>조건에 맞는 공공임대 공고를 맞춤 공고로 보여 드리고, 팔로우한 공고가 바뀌면 알려 드립니다.</p>
         <Suspense fallback={<p role="status">불러오는 중…</p>}>
           <OnboardingForm />
         </Suspense>

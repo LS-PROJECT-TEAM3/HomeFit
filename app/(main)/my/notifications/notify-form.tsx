@@ -35,7 +35,7 @@ export function NotifyForm({ initialEmail, found, enabled: initialEnabled }: Pro
       </form>
 
       <Message state={other} />
-      <p>알림: <strong>{enabled ? "켜짐" : "꺼짐"}</strong>{enabled ? null : " (켜야 사건 알림을 보냅니다)"}</p>
+      <p>슬랙 알림: <strong>{enabled ? "켜짐" : "꺼짐"}</strong>{enabled ? null : " (켜야 위험·기회 알림을 보냅니다)"}</p>
       <div className={styles.checks}>
         <button type="button" className={styles.primary} disabled={busy || !canUse}
           onClick={() => run(async () => {

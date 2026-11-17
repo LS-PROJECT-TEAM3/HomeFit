@@ -6,7 +6,7 @@ import { parseHomeForm, parseMeasurementForm, type HomeFormInput, type Measureme
 import { createClient, currentUserId } from "@/lib/supabase/server";
 
 export type HomeState = {
-  errors?: Partial<Record<"sigunguCode" | "housingType" | "exclusiveArea" | "windowType", string>>;
+  errors?: Partial<Record<"sigunguCode" | "housingType" | "exclusiveArea" | "windowType" | "contractType" | "deposit" | "monthlyRent" | "maintenanceFee" | "contractEndDate", string>>;
   error?: string;
   saved?: boolean;
   /** 저장하지 못했을 때 입력을 되살린다(React가 제출 뒤 폼을 비움) */
@@ -31,6 +31,8 @@ export async function saveHome(_prev: HomeState, formData: FormData): Promise<Ho
   const values: HomeFormInput = {
     sidoCode: text(formData, "sidoCode"), sigunguCode: text(formData, "sigunguCode"), housingType: text(formData, "housingType"),
     exclusiveArea: text(formData, "exclusiveArea"), areaUnit: text(formData, "areaUnit"), windowType: text(formData, "windowType"),
+    contractType: text(formData, "contractType"), deposit: text(formData, "deposit"), monthlyRent: text(formData, "monthlyRent"),
+    maintenanceFee: text(formData, "maintenanceFee"), contractEndDate: text(formData, "contractEndDate"),
   };
   const parsed = parseHomeForm(values);
   if (!parsed.ok) return { errors: parsed.errors, values };
@@ -40,6 +42,8 @@ export async function saveHome(_prev: HomeState, formData: FormData): Promise<Ho
     {
       user_id: userId, sigungu_code: parsed.value.sigunguCode, housing_type: parsed.value.housingType,
       exclusive_area_m2: parsed.value.exclusiveAreaM2, window_type: parsed.value.windowType,
+      contract_type: parsed.value.contractType, deposit: parsed.value.deposit, monthly_rent: parsed.value.monthlyRent,
+      maintenance_fee: parsed.value.maintenanceFee, contract_end_date: parsed.value.contractEndDate,
       created_by: userId, updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },

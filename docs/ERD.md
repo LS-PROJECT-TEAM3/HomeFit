@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-17 (v1.4, 승인 2026-11-17)
+- 최종 갱신: 2026-11-17 (v1.5, 승인 2026-11-17: homes.maintenance_fee)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -71,6 +71,7 @@ erDiagram
 | contract_type | text: `monthly` / `jeonse` | | 계약 형태(월세 / 전세) | [PRD FR-03] |
 | deposit | integer (원) | | 보증금 | [PRD FR-03] |
 | monthly_rent | integer (원) | | 월세. 전세면 0 | [PRD FR-03] |
+| maintenance_fee | integer (원) | | 월 관리비. 월 예상 주거비 = 월세 + 관리비 (v1.5) | [PRD FR-03, FR-13 v1.6] [GLOSSARY 관리비] |
 | contract_end_date | date | | 계약 만료일 | [PRD FR-03] |
 | window_type | text: `single` / `double` / `unknown` | ✔ | 창 종류(홑유리 / 이중유리 / 모름) | [PRD FR-03] [CUJ-02 1단계] |
 | created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
@@ -434,6 +435,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-17 | v1.5 | homes.maintenance_fee(월 관리비) 추가. 홈 "월 예상 주거비"(PRD v1.6 FR-13) 계산용 |
 | 2026-11-17 | v1.4 | llm_calls.purpose에 `response_plan` 추가(습도·결로 대응 계획 AI 초안, 마이그레이션 0011). 표·칸 변경 없음 |
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |
 | 2026-11-17 | v1.0 | 승인 |

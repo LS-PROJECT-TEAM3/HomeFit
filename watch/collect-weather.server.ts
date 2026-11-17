@@ -1,5 +1,8 @@
 import { planHumidityIncidents } from "@/incident/humidity-detect";
+import type { HumidityFacts } from "@/incident/humidity-detect";
 import { draftHumidityPlan } from "@/incident/humidity-plan.server";
+import { notifyIncidents } from "@/incident/notify.server";
+import type { CreatedIncident } from "@/incident/plans.server";
 import type { DraftResult } from "@/incident/plan-draft.server";
 import { newCallContext } from "@/lib/llm/call.server";
 import {
@@ -30,6 +33,7 @@ function secretsToMask(): string[] {
   return [
     process.env.DATA_GO_KR_SERVICE_KEY ?? "", process.env.SUPABASE_SECRET_KEY ?? "",
     process.env.GEMINI_API_KEY ?? "", process.env.ANTHROPIC_API_KEY ?? "", // spec 002 FR-008: AI 오류 문구에 키가 섞여도 가린다
+    process.env.SLACK_BOT_TOKEN ?? "",
   ];
 }
 
@@ -54,6 +58,22 @@ async function saveObservations(db: AdminClient, runId: string, collected: Colle
   const { error } = await db.from("observations").insert(rows);
   if (error) throw new Error(`예보 값을 저장하지 못했습니다: ${error.message}`);
   return rows.length;
+}
+
+/**
+ * spec 003 FR-009: 새 습도·결로 알림을 슬랙으로(켠 사람만). 실패해도 수집은 성공으로 끝내고 실행 기록에만 남긴다.
+ * 갱신된 알림은 다시 보내지 않는다(알림 기록이 알림마다 한 번, ERD notifications 유일 조건)
+ */
+async function runNotifyStep(db: AdminClient, runId: string, created: CreatedIncident[]) {
+  try {
+    const candidates = created.map((c) => ({ incidentId: c.id, userId: c.user_id, detectedAt: c.detected_at, facts: c.facts as unknown as HumidityFacts }));
+    const stats = await notifyIncidents(db, candidates);
+    const status = stats.sent + stats.failed === 0 ? "skipped" : "succeeded";
+    await recordStep(db, runId, { name: "notify", status, itemsIn: created.length, itemsOut: stats.sent, detail: stats });
+  } catch (cause) {
+    const message = maskSecrets(cause instanceof Error ? cause.message : String(cause), secretsToMask());
+    await recordStep(db, runId, { name: "notify", status: "failed", detail: { error: message } });
+  }
 }
 
 // 실패 이유에 키가 섞일 수 있어 가린다 (PRD FR-27)
@@ -93,6 +113,7 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Weathe
     name: "draft_plan", status: created.length ? "succeeded" : "skipped", itemsIn: created.length, itemsOut: created.length,
     detail: { ai_provider: process.env.AI_PROVIDER || "(비어 있음)", ai_drafted: stats.drafted, ai_failed: stats.failed, ai_skipped_by_limit: stats.skipped, ai_failure_reasons: stats.failureReasons },
   });
+  await runNotifyStep(db, runId, created);
   const waiting = created.length + updated.length;
   await recordStep(db, runId, { name: "await_approval", status: waiting ? "waiting" : "skipped", itemsOut: waiting });
   return { sigungu: collected.bySigungu.size, newIncidents: created.length, updatedIncidents: updated.length };
