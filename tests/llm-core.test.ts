@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCallBudget } from "@/lib/llm/budget";
+import { DEFAULT_CALLS_PER_RUN, createCallBudget } from "@/lib/llm/budget";
 import { decideRetry } from "@/lib/llm/retry";
 import { selectProvider } from "@/lib/llm/select";
 
@@ -41,6 +41,10 @@ describe("createCallBudget", () => {
     const allowed = Array.from({ length: 25 }, () => budget.tryTake()).filter(Boolean).length;
     expect(allowed).toBe(20);
     expect(budget.skipped()).toBe(5);
+  });
+
+  it("기본 상한은 Gemini 무료 분당 한도(15)보다 작다 (Q22)", () => {
+    expect(DEFAULT_CALLS_PER_RUN).toBeLessThan(15);
   });
 });
 
