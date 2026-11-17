@@ -15,6 +15,9 @@ export function makeNotice(overrides: Partial<Notice> = {}): Notice {
     applyStart: "2026-11-20",
     applyEnd: "2026-11-22",
     url: "https://example.test/notice/0001",
+    complexName: "가짜단지1",
+    statusName: "일반공고",
+    beforeAnnouncementId: null,
     ...overrides,
   };
 }

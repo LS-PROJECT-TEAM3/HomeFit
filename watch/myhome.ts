@@ -17,6 +17,9 @@ export type MyhomeItem = {
   mtRntchrg?: number;
   pcUrl?: string;
   url?: string;
+  hsmpNm?: string;
+  sttusNm?: string;
+  beforePblancId?: string;
 };
 
 export type ParseResult =
@@ -60,6 +63,10 @@ export function normalizeMyhomeItem(item: MyhomeItem): Notice | null {
     applyStart: toIsoDate(item.beginDe),
     applyEnd: toIsoDate(item.endDe),
     url: emptyToNull(item.pcUrl) ?? emptyToNull(item.url),
+    // FR-016 (spec 001 v0.2): 정정공고·같은 단지 판단
+    complexName: emptyToNull(item.hsmpNm),
+    statusName: emptyToNull(item.sttusNm),
+    beforeAnnouncementId: emptyToNull(item.beforePblancId),
   };
 }
 

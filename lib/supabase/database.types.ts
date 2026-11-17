@@ -1,4 +1,4 @@
-// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0003 기준)을 짧게 옮긴 것.
+// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0005 기준)을 짧게 옮긴 것.
 // 표를 바꾸면 Supabase 도구의 "generate TypeScript types"로 다시 만들어 이 파일을 바꾼다.
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -34,6 +34,8 @@ type SourceItemRow = {
   sigungu_code: string | null; supply_type: string | null; monthly_rent: number | null;
   announced_at: string | null; apply_start: string | null; apply_end: string | null; url: string | null;
   content_hash: string; raw: Json; first_seen_at: string; last_seen_at: string;
+  complex_key: string | null; status_name: string | null; before_external_id: string | null;
+  previous_values: Json | null;
 };
 
 type ObservationRow = {
@@ -63,6 +65,16 @@ type ScheduleItemRow = {
   due_date: string | null; checklist_state: Json; created_at: string; updated_at: string;
 };
 
+// 0005: 슬랙 알림 (ERD v1.1)
+type NotificationSettingRow = {
+  user_id: string; slack_webhook_url: string | null; enabled: boolean; enabled_at: string | null; updated_at: string;
+};
+
+type NotificationRow = {
+  id: string; incident_id: string; user_id: string; channel: string; status: string; attempts: number;
+  last_error: string | null; sent_at: string | null; created_at: string;
+};
+
 // 기본값이 있는 칸은 넣을 때 빼도 된다
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -86,6 +98,7 @@ export type Database = {
           SourceItemRow,
           | "id" | "sido_code" | "sigungu_code" | "supply_type" | "monthly_rent" | "announced_at"
           | "apply_start" | "apply_end" | "url" | "first_seen_at" | "last_seen_at"
+          | "complex_key" | "status_name" | "before_external_id" | "previous_values"
         >
       >;
       observations: Table<
@@ -111,6 +124,14 @@ export type Database = {
       schedule_items: Table<
         ScheduleItemRow,
         Optional<ScheduleItemRow, "id" | "due_date" | "created_at" | "updated_at">
+      >;
+      notification_settings: Table<
+        NotificationSettingRow,
+        Optional<NotificationSettingRow, "slack_webhook_url" | "enabled" | "enabled_at" | "updated_at">
+      >;
+      notifications: Table<
+        NotificationRow,
+        Optional<NotificationRow, "id" | "attempts" | "last_error" | "sent_at" | "created_at">
       >;
     };
     Views: Record<never, never>;

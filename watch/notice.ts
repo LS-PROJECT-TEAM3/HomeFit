@@ -18,6 +18,12 @@ export type Notice = {
   applyStart: string | null;
   applyEnd: string | null;
   url: string | null;
+  /** 단지 이름. 같은 단지의 완화·재공고 판단 (FR-016, ERD source_items.complex_key) */
+  complexName: string | null;
+  /** 공고 상태(예: "정정공고"). ERD source_items.status_name */
+  statusName: string | null;
+  /** 고치기 전 공고 ID. ERD source_items.before_external_id */
+  beforeAnnouncementId: string | null;
 };
 
 /**

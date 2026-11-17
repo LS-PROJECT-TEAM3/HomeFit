@@ -21,7 +21,18 @@ describe("normalizeMyhomeItem", () => {
       applyStart: "2026-11-30",
       applyEnd: "2026-12-02",
       url: "https://www.myhome.go.kr/hws/portal/sch/selectRsdtRcritNtcDetailView.do?pblancId=21581&houseSn=3",
+      complexName: "부산고촌",
+      statusName: "정정공고",
+      beforeAnnouncementId: "21534",
     });
+  });
+
+  // FR-016 (spec 001 v0.2): 정정공고·같은 단지 판단에 쓰는 칸
+  it("단지 이름·공고 상태·이전 공고 ID가 비면 null", () => {
+    const notice = normalizeMyhomeItem(seoulItem);
+    expect(notice?.complexName).toBeNull();
+    expect(notice?.statusName).toBe("일반공고");
+    expect(notice?.beforeAnnouncementId).toBeNull();
   });
 
   it("Q17: pnu가 없으면(시도 전체 공고) 시도는 이름으로 찾고 시군구는 비운다", () => {
