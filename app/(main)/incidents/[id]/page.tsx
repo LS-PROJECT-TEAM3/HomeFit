@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { LoadError, Loading } from "@/app/_components/states";
 import { isIncidentStatus, SimulatedBadge, StatusBadge, UpdatedBadge } from "@/app/_components/status";
+import { describeChange } from "@/incident/change-text";
 import { describeDeadline } from "@/incident/checklist";
 import { getIncidentDetail, type IncidentDetail } from "@/incident/queries.server";
 import { createClient, currentUserId } from "@/lib/supabase/server";
@@ -31,6 +32,21 @@ function Facts({ detail, today }: { detail: IncidentDetail; today: string }) {
       <p className={styles.notice}>자격은 공고문 기준으로 확인이 필요합니다.</p>
       {facts.url ? <a href={facts.url} target="_blank" rel="noopener noreferrer">공고 원문 보기 (마이홈)</a> : null}
       <p className={styles.source}>출처: 마이홈 공공임대 모집공고 · 수집 {new Date(detail.detectedAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}</p>
+    </section>
+  );
+}
+
+// FR-009 (spec 001 v0.2): 무엇이 바뀌었나(전 → 후, 정정공고, 완화 재공고). v0.1 사건은 없음
+function WhatChanged({ detail }: { detail: IncidentDetail }) {
+  const text = describeChange(detail.facts.change);
+  if (!text) return null;
+  return (
+    <section className={styles.card} aria-labelledby="change-title">
+      <h2 id="change-title" className={styles.sectionTitle}>무엇이 바뀌었나</h2>
+      <ul className={styles.checklist}>
+        {text.lines.map((line) => <li key={line}><strong>{line}</strong></li>)}
+      </ul>
+      {text.note ? <p className={styles.notice}>{text.note}</p> : null}
     </section>
   );
 }
@@ -85,6 +101,7 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
         {detail.isSimulated ? <SimulatedBadge /> : null}
       </div>
       <h1 className={styles.title}>{detail.facts.title}</h1>
+      <WhatChanged detail={detail} />
       <Facts detail={detail} today={toKstDate(new Date())} />
       <Plan detail={detail} />
       {/* FR-011: 관리자도 남의 사건은 승인·거절하지 못한다 */}

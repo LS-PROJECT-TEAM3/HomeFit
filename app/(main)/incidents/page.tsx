@@ -40,8 +40,9 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
         <Empty>
           {filter.status === "all" && filter.period === "all" ? (
             <>
-              조건에 맞는 새 공고가 아직 없습니다. 마지막 확인: {formatTime(status.lastSuccessAt)}.{" "}
-              <Link href="/my/conditions">조건 수정하기</Link>
+              {/* FR-015 (spec 001 v0.2): 처음 보이는 공고는 사건이 아니라 맞는 공고에 있다 */}
+              맞는 공고에 아직 변화가 없습니다. 마지막 확인: {formatTime(status.lastSuccessAt)}.{" "}
+              <Link href="/notices">맞는 공고 보기</Link>
             </>
           ) : (
             "거른 조건에 맞는 사건이 없습니다."

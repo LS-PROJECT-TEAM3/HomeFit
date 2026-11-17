@@ -5,6 +5,7 @@ import styles from "./main.module.css";
 const MENU = [
   { href: "/", label: "홈" },
   { href: "/incidents", label: "사건" },
+  { href: "/notices", label: "맞는 공고" }, // IA NT_080000_PG (spec 001 v0.2)
   { href: "/schedule", label: "내 일정" },
   { href: "/my/conditions", label: "내 정보" },
 ];

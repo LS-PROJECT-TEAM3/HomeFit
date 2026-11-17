@@ -1,21 +1,21 @@
 import type { ChecklistItem } from "@/incident/checklist";
 import { periodStart, type IncidentFilter } from "@/incident/filter";
 import { createClient, requireUserId } from "@/lib/supabase/server";
-import type { Notice } from "@/watch/notice";
+import type { IncidentFacts } from "@/incident/detect";
 
 // 사건 화면이 읽는 자료. 로그인한 사용자 권한(RLS)으로 읽는다 (FR-014).
 // RLS는 관리자에게 모든 사건을 보여 주므로 목록·건수는 user_id로 내 것만 거른다 (FR-007, 리뷰 2026-11-17)
 // 읽기 실패는 던져서 화면이 "조회 실패"를 보이게 한다(빈 목록으로 숨기지 않음, P3-12)
 
 export type IncidentSummary = {
-  id: string; status: string; facts: Notice; isUpdated: boolean; isSimulated: boolean; detectedAt: string;
+  id: string; status: string; facts: IncidentFacts; isUpdated: boolean; isSimulated: boolean; detectedAt: string;
 };
 
 const PAGE_SIZE = 20;
 
 function toSummary(row: { id: string; status: string; facts: unknown; is_updated: boolean; is_simulated: boolean; detected_at: string }): IncidentSummary {
   return {
-    id: row.id, status: row.status, facts: row.facts as Notice, // facts는 Notice로 저장했다 (incident/detect.ts)
+    id: row.id, status: row.status, facts: row.facts as IncidentFacts, // facts는 IncidentFacts로 저장했다 (incident/detect.ts)
     isUpdated: row.is_updated, isSimulated: row.is_simulated, detectedAt: row.detected_at,
   };
 }
