@@ -1,0 +1,18 @@
+{
+  "project": "보험 가입 서비스 (예시)",
+  "screens": [
+    {"menu_code": "HM", "no": [0, 0, 0], "path": ["메인"], "type": "페이지", "login": "불필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/", "menu_entry": true},
+    {"menu_code": "PD", "no": [1, 0, 0], "path": ["메인", "보험상품"], "type": "페이지", "login": "불필요", "dev": "콘텐츠", "priority": "MVP", "status": "신규", "url": "/products", "menu_entry": true},
+    {"menu_code": "PD", "no": [1, 1, 0], "path": ["메인", "보험상품", "자동차보험"], "type": "페이지", "login": "불필요", "dev": "콘텐츠", "priority": "MVP", "status": "신규", "url": "/products/car", "menu_entry": true},
+    {"menu_code": "PD", "no": [1, 1, 1], "path": ["메인", "보험상품", "자동차보험", "보험료 계산"], "type": "팝업", "login": "불필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "", "note": "차량 정보 입력 후 예상 보험료 표시"},
+    {"menu_code": "PD", "no": [1, 1, 2], "path": ["메인", "보험상품", "자동차보험", "가입 정보 입력"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/products/car/apply", "note": "비로그인 시 로그인 팝업 후 복귀"},
+    {"menu_code": "PD", "no": [1, 1, 3], "path": ["메인", "보험상품", "자동차보험", "가입 완료"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/products/car/done"},
+    {"menu_code": "MY", "no": [2, 0, 0], "path": ["메인", "마이페이지"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/my", "menu_entry": true},
+    {"menu_code": "MY", "no": [2, 1, 0], "path": ["메인", "마이페이지", "가입 내역"], "type": "탭", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/my/contracts", "menu_entry": true},
+    {"menu_code": "MY", "no": [2, 2, 0], "path": ["메인", "마이페이지", "회원정보 수정"], "type": "탭", "login": "필요", "dev": "개발", "priority": "2차", "status": "신규", "url": "/my/profile", "menu_entry": true},
+    {"menu_code": "MB", "no": [3, 0, 0], "path": ["메인", "로그인"], "type": "팝업", "login": "불필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "", "menu_entry": true},
+    {"menu_code": "MB", "no": [3, 1, 0], "path": ["메인", "로그인", "회원가입"], "type": "페이지", "login": "불필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/signup", "menu_entry": true},
+    {"menu_code": "MB", "no": [3, 1, 1], "path": ["메인", "로그인", "회원가입", "본인인증"], "type": "링크", "login": "불필요", "dev": "외부연동", "priority": "MVP", "status": "신규", "url": "", "note": "외부 인증 서비스"},
+    {"menu_code": "MB", "no": [3, 2, 0], "path": ["메인", "로그인", "아이디/비밀번호 찾기"], "type": "페이지", "login": "불필요", "dev": "개발", "priority": "2차", "status": "신규", "url": "/find-account", "menu_entry": true}
+  ]
+}
