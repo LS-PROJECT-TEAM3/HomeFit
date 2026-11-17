@@ -9,6 +9,10 @@ const CALC_AND_DETECT = [
   "incident/checklist.ts",
   "incident/dedup.ts",
   "watch/myhome.ts",
+  // spec 003: 결로 계산·예보 해석·습도 사건 판단도 AI와 나눈다
+  "incident/condensation.ts",
+  "incident/humidity-detect.ts",
+  "watch/kma.ts",
 ];
 const AI_MODULES = [
   "lib/llm/types.ts",

@@ -46,3 +46,9 @@ describe("buildDefaultChecklist", () => {
     expect(items.every((item) => item.dueOn === null)).toBe(true);
   });
 });
+
+describe("describeDeadline 값이 없을 때", () => {
+  it("마감일 칸이 아예 없는 사건(습도·결로, spec 003)도 오류 없이 null", () => {
+    expect(describeDeadline(undefined, "2026-11-17")).toBeNull();
+  });
+});

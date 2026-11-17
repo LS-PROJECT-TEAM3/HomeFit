@@ -17,8 +17,9 @@ function toUtcDay(date: string): number {
  * FR-009, FR-013 (spec 001): 마감까지 남은 날을 글로 보여 준다. 색만 쓰지 않게 글자로 쓴다.
  * @param today 한국 날짜 "YYYY-MM-DD"
  */
-export function describeDeadline(applyEnd: string | null, today: string): string | null {
-  if (applyEnd === null) return null;
+export function describeDeadline(applyEnd: string | null | undefined, today: string): string | null {
+  // 습도·결로 사건(spec 003)처럼 마감일 칸이 없는 사건도 오지만 오류 없이 넘긴다
+  if (applyEnd === null || applyEnd === undefined) return null;
   const days = Math.round((toUtcDay(applyEnd) - toUtcDay(today)) / DAY_MS);
   if (days < 0) return "마감 지남";
   if (days === 0) return "오늘 마감";
