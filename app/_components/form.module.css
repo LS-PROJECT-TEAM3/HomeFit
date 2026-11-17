@@ -62,6 +62,17 @@
   font-size: var(--font-size-sm);
 }
 
+/* 칸 아래 도움말 (spec 001 v0.3 시군구) */
+.help {
+  margin: 0;
+  color: var(--color-muted-text);
+  font-size: var(--font-size-sm);
+}
+
+.help:empty {
+  display: none;
+}
+
 .checks {
   display: flex;
   flex-wrap: wrap;

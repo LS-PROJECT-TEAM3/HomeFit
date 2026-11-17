@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { ConditionFormInput } from "@/incident/condition-form";
 import type { PolicyCondition } from "@/incident/match";
 import { SIDO_OPTIONS } from "@/watch/sido";
 import { saveConditions, type ConditionState } from "./actions";
+import { SigunguField } from "./sigungu-field";
 import styles from "@/app/_components/form.module.css";
 
 // 마이홈 실제 응답의 공급 유형 이름 (spec 001 Q6). "모두"가 기본값
@@ -37,16 +38,27 @@ export function ConditionForm({ initial, next, submitLabel }: Props) {
   const errors = state.errors ?? {};
   // 제출 뒤 React가 폼을 비우므로, 서버가 돌려준 입력(없으면 저장된 조건)으로 다시 채운다
   const values = state.values ?? toInput(initial);
+  return <ConditionFields key={JSON.stringify(values)} values={values} errors={errors} state={state} action={action} pending={pending} next={next} submitLabel={submitLabel} />;
+}
+
+type FieldsProps = {
+  values: ConditionFormInput; errors: NonNullable<ConditionState["errors"]>; state: ConditionState;
+  action: (formData: FormData) => void; pending: boolean; next: Props["next"]; submitLabel: string;
+};
+
+function ConditionFields({ values, errors, state, action, pending, next, submitLabel }: FieldsProps) {
+  // FR-002 (spec 001 v0.3): 시도에 따라 시군구 목록이 바뀐다
+  const [sidoCode, setSidoCode] = useState(values.sidoCode);
   const picked = values.supplyTypes;
   return (
-    <form key={JSON.stringify(values)} action={action} className={styles.form} noValidate>
+    <form action={action} className={styles.form} noValidate>
       <input type="hidden" name="next" value={next} />
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
       {state.saved ? <p className={styles.notice} role="status">저장했습니다.</p> : null}
 
       <div className={styles.field}>
         <label className={styles.label} htmlFor="sidoCode">시도 (필수)</label>
-        <select id="sidoCode" name="sidoCode" defaultValue={values.sidoCode} className={styles.input}
+        <select id="sidoCode" name="sidoCode" value={sidoCode} onChange={(e) => setSidoCode(e.target.value)} className={styles.input}
           aria-invalid={Boolean(errors.sidoCode)} aria-describedby="sidoCode-error">
           <option value="">고르세요</option>
           {SIDO_OPTIONS.map((sido) => <option key={sido.code} value={sido.code}>{sido.name}</option>)}
@@ -54,8 +66,8 @@ export function ConditionForm({ initial, next, submitLabel }: Props) {
         <FieldError id="sidoCode-error" message={errors.sidoCode} />
       </div>
 
-      {/* Q18 임시 처리: 시군구 목록 출처가 정해질 때까지 시도 전체만 받는다(Q15 가정과 같은 동작) */}
-      <input type="hidden" name="sigunguCode" value={values.sigunguCode} />
+      {/* Q18 해결(spec 001 v0.3): 법정동코드 API의 시군구 목록 */}
+      <SigunguField sidoCode={sidoCode} initial={values.sigunguCode} error={errors.sigunguCode} />
 
       <fieldset className={styles.checks}>
         <legend className={styles.label}>공급 유형</legend>
