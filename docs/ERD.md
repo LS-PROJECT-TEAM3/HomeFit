@@ -335,7 +335,7 @@ erDiagram
 | run_id | uuid (FK runs) | | 어느 수집 실행에서 불렀나. 수집 밖(시험 메시지 등)이면 비움 | [spec 002 FR-004] |
 | provider | text: `gemini` / `claude` / `mock` | ✔ | 공급자. 나중에 `groq`·`openrouter`를 더할 수 있다 | [spec 002 FR-001] |
 | model | text | | 모델 이름. 설정이 없어 부르지 못했으면 비움 | [spec 002 FR-004] |
-| purpose | text: `application_plan` / `notice_summary` | ✔ | 용도(신청 준비 계획 / 공고 요약, v1.4). 기록 찾기·위키 챗봇이 생기면 값을 더한다 | [spec 002 FR-004] |
+| purpose | text: `application_plan` / `notice_summary` / `response_plan` | ✔ | 용도(신청 준비 계획 / 공고 요약, v1.4 / 습도·결로 대응 계획, 마이그레이션 0011). 기록 찾기·위키 챗봇이 생기면 값을 더한다 | [spec 002 FR-004] [spec 003 FR-007] |
 | ok | boolean | ✔ | 성공 여부 | [spec 002 FR-004] |
 | error_kind | text: `config` / `auth` / `rate_limit` / `timeout` / `refused` / `invalid_json` / `invalid_shape` / `server` / `unknown` | | 실패 종류(성공이면 비움) | [spec 002 FR-002] |
 | attempts | integer | ✔ | 시도 횟수(한도 초과로 다시 시도한 것 포함) | [spec 002 FR-005] |
@@ -429,10 +429,12 @@ erDiagram
 ## 실제 DB 대조
 DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과를 한 줄로 적는다(P3-16).
 - 2026-11-17 (마이그레이션 0001~0005): `source_items`(칸 20개, v1.1 칸 complex_key·status_name·before_external_id·previous_values 포함), `notification_settings`(6개, 0006에서 slack_email·slack_user_id), `notifications`(9개)가 이 문서 표와 이름이 같다(information_schema 조회). 첫 기능 밖 표(homes 등)는 아직 만들지 않았다.
+- 2026-11-17 (마이그레이션 0010·0011, spec 003): `homes`(칸 12개)·`indoor_measurements`(7개)를 이 문서 표 그대로 만들었다. `sources`에 `kma_forecast`, `llm_calls.purpose`에 `response_plan`을 더했다.
 
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-17 | v1.4 | llm_calls.purpose에 `response_plan` 추가(습도·결로 대응 계획 AI 초안, 마이그레이션 0011). 표·칸 변경 없음 |
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |
 | 2026-11-17 | v1.0 | 승인 |
 | 2026-11-17 | v1.4 | notice_follows(공고 팔로우 승인·거절)·notice_summaries(공고 요약) 표 추가(PRD v1.5 FR-38, H-006) |

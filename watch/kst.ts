@@ -12,3 +12,9 @@ export function toKstDate(now: Date): string {
 export function toKstDateTime(at: Date): string {
   return new Date(at.getTime() + KST_OFFSET_MS).toISOString().slice(0, 16);
 }
+
+/** 한국 시각 "11월 19일 02시" (spec 003 습도 사건 제목·AI 지시문) */
+export function toKstHourLabel(at: Date): string {
+  const kst = new Date(at.getTime() + KST_OFFSET_MS);
+  return `${kst.getUTCMonth() + 1}월 ${kst.getUTCDate()}일 ${String(kst.getUTCHours()).padStart(2, "0")}시`;
+}

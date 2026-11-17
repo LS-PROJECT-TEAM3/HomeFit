@@ -1,6 +1,9 @@
 import { planHumidityIncidents } from "@/incident/humidity-detect";
+import { draftHumidityPlan } from "@/incident/humidity-plan.server";
+import type { DraftResult } from "@/incident/plan-draft.server";
+import { newCallContext } from "@/lib/llm/call.server";
 import {
-  insertDefaultHumidityPlans, insertHumidityIncidents, loadHomesForCheck, loadRecentHumidityIncidents, updateHumidityIncidents,
+  insertHumidityIncidents, insertHumidityPlans, loadHomesForCheck, loadRecentHumidityIncidents, updateHumidityIncidents,
 } from "@/incident/humidity.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
@@ -24,7 +27,10 @@ export type WeatherSummary = {
 type CollectInput = { db: AdminClient; fetchForecast: ForecastFetcher; trigger: RunTrigger; now: Date };
 
 function secretsToMask(): string[] {
-  return [process.env.DATA_GO_KR_SERVICE_KEY ?? "", process.env.SUPABASE_SECRET_KEY ?? ""];
+  return [
+    process.env.DATA_GO_KR_SERVICE_KEY ?? "", process.env.SUPABASE_SECRET_KEY ?? "",
+    process.env.GEMINI_API_KEY ?? "", process.env.ANTHROPIC_API_KEY ?? "", // spec 002 FR-008: AI 오류 문구에 키가 섞여도 가린다
+  ];
 }
 
 /**
@@ -75,12 +81,18 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Weathe
   await recordStep(db, runId, { name: "compare", status: "succeeded", itemsIn: collected.bySigungu.size, itemsOut: saved });
 
   const plan = planHumidityIncidents({ homes, forecastBySigungu: collected.bySigungu, openIncidents: await loadRecentHumidityIncidents(db, now), now });
+  // spec 002 FR-006, spec 001 리뷰: 느린 AI 호출은 사건을 저장하기 **전에** 끝낸다(시간 제한에 걸려도 계획 없는 사건이 남지 않게)
+  const drafts = new Map<string, DraftResult>();
+  const ctx = newCallContext(runId);
+  for (const planned of plan.create) drafts.set(planned.dedupKey, await draftHumidityPlan(db, planned.facts, ctx));
   const created = await insertHumidityIncidents(db, { planned: plan.create, runId, isSimulated });
   const updated = await updateHumidityIncidents(db, plan.update);
   await recordStep(db, runId, { name: "detect", status: "succeeded", itemsIn: homes.length, itemsOut: created.length + updated.length, detail: { created: created.length, updated: updated.length, ...plan.counts } });
-  // 4단계에서 AI 초안을 더한다. 지금은 기본 대응 계획
-  await insertDefaultHumidityPlans(db, created);
-  await recordStep(db, runId, { name: "draft_plan", status: created.length ? "succeeded" : "skipped", itemsIn: created.length, itemsOut: created.length, detail: { ai: "기본 계획(3단계)" } });
+  const stats = await insertHumidityPlans(db, created, drafts);
+  await recordStep(db, runId, {
+    name: "draft_plan", status: created.length ? "succeeded" : "skipped", itemsIn: created.length, itemsOut: created.length,
+    detail: { ai_provider: process.env.AI_PROVIDER || "(비어 있음)", ai_drafted: stats.drafted, ai_failed: stats.failed, ai_skipped_by_limit: stats.skipped, ai_failure_reasons: stats.failureReasons },
+  });
   const waiting = created.length + updated.length;
   await recordStep(db, runId, { name: "await_approval", status: waiting ? "waiting" : "skipped", itemsOut: waiting });
   return { sigungu: collected.bySigungu.size, newIncidents: created.length, updatedIncidents: updated.length };

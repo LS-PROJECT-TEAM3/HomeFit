@@ -9,6 +9,7 @@ import { getIncidentDetail, type IncidentDetail } from "@/incident/queries.serve
 import { createClient, currentUserId } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import { DecisionPanel } from "./decision-panel";
+import { HumidityFactsView } from "./humidity-facts";
 import styles from "./detail.module.css";
 
 export const metadata = { title: "사건 상세 | HomeFit AI" };
@@ -53,22 +54,24 @@ function WhatChanged({ detail }: { detail: IncidentDetail }) {
 
 function Plan({ detail }: { detail: IncidentDetail }) {
   const plan = detail.plan;
+  // spec 003 FR-007: 습도 사건은 대응 계획, 근거는 측정값·예보
+  const humidity = detail.humidity !== null;
   return (
     <section className={styles.card} aria-labelledby="plan-title">
-      <h2 id="plan-title" className={styles.sectionTitle}>신청 준비 계획 (초안)</h2>
+      <h2 id="plan-title" className={styles.sectionTitle}>{humidity ? "대응 계획 (초안)" : "신청 준비 계획 (초안)"}</h2>
       {plan?.aiOk && plan.summary ? (
         <>
           <p>{plan.summary}</p>
           <p className={styles.source}>
-            {plan.isMock ? "시험용 요약(mock, 실제 AI가 쓴 글이 아님)" : "AI 요약"} · 근거: 위 공고 원문 값{plan.citations[0] ? ` (${plan.citations[0].label})` : ""}
+            {plan.isMock ? "시험용 요약(mock, 실제 AI가 쓴 글이 아님)" : "AI 요약"} · 근거: {humidity ? "위 측정값·예보·추정값" : "위 공고 원문 값"}{plan.citations[0] ? ` (${plan.citations[0].label})` : ""}
           </p>
         </>
       ) : (
-        <p className={styles.notice}>요약을 만들지 못했습니다. 원문을 확인해 주세요.</p>
+        <p className={styles.notice}>{humidity ? "AI 초안을 만들지 못해 기본 대응 계획을 보여 드립니다." : "요약을 만들지 못했습니다. 원문을 확인해 주세요."}</p>
       )}
       <ul className={styles.checklist}>
         {(plan?.checklist ?? []).map((item, i) => (
-          <li key={i}>{item.label}{item.dueOn ? <span className={styles.due}> (마감 {item.dueOn})</span> : null}</li>
+          <li key={i}>{item.label}{item.dueOn ? <span className={styles.due}> ({humidity ? "할 날" : "마감"} {item.dueOn})</span> : null}</li>
         ))}
       </ul>
     </section>
@@ -101,8 +104,14 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
         {detail.isSimulated ? <SimulatedBadge /> : null}
       </div>
       <h1 className={styles.title}>{detail.facts.title}</h1>
-      <WhatChanged detail={detail} />
-      <Facts detail={detail} today={toKstDate(new Date())} />
+      {detail.humidity ? (
+        <HumidityFactsView facts={detail.humidity} now={new Date()} />
+      ) : (
+        <>
+          <WhatChanged detail={detail} />
+          <Facts detail={detail} today={toKstDate(new Date())} />
+        </>
+      )}
       <Plan detail={detail} />
       {/* FR-011: 관리자도 남의 사건은 승인·거절하지 못한다 */}
       {detail.isMine && open ? <DecisionPanel incidentId={detail.id} /> : null}
@@ -121,7 +130,7 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
   );
 }
 
-// IA IC_020100_PG 사건 상세 (FR-009, FR-010, spec 001). MOT: 무엇을 언제까지 해야 하는지 바로 보이게
+// IA IC_020100_PG 사건 상세 (FR-009, FR-010, spec 001; FR-006·007, spec 003). MOT: 무엇을 언제까지 해야 하는지 바로 보이게
 export default function IncidentDetailPage({ params }: PageProps<"/incidents/[id]">) {
   return (
     <main className={styles.main}>

@@ -2,6 +2,7 @@ import type { ChecklistItem } from "@/incident/checklist";
 import { periodStart, type IncidentFilter } from "@/incident/filter";
 import { createClient, requireUserId } from "@/lib/supabase/server";
 import type { IncidentFacts } from "@/incident/detect";
+import type { HumidityFacts } from "@/incident/humidity-detect";
 
 // 사건 화면이 읽는 자료. 로그인한 사용자 권한(RLS)으로 읽는다 (FR-014).
 // RLS는 관리자에게 모든 사건을 보여 주므로 목록·건수는 user_id로 내 것만 거른다 (FR-007, 리뷰 2026-11-17)
@@ -9,14 +10,20 @@ import type { IncidentFacts } from "@/incident/detect";
 
 export type IncidentSummary = {
   id: string; status: string; facts: IncidentFacts; isUpdated: boolean; isSimulated: boolean; detectedAt: string;
+  /** 습도·결로 사건이면 판단 근거(spec 003 FR-006). 공고 사건이면 null */
+  humidity: HumidityFacts | null;
 };
 
 const PAGE_SIZE = 20;
 
-function toSummary(row: { id: string; status: string; facts: unknown; is_updated: boolean; is_simulated: boolean; detected_at: string }): IncidentSummary {
+type SummaryRow = { id: string; status: string; incident_type: string; facts: unknown; is_updated: boolean; is_simulated: boolean; detected_at: string };
+
+function toSummary(row: SummaryRow): IncidentSummary {
   return {
-    id: row.id, status: row.status, facts: row.facts as IncidentFacts, // facts는 IncidentFacts로 저장했다 (incident/detect.ts)
+    id: row.id, status: row.status, facts: row.facts as IncidentFacts, // 공고 사건 facts는 IncidentFacts로 저장했다 (incident/detect.ts)
     isUpdated: row.is_updated, isSimulated: row.is_simulated, detectedAt: row.detected_at,
+    // 습도 사건 facts는 HumidityFacts로 저장했다 (incident/humidity-detect.ts)
+    humidity: row.incident_type === "humidity_condensation" ? (row.facts as HumidityFacts) : null,
   };
 }
 
@@ -24,7 +31,7 @@ export async function listIncidents(filter: IncidentFilter, now: Date): Promise<
   const [supabase, userId] = await Promise.all([createClient(), requireUserId()]);
   let query = supabase
     .from("incidents")
-    .select("id, status, facts, is_updated, is_simulated, detected_at")
+    .select("id, status, incident_type, facts, is_updated, is_simulated, detected_at")
     .eq("user_id", userId)
     .order("detected_at", { ascending: false })
     .limit(PAGE_SIZE);
@@ -71,7 +78,7 @@ export async function getIncidentDetail(id: string, userId: string): Promise<Inc
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("incidents")
-    .select("id, user_id, status, facts, is_updated, is_simulated, detected_at, first_viewed_at")
+    .select("id, user_id, status, incident_type, facts, is_updated, is_simulated, detected_at, first_viewed_at")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error("사건을 불러오지 못했습니다.");

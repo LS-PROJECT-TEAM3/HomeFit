@@ -20,7 +20,7 @@ export type LlmErrorKind =
   | "unknown";
 
 /** ERD llm_calls.purpose */
-export type LlmPurpose = "application_plan" | "notice_summary";
+export type LlmPurpose = "application_plan" | "notice_summary" | "response_plan";
 
 export type LlmRequest = {
   purpose: LlmPurpose;

@@ -5,6 +5,7 @@ import { Empty, LoadError, Loading } from "@/app/_components/states";
 import { isIncidentStatus, SimulatedBadge, StatusBadge, UpdatedBadge } from "@/app/_components/status";
 import { summarizeChange } from "@/incident/change-text";
 import { describeDeadline } from "@/incident/checklist";
+import type { HumidityFacts } from "@/incident/humidity-detect";
 import { parseIncidentFilter, type IncidentFilter } from "@/incident/filter";
 import { listIncidents, myhomeCollectionStatus } from "@/incident/queries.server";
 import { toKstDate } from "@/watch/kst";
@@ -20,6 +21,18 @@ const PERIOD_OPTIONS = [["all", "전체 기간"], ["7d", "최근 7일"], ["30d",
 function formatTime(iso: string | null): string {
   if (!iso) return "아직 없음";
   return new Date(iso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", dateStyle: "medium", timeStyle: "short" });
+}
+
+// FR-006 (spec 003): 습도·결로 사건 한 줄. 추정값은 "추정"이라고 밝힌다
+function HumidityLine({ facts, today }: { facts: HumidityFacts; today: string }) {
+  return (
+    <>
+      <span className={styles.change}>
+        창 표면 {facts.surfaceC.toFixed(1)}°C(추정) · 이슬점 {facts.dewPointC.toFixed(1)}°C · 바깥 {facts.outdoorC}°C
+      </span>
+      <span className={styles.meta}>습도·결로 위험 · 할 일 {describeDeadline(facts.dueDate, today) ?? facts.dueDate}</span>
+    </>
+  );
 }
 
 async function IncidentList({ filter }: { filter: IncidentFilter }) {
@@ -60,11 +73,17 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
                   {incident.isSimulated ? <SimulatedBadge /> : null}
                 </span>
                 <span className={styles.itemTitle}>{incident.facts.title}</span>
-                {/* FR-008 수용 기준 3 (spec 001 v0.4): 무엇이 바뀌었는지 한 줄 */}
-                <span className={styles.change}>{summarizeChange(incident.facts.change)}</span>
-                <span className={styles.meta}>
-                  {incident.facts.supplyType ?? "공급 유형 공고문 확인"} · {describeDeadline(incident.facts.applyEnd, today) ?? "마감일: 공고문 확인"}
-                </span>
+                {incident.humidity ? (
+                  <HumidityLine facts={incident.humidity} today={today} />
+                ) : (
+                  <>
+                    {/* FR-008 수용 기준 3 (spec 001 v0.4): 무엇이 바뀌었는지 한 줄 */}
+                    <span className={styles.change}>{summarizeChange(incident.facts.change)}</span>
+                    <span className={styles.meta}>
+                      {incident.facts.supplyType ?? "공급 유형 공고문 확인"} · {describeDeadline(incident.facts.applyEnd, today) ?? "마감일: 공고문 확인"}
+                    </span>
+                  </>
+                )}
               </Link>
             </li>
           ))}

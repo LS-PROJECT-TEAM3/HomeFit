@@ -2,7 +2,7 @@ import {
   assessCondensationRisk, isMoreSevere, sameRiskWindow,
   type HourlyForecast, type Measurement, type RiskAssessment, type WindowType,
 } from "@/incident/condensation";
-import { toKstDate } from "@/watch/kst";
+import { toKstDate, toKstHourLabel } from "@/watch/kst";
 
 // FR-004, FR-005 (spec 003): 예보를 읽은 뒤 내 집마다 습도·결로 사건을 새로 만들지, 갱신할지, 건너뛸지 정한다. 순수 함수
 
@@ -58,11 +58,6 @@ type PlanInput = {
 const DAY_MS = 86_400_000;
 const OPEN_STATUSES = new Set(["new", "pending"]);
 
-function kstLabel(iso: string): string {
-  const kst = new Date(Date.parse(iso) + 9 * 3_600_000);
-  return `${kst.getUTCMonth() + 1}월 ${kst.getUTCDate()}일 ${String(kst.getUTCHours()).padStart(2, "0")}시`;
-}
-
 function dueDateFor(riskAt: string, now: Date): string {
   const dayBefore = toKstDate(new Date(Date.parse(riskAt) - DAY_MS));
   const today = toKstDate(now);
@@ -72,7 +67,7 @@ function dueDateFor(riskAt: string, now: Date): string {
 function factsFor(home: HomeForCheck, risk: Extract<RiskAssessment, { status: "risk" }>, windowStart: string, now: Date): HumidityFacts {
   const word = risk.condition === "surface" ? "결로 위험" : "습도 위험";
   return {
-    kind: "humidity", title: `${word}: ${kstLabel(risk.riskAt)}`, dueDate: dueDateFor(risk.riskAt, now), windowStart,
+    kind: "humidity", title: `${word}: ${toKstHourLabel(new Date(risk.riskAt))}`, dueDate: dueDateFor(risk.riskAt, now), windowStart,
     windowType: home.windowType, sigunguCode: home.sigunguCode, measurement: home.measurement as Measurement,
     riskAt: risk.riskAt, condition: risk.condition, outdoorC: risk.outdoorC, outdoorHumidity: risk.outdoorHumidity,
     surfaceC: risk.surfaceC, dewPointC: risk.dewPointC, marginC: risk.marginC, forecastHours: risk.forecastHours, humidHours: risk.humidHours,

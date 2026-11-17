@@ -1,7 +1,8 @@
 import { RISK_RULES, type Measurement, type WindowType } from "@/incident/condensation";
-import type { HomeForCheck, HumidityUpdate, OpenHumidityIncident, PlannedHumidityIncident } from "@/incident/humidity-detect";
-import { defaultHumidityChecklist } from "@/incident/humidity-plan";
-import type { CreatedIncident } from "@/incident/plans.server";
+import type { HomeForCheck, HumidityFacts, HumidityUpdate, OpenHumidityIncident, PlannedHumidityIncident } from "@/incident/humidity-detect";
+import { composeHumidityChecklist, defaultHumidityChecklist, redateChecklist } from "@/incident/humidity-plan";
+import type { DraftResult } from "@/incident/plan-draft.server";
+import type { CreatedIncident, PlanStats } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -53,7 +54,10 @@ export async function loadRecentHumidityIncidents(db: AdminClient, now: Date): P
  * 새 습도 사건. 같은 키가 동시에 들어오면 DB 유일 조건(user_id, dedup_key)이 막고 건너뛴다
  * (수집이 두 번 겹쳐 돌아도 사건은 하나, CLAUDE.md 팀 규칙)
  */
-export async function insertHumidityIncidents(db: AdminClient, input: { planned: PlannedHumidityIncident[]; runId: string; isSimulated: boolean }): Promise<CreatedIncident[]> {
+/** 새로 만든 사건. dedup_key로 미리 받은 AI 초안을 찾는다 */
+export type CreatedHumidityIncident = CreatedIncident & { dedup_key: string };
+
+export async function insertHumidityIncidents(db: AdminClient, input: { planned: PlannedHumidityIncident[]; runId: string; isSimulated: boolean }): Promise<CreatedHumidityIncident[]> {
   if (input.planned.length === 0) return [];
   const rows = input.planned.map((plan) => ({
     user_id: plan.userId, incident_type: HUMIDITY, target_kind: "home", target_id: plan.homeId, run_id: input.runId,
@@ -62,7 +66,7 @@ export async function insertHumidityIncidents(db: AdminClient, input: { planned:
   const { data, error } = await db
     .from("incidents")
     .upsert(rows, { onConflict: "user_id,dedup_key", ignoreDuplicates: true })
-    .select("id, facts, user_id, detected_at");
+    .select("id, facts, user_id, detected_at, dedup_key");
   if (error) throw new Error(`습도 사건을 만들지 못했습니다: ${error.message}`);
   return data;
 }
@@ -79,25 +83,34 @@ export async function updateHumidityIncidents(db: AdminClient, updates: Humidity
       .select("id, facts, user_id, detected_at");
     if (error) throw new Error(`습도 사건을 갱신하지 못했습니다: ${error.message}`);
     updated.push(...data);
-    // 계획의 할 일 날짜도 새 마감일로 맞춘다
-    const checklist = defaultHumidityChecklist({ dueDate: update.facts.dueDate, condition: update.facts.condition });
+    // 할 일 날짜만 새 마감일로 맞춘다. AI가 쓴 할 일 글은 그대로 둔다 (4단계 리뷰 1)
+    const { data: plan, error: readError } = await db.from("response_plans").select("checklist").eq("incident_id", update.incidentId).maybeSingle();
+    if (readError) throw new Error(`대응 계획을 읽지 못했습니다: ${readError.message}`);
+    const redated = redateChecklist(plan?.checklist, update.facts.dueDate);
+    const checklist = redated.length > 0 ? redated : defaultHumidityChecklist(update.facts);
     const { error: planError } = await db.from("response_plans").update({ checklist: checklist as unknown as Json }).eq("incident_id", update.incidentId);
     if (planError) throw new Error(`대응 계획을 갱신하지 못했습니다: ${planError.message}`);
   }
   return updated;
 }
 
-/** 새 사건마다 기본 대응 계획(AI 초안은 4단계). 계획이 있어야 승인할 수 있다 */
-export async function insertDefaultHumidityPlans(db: AdminClient, created: CreatedIncident[]): Promise<void> {
-  if (created.length === 0) return;
+/** FR-007 (spec 003): 새 사건마다 대응 계획. AI 초안이 있으면 그 글과 할 일, 없거나 실패하면 기본 할 일. 날짜는 코드가 붙인다 */
+export async function insertHumidityPlans(db: AdminClient, created: CreatedHumidityIncident[], drafts: ReadonlyMap<string, DraftResult>): Promise<PlanStats> {
+  if (created.length === 0) return { drafted: 0, failed: 0, skipped: 0, failureReasons: [] };
   const rows = created.map((incident) => {
-    const facts = incident.facts as { dueDate: string; condition: "surface" | "humidity" };
+    const facts = incident.facts as unknown as HumidityFacts;
+    const draft = drafts.get(incident.dedup_key);
+    const base = { incident_id: incident.id, plan_type: "response_plan", citations: [{ kind: "forecast", label: "기상청 단기예보·내 측정값" }] as unknown as Json };
+    if (!draft?.ok) return { ...base, generation_status: "failed", checklist: defaultHumidityChecklist(facts) as unknown as Json };
     return {
-      incident_id: incident.id, plan_type: "response_plan", generation_status: "failed",
-      checklist: defaultHumidityChecklist(facts) as unknown as Json,
-      citations: [{ kind: "forecast", label: "기상청 단기예보" }] as unknown as Json,
+      ...base, generation_status: "succeeded", ai_summary: draft.draft.summary, model: draft.model,
+      checklist: composeHumidityChecklist(draft.draft.labels, facts.dueDate) as unknown as Json,
     };
   });
   const { error } = await db.from("response_plans").upsert(rows, { onConflict: "incident_id", ignoreDuplicates: true });
   if (error) throw new Error(`대응 계획을 만들지 못했습니다: ${error.message}`);
+  const drafted = rows.filter((row) => row.generation_status === "succeeded").length;
+  const values = [...drafts.values()];
+  const failureReasons = [...new Set(values.flatMap((draft) => (draft.ok || draft.skipped ? [] : [draft.reason])))];
+  return { drafted, failed: rows.length - drafted, skipped: values.filter((draft) => !draft.ok && draft.skipped).length, failureReasons };
 }
