@@ -35,6 +35,8 @@
     {"menu_code": "SC", "no": [6, 0, 0], "path": ["홈", "내 일정"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/schedule", "menu_entry": true, "note": "승인한 신청 준비 계획·대응 계획·재계약 판단 메모. 계약 만료 일정(2차)도 여기"},
     {"menu_code": "SC", "no": [6, 1, 0], "path": ["홈", "내 일정", "일정 상세"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/schedule/[id]", "note": "체크리스트 진행 표시, 출처 사건 링크"},
     {"menu_code": "NT", "no": [8, 0, 0], "path": ["홈", "맞는 공고"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/notices", "menu_entry": true, "note": "내 조건에 맞는 공고 목록(사건 아님, 승인 없음). 제목·공급 유형·마감·원문 링크"},
+    {"menu_code": "NT", "no": [8, 1, 0], "path": ["홈", "맞는 공고", "공고 상세"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/notices/[id]", "note": "공고 원문 값, 단지별, 원문 링크, 내 사건 링크, AI 공고 요약, 팔로우 승인·거절 (H-006)"},
+    {"menu_code": "NT", "no": [8, 1, 1], "path": ["홈", "맞는 공고", "공고 상세", "공고 거절"], "type": "모달", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "", "note": "관심 없음, 사유 선택 (H-006)"},
 
     {"menu_code": "AD", "no": [7, 0, 0], "path": ["관리자"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/admin", "menu_entry": true, "note": "관리자만. 일반 사용자는 주소·API로도 못 봄(화면·서버·RLS)"},
     {"menu_code": "AD", "no": [7, 1, 0], "path": ["관리자", "회원"], "type": "탭", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/admin/users", "menu_entry": true},

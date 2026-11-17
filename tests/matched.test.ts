@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { describeChange } from "@/incident/change-text";
-import { listMatchedNotices } from "@/incident/matched";
+import { describeChange, summarizeChange } from "@/incident/change-text";
+import { listMatchedNotices, noticeComplexes } from "@/incident/matched";
 import { makeCondition, makeNotice } from "./fixtures";
 
 const today = "2026-11-17";
@@ -76,5 +76,62 @@ describe("describeChange 단지별", () => {
   it("단지 이름이 있으면 줄 앞에 붙인다", () => {
     const text = describeChange({ kind: "changed", changes: [{ field: "monthlyRent", before: 200000, after: 210000, complex: "가동" }], relatedAnnouncementId: null });
     expect(text?.lines).toEqual(["가동 월 임대료 200,000원 → 210,000원"]);
+  });
+});
+
+// FR-008 수용 기준 3 (spec 001 v0.4, H-006): 사건 목록의 바뀐 내용 한 줄
+describe("summarizeChange", () => {
+  it("한 칸이면 그 줄", () => {
+    expect(summarizeChange({ kind: "changed", changes: [{ field: "applyEnd", before: "2026-12-03", after: "2026-12-09" }], relatedAnnouncementId: null })).toBe("접수 마감 2026-12-03 → 2026-12-09");
+  });
+
+  it("여럿이면 첫 줄 외 N건", () => {
+    const change = { kind: "changed" as const, relatedAnnouncementId: null, changes: [
+      { field: "applyEnd" as const, before: "a", after: "b" }, { field: "monthlyRent" as const, before: 1, after: 2 }, { field: "supplyType" as const, before: "x", after: "y" },
+    ] };
+    expect(summarizeChange(change)).toBe("접수 마감 a → b 외 2건");
+  });
+
+  it("정정공고·완화는 짧게", () => {
+    expect(summarizeChange({ kind: "correction", changes: [], relatedAnnouncementId: "21577" })).toBe("정정공고: 이전 공고 21577");
+    expect(summarizeChange({ kind: "relaxed", changes: [], relatedAnnouncementId: null })).toBe("같은 단지 자격 완화·추가 모집·재공고");
+  });
+
+  it("이전 기준 사건", () => {
+    expect(summarizeChange(undefined)).toBe("이전 기준: 처음 보인 공고");
+  });
+});
+
+// FR-017 수용 기준 4 (spec 001 v0.4): 공고 상세의 단지별 요약
+describe("noticeComplexes", () => {
+  it("단지마다 이름·시군구·임대료, 같은 단지는 한 번", () => {
+    const notices = [
+      makeNotice({ externalId: "A-2", complexName: "나동", sigunguCode: "30230", monthlyRent: 300000 }),
+      makeNotice({ externalId: "A-1", complexName: "가동", sigunguCode: "30200", monthlyRent: 200000 }),
+      makeNotice({ externalId: "A-1", complexName: "가동", sigunguCode: "30200", monthlyRent: 200000 }),
+    ];
+    expect(noticeComplexes(notices)).toEqual([
+      { externalId: "A-1", name: "가동", sigunguCode: "30200", monthlyRent: 200000 },
+      { externalId: "A-2", name: "나동", sigunguCode: "30230", monthlyRent: 300000 },
+    ]);
+  });
+
+  it("단지 이름이 없으면 '단지 정보 없음'", () => {
+    expect(noticeComplexes([makeNotice({ complexName: null })])[0].name).toBe("단지 정보 없음");
+  });
+});
+
+// FR-020 (spec 001 v0.5): 목록 표시와 순서
+describe("listMatchedNotices 팔로우", () => {
+  it("새 공고·팔로우는 마감 순, 관심 없음은 그 아래, 마감 지난 공고는 맨 아래", () => {
+    const notices = [
+      makeNotice({ externalId: "A-1", announcementId: "A", applyEnd: "2026-11-20" }),
+      makeNotice({ externalId: "B-1", announcementId: "B", applyEnd: "2026-11-30" }),
+      makeNotice({ externalId: "C-1", announcementId: "C", applyEnd: "2026-11-25" }),
+      makeNotice({ externalId: "D-1", announcementId: "D", applyEnd: "2026-11-01" }),
+    ];
+    const decisions = new Map([["A", "ignore" as const], ["B", "follow" as const]]);
+    const list = listMatchedNotices({ notices, condition, today, decisions });
+    expect(list.map((m) => [m.notice.announcementId, m.decision])).toEqual([["C", "new"], ["B", "follow"], ["A", "ignore"], ["D", "new"]]);
   });
 });

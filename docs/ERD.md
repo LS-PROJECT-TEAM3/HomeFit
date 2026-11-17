@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-17 (v1.3, spec 002 승인과 함께 2026-11-17)
+- 최종 갱신: 2026-11-17 (v1.4, 승인 2026-11-17)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -297,6 +297,24 @@ erDiagram
 | duplicate_count | integer | ✔ | 중복 사건 수(KPI 3) | [PRD 3절 KPI] |
 | created_at | timestamptz | ✔ | | |
 
+#### notice_follows — 공고 팔로우 (H-006)
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| user_id | uuid (FK profiles) | ✔ | (user_id, source_code, announcement_id) 유일 | [PRD FR-38] |
+| source_code | text (FK sources) | ✔ | `myhome_notice` | [PRD FR-38] |
+| announcement_id | text | ✔ | 공고 ID(단지 여럿을 묶음) | [PRD FR-38] |
+| decision | text: `follow` / `ignore` | ✔ | 승인(팔로우) / 거절(관심 없음) | [PRD FR-38] |
+| reason | text | | 거절 사유(선택) | [PRD FR-38] |
+| decided_at | timestamptz | ✔ | 결정한 시각. 팔로우 전에 생긴 변화는 사건으로 만들지 않는 기준 | [PRD FR-38] |
+
+#### notice_summaries — 공고 요약 (H-006)
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| source_code, announcement_id | text (PK 둘) | ✔ | 공고마다 한 줄. 모든 사용자가 같이 읽음(공개 자료) | [PRD FR-38] |
+| summary | text | ✔ | AI 공고 요약 | [PRD FR-38] |
+| model | text | ✔ | `공급자:모델` | [spec 002 FR-010] |
+| created_at | timestamptz | ✔ | | |
+
 #### notifications — 알림 기록
 | 필드 | 타입 | 필수 | 설명 | 출처 |
 |---|---|---|---|---|
@@ -317,7 +335,7 @@ erDiagram
 | run_id | uuid (FK runs) | | 어느 수집 실행에서 불렀나. 수집 밖(시험 메시지 등)이면 비움 | [spec 002 FR-004] |
 | provider | text: `gemini` / `claude` / `mock` | ✔ | 공급자. 나중에 `groq`·`openrouter`를 더할 수 있다 | [spec 002 FR-001] |
 | model | text | | 모델 이름. 설정이 없어 부르지 못했으면 비움 | [spec 002 FR-004] |
-| purpose | text: `application_plan` | ✔ | 용도(신청 준비 계획). 기록 찾기·위키 챗봇이 생기면 값을 더한다 | [spec 002 FR-004] |
+| purpose | text: `application_plan` / `notice_summary` | ✔ | 용도(신청 준비 계획 / 공고 요약, v1.4). 기록 찾기·위키 챗봇이 생기면 값을 더한다 | [spec 002 FR-004] |
 | ok | boolean | ✔ | 성공 여부 | [spec 002 FR-004] |
 | error_kind | text: `config` / `auth` / `rate_limit` / `timeout` / `refused` / `invalid_json` / `invalid_shape` / `server` / `unknown` | | 실패 종류(성공이면 비움) | [spec 002 FR-002] |
 | attempts | integer | ✔ | 시도 횟수(한도 초과로 다시 시도한 것 포함) | [spec 002 FR-005] |
@@ -376,6 +394,8 @@ erDiagram
 | source_items | 로그인하면 읽기(공개 공고라서, 맞는 공고 목록) | 읽기 | 읽기·쓰기 |
 | notification_settings | 내 행만 읽기, 알림 켜기·끄기(enabled·enabled_at·updated_at)만 수정. 이메일·슬랙 사람 ID는 서버만 씀(0008) | **볼 수 없음**(슬랙 이메일은 개인 정보) | 읽기·쓰기 |
 | notifications | 내 행 읽기 | 읽기(주소 없음) | 쓰기 |
+| notice_follows | 내 행 읽기·쓰기 | 읽기 | 읽기 |
+| notice_summaries | 로그인하면 읽기 | 읽기 | 쓰기 |
 | incidents, response_plans | 내 행만 읽기 | 전체 읽기 | 쓰기 |
 | incident_actions | 내 사건에만 승인·거절 추가 | 읽기만 (대신 승인 불가) | |
 | schedule_items | 내 행 읽기, 체크 상태 수정 | 읽기 | 승인 때 생성 |
@@ -415,6 +435,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |
 | 2026-11-17 | v1.0 | 승인 |
+| 2026-11-17 | v1.4 | notice_follows(공고 팔로우 승인·거절)·notice_summaries(공고 요약) 표 추가(PRD v1.5 FR-38, H-006) |
 | 2026-11-17 | v1.3 | 접근 규칙: notification_settings 이메일·사람 ID는 서버만(0008, 12단계 리뷰 4번, 사용자 결정). 칸 변경 없음 |
 | 2026-11-17 | v1.3 | llm_calls 표 추가(spec 002 AI 호출 기록) |
 | 2026-11-17 | v1.2 | notification_settings: slack_webhook_url를 빼고 slack_email·slack_user_id(PRD v1.3, 팀 슬랙 봇 DM) |

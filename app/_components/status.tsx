@@ -29,3 +29,13 @@ export function UpdatedBadge() {
 export function SimulatedBadge() {
   return <span className={`${styles.badge} ${styles.simulated}`}>시뮬레이터</span>;
 }
+
+// FR-020 (spec 001 v0.5): 맞는 공고의 팔로우 상태도 사건 상태처럼 배지로 (H-006 사용자 의견)
+export type NoticeStatus = "new" | "follow" | "ignore" | "closed";
+
+const NOTICE_LABELS: Record<NoticeStatus, string> = { new: "새 공고", follow: "팔로우", ignore: "관심 없음", closed: "마감" };
+const NOTICE_STYLES: Record<NoticeStatus, string> = { new: styles.new, follow: styles.approved, ignore: styles.rejected, closed: styles.updated };
+
+export function NoticeBadge({ status }: { status: NoticeStatus }) {
+  return <span className={`${styles.badge} ${NOTICE_STYLES[status]}`}>{NOTICE_LABELS[status]}</span>;
+}

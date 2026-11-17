@@ -1,4 +1,4 @@
-import { listMatchedNotices, type MatchedNotice } from "@/incident/matched";
+import { listMatchedNotices, type FollowDecision, type MatchedNotice } from "@/incident/matched";
 import type { PolicyCondition } from "@/incident/match";
 import { createClient, requireUserId } from "@/lib/supabase/server";
 import type { Notice } from "@/watch/notice";
@@ -44,5 +44,29 @@ export async function listMyMatchedNotices(today: string): Promise<MatchedResult
     .limit(1000);
   if (error) throw new Error("맞는 공고를 불러오지 못했습니다.");
   const notices = data.map((row) => row.raw as unknown as Notice); // raw는 Notice로 저장했다 (watch/source-items.server.ts)
-  return { hasCondition: true, items: listMatchedNotices({ notices, condition, today }) };
+  // FR-020 (spec 001 v0.5): 내 팔로우·관심 없음
+  const follows = await supabase.from("notice_follows").select("announcement_id, decision").eq("user_id", userId).eq("source_code", "myhome_notice");
+  if (follows.error) throw new Error("맞는 공고를 불러오지 못했습니다.");
+  const decisions = new Map(follows.data.map((row) => [row.announcement_id, row.decision as FollowDecision]));
+  return { hasCondition: true, items: listMatchedNotices({ notices, condition, today, decisions }) };
+}
+
+export type NoticeDetail = { notices: Notice[]; myIncidents: { id: string; status: string }[]; myDecision: FollowDecision | null };
+
+/**
+ * FR-017 수용 기준 4·5 (spec 001 v0.4): 공고 하나(단지 여럿)의 원문 값과, 이 공고로 생긴 내 사건.
+ * 공고 ID로 찾는다. 외부 ID는 "공고 ID-단지 번호"라서 앞부분으로 찾는다.
+ */
+export async function getNoticeDetail(announcementId: string): Promise<NoticeDetail | null> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const [items, incidents, follow] = await Promise.all([
+    supabase.from("source_items").select("raw").eq("source_code", "myhome_notice").like("external_id", `${announcementId}-%`).limit(50),
+    supabase.from("incidents").select("id, status").eq("user_id", userId).eq("facts->>announcementId", announcementId).order("detected_at", { ascending: false }),
+    supabase.from("notice_follows").select("decision").eq("user_id", userId).eq("source_code", "myhome_notice").eq("announcement_id", announcementId).maybeSingle(),
+  ]);
+  if (items.error || incidents.error || follow.error) throw new Error("공고를 불러오지 못했습니다.");
+  const notices = items.data.map((row) => row.raw as unknown as Notice);
+  if (notices.length === 0) return null;
+  return { notices, myIncidents: incidents.data, myDecision: (follow.data?.decision as FollowDecision | undefined) ?? null };
 }

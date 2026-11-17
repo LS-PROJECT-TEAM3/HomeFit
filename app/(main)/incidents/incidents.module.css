@@ -78,3 +78,9 @@
   color: var(--color-muted-text);
   font-size: var(--font-size-sm);
 }
+
+/* 사건 목록의 바뀐 내용 한 줄 (spec 001 v0.4) */
+.change {
+  font-weight: 600;
+  color: var(--color-text);
+}

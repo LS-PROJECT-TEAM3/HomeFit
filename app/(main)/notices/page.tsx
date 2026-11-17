@@ -2,7 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Empty, LoadError, Loading } from "@/app/_components/states";
-import { SimulatedBadge } from "@/app/_components/status";
+import { NoticeBadge, SimulatedBadge } from "@/app/_components/status";
 import { describeDeadline } from "@/incident/checklist";
 import { listMyMatchedNotices, type MatchedResult } from "@/incident/notices.server";
 import { toKstDate } from "@/watch/kst";
@@ -27,19 +27,20 @@ async function MatchedList() {
   }
   return (
     <ul className={styles.list}>
-      {result.items.map(({ notice, expired, isSimulated }) => (
+      {result.items.map(({ notice, expired, isSimulated, decision }) => (
         <li key={notice.announcementId}>
-          <div className={styles.item}>
+          {/* H-006: 박스 전체를 눌러 공고 상세로. 상태는 사건 목록처럼 배지 */}
+          <Link href={`/notices/${encodeURIComponent(notice.announcementId)}`} className={styles.item}>
             <span className={styles.badges}>
-              {expired ? <span className={styles.meta}>마감</span> : null}
+              <NoticeBadge status={decision} />
+              {expired ? <NoticeBadge status="closed" /> : null}
               {isSimulated ? <SimulatedBadge /> : null}
             </span>
             <span className={styles.itemTitle}>{notice.title}</span>
             <span className={styles.meta}>
               {notice.supplyType ?? "공급 유형 공고문 확인"} · {expired ? `마감 ${notice.applyEnd}` : (describeDeadline(notice.applyEnd, today) ?? "마감일: 공고문 확인")}
             </span>
-            {notice.url ? <a href={notice.url} target="_blank" rel="noopener noreferrer">공고 원문 보기 (마이홈)</a> : null}
-          </div>
+          </Link>
         </li>
       ))}
     </ul>
@@ -51,7 +52,7 @@ export default function NoticesPage() {
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>맞는 공고</h1>
-      <p className={styles.meta}>내 조건에 맞는 공고입니다. 이 공고의 접수 기간·임대료가 바뀌거나 정정공고가 올라오면 사건으로 알려 드립니다.</p>
+      <p className={styles.meta}>내 조건에 맞는 공고입니다. 눌러서 요약을 보고 팔로우할지 정하세요. 팔로우한 공고의 접수 기간·임대료가 바뀌거나 정정공고가 올라오면 사건으로 알려 드립니다.</p>
       <Suspense fallback={<Loading />}>
         <MatchedList />
       </Suspense>

@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Empty, LoadError, Loading } from "@/app/_components/states";
 import { isIncidentStatus, SimulatedBadge, StatusBadge, UpdatedBadge } from "@/app/_components/status";
+import { summarizeChange } from "@/incident/change-text";
 import { describeDeadline } from "@/incident/checklist";
 import { parseIncidentFilter, type IncidentFilter } from "@/incident/filter";
 import { listIncidents, myhomeCollectionStatus } from "@/incident/queries.server";
@@ -59,6 +60,8 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
                   {incident.isSimulated ? <SimulatedBadge /> : null}
                 </span>
                 <span className={styles.itemTitle}>{incident.facts.title}</span>
+                {/* FR-008 수용 기준 3 (spec 001 v0.4): 무엇이 바뀌었는지 한 줄 */}
+                <span className={styles.change}>{summarizeChange(incident.facts.change)}</span>
                 <span className={styles.meta}>
                   {incident.facts.supplyType ?? "공급 유형 공고문 확인"} · {describeDeadline(incident.facts.applyEnd, today) ?? "마감일: 공고문 확인"}
                 </span>

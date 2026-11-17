@@ -4,6 +4,7 @@ import { findNoticeChanges } from "@/incident/notice-change";
 import { draftPlans, insertPlans } from "@/incident/plans.server";
 import { newCallContext } from "@/lib/llm/call.server";
 import type { IncidentFacts } from "@/incident/detect";
+import { loadFollows } from "@/incident/follows.server";
 import { notifyIncidents } from "@/incident/notify.server";
 import type { CreatedIncident } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
@@ -80,6 +81,7 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
   const changes = findNoticeChanges({ notices: collected.notices, ...saved, today });
   const planned = planChangeIncidents({
     changes, owners: await loadConditionOwners(db), existingKeys: await loadExistingKeys(db), today, sourceCode: MYHOME_SOURCE,
+    follows: await loadFollows(db, MYHOME_SOURCE), // spec 001 v0.5: 팔로우한 공고만
   });
   // spec 002 FR-006: 한 번 수집의 AI 호출 상한·대기 예산
   const drafts = await draftPlans(db, planned.map((plan) => plan.facts), newCallContext(runId));

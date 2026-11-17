@@ -19,12 +19,13 @@ async function Dashboard() {
     const [counts, schedule, condition, matched] = await Promise.all([
       countOpenIncidents(), listSchedule(3), loadMyCondition(userId), listMyMatchedNotices(toKstDate(new Date())),
     ]);
-    data = { counts, schedule, condition, openMatched: matched.items.filter((item) => !item.expired).length };
+    const open = matched.items.filter((item) => !item.expired);
+    data = { counts, schedule, condition, openMatched: open.length, toDecide: open.filter((item) => item.decision === "new").length };
   } catch {
     return <LoadError>사건을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
   const today = toKstDate(new Date());
-  const { counts, schedule, condition, openMatched } = data;
+  const { counts, schedule, condition, openMatched, toDecide } = data;
   return (
     <div className={styles.bento}>
       {condition ? null : (
@@ -42,6 +43,11 @@ async function Dashboard() {
         <span className={`${styles.number} tabular-nums`}>{counts.pendingCount}</span>
       </Link>
       {/* FR-007·FR-017 (spec 001 v0.2): 맞는 공고 수는 사건과 따로 */}
+      {/* FR-020 수용 기준 4 (spec 001 v0.5) */}
+      <Link href="/notices" className={styles.card}>
+        <span className={styles.cardLabel}>정할 공고</span>
+        <span className={`${styles.number} tabular-nums`}>{toDecide}</span>
+      </Link>
       <Link href="/notices" className={styles.card}>
         <span className={styles.cardLabel}>맞는 공고(마감 전)</span>
         <span className={`${styles.number} tabular-nums`}>{openMatched}</span>

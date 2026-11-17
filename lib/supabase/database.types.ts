@@ -1,4 +1,4 @@
-// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0007 기준)을 짧게 옮긴 것.
+// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0009 기준)을 짧게 옮긴 것.
 // 표를 바꾸면 Supabase 도구의 "generate TypeScript types"로 다시 만들어 이 파일을 바꾼다.
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -82,6 +82,13 @@ type LlmCallRow = {
   output_tokens: number | null; created_at: string;
 };
 
+// 0009: 공고 팔로우·공고 요약 (ERD v1.4)
+type NoticeFollowRow = {
+  user_id: string; source_code: string; announcement_id: string; decision: string; reason: string | null; decided_at: string;
+};
+
+type NoticeSummaryRow = { source_code: string; announcement_id: string; summary: string; model: string; created_at: string };
+
 // 기본값이 있는 칸은 넣을 때 빼도 된다
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -136,6 +143,8 @@ export type Database = {
         NotificationSettingRow,
         Optional<NotificationSettingRow, "slack_email" | "slack_user_id" | "enabled" | "enabled_at" | "updated_at">
       >;
+      notice_follows: Table<NoticeFollowRow, Optional<NoticeFollowRow, "reason" | "decided_at">>;
+      notice_summaries: Table<NoticeSummaryRow, Optional<NoticeSummaryRow, "created_at">>;
       llm_calls: Table<
         LlmCallRow,
         Optional<LlmCallRow, "id" | "run_id" | "model" | "error_kind" | "input_tokens" | "output_tokens" | "created_at">

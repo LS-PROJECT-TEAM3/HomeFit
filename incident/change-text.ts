@@ -33,3 +33,13 @@ export function describeChange(change: IncidentFacts["change"]): ChangeText | nu
     note: null,
   };
 }
+
+/** FR-008 수용 기준 3 (spec 001 v0.4, H-006): 사건 목록에 보일 바뀐 내용 한 줄 */
+export function summarizeChange(change: IncidentFacts["change"]): string {
+  if (!change) return "이전 기준: 처음 보인 공고";
+  if (change.kind === "correction") return `정정공고: 이전 공고 ${change.relatedAnnouncementId ?? "?"}`;
+  if (change.kind === "relaxed") return "같은 단지 자격 완화·추가 모집·재공고";
+  const lines = describeChange(change)?.lines ?? [];
+  if (lines.length === 0) return "바뀐 내용은 상세에서 확인";
+  return lines.length > 1 ? `${lines[0]} 외 ${lines.length - 1}건` : lines[0];
+}

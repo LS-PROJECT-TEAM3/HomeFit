@@ -13,8 +13,9 @@ import type { PageFetcher } from "@/watch/myhome.server";
  * - correction: sample의 부산 공고를 고친 정정공고 한 건 (FR-016, C-043)
  * - relaxed: sample의 부산 공고와 같은 단지의 "자격완화" 공고 한 건 (FR-016, C-044)
  * - extended: sample과 같은데 마감일이 7일 늦음. 이미 본 변화와 다른 새 변화를 만들 때 쓴다 (spec 002 C-013)
+ * - later: 마감일이 14일 늦음. 팔로우 확인용 새 변화 (spec 001 v0.5 C-062)
  */
-export const FIXTURE_NAMES = ["sample", "changed", "malformed", "failure", "bulk", "fresh", "correction", "relaxed", "extended"] as const;
+export const FIXTURE_NAMES = ["sample", "changed", "malformed", "failure", "bulk", "fresh", "correction", "relaxed", "extended", "later"] as const;
 export type FixtureName = (typeof FIXTURE_NAMES)[number];
 
 // 이전 공고 ID도 SIM-을 붙여 실제 공고와 이어지지 않게 한다
@@ -33,6 +34,7 @@ function shiftDate(yyyymmdd: string | undefined, days: number): string {
 function itemsFor(name: Exclude<FixtureName, "failure">): MyhomeItem[] {
   if (name === "changed") return baseItems.map((item) => ({ ...item, endDe: shiftDate(item.endDe, 1) }));
   if (name === "extended") return baseItems.map((item) => ({ ...item, endDe: shiftDate(item.endDe, 7) }));
+  if (name === "later") return baseItems.map((item) => ({ ...item, endDe: shiftDate(item.endDe, 14) }));
   if (name === "malformed") return baseItems.map((item, i) => (i === 0 ? { ...item, pblancId: "" } : item));
   if (name === "fresh") return baseItems.map((item) => ({ ...item, pblancId: `SIM-FRESH-${item.pblancId ?? ""}`.replace("SIM-FRESH-SIM-", "SIM-FRESH-") }));
   if (name === "correction") {
