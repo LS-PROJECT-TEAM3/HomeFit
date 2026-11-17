@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { ConditionForm } from "@/app/my/conditions/condition-form";
-import { loadMyCondition } from "@/app/my/conditions/load";
+import { ConditionForm } from "@/app/(main)/my/conditions/condition-form";
+import { loadMyCondition } from "@/app/(main)/my/conditions/load";
 import { currentUserId } from "@/lib/supabase/server";
 import styles from "@/app/_components/form.module.css";
 

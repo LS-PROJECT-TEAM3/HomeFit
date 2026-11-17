@@ -18,6 +18,7 @@
   --color-danger-bg: #fef2f2;
   --color-danger-text: #991b1b;
   --color-primary-hover: #1d4ed8;
+  --color-backdrop: rgba(15, 23, 42, 0.4);
   --color-focus-ring: #2563eb;
 
   /* 흐름 화면 상태 색 (색과 글자 라벨을 함께 쓴다) */

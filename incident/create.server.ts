@@ -1,5 +1,5 @@
-import { buildDefaultChecklist } from "@/incident/checklist";
 import type { ConditionOwner, PlannedIncident } from "@/incident/detect";
+import type { CreatedIncident } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -40,12 +40,11 @@ type InsertInput = {
 };
 
 /**
- * FR-005, FR-010 (spec 001): 사건과 기본 신청 준비 계획을 만든다.
+ * FR-005 (spec 001): 사건을 만들고 새로 생긴 행을 돌려준다(계획은 incident/plans.server.ts).
  * 같은 키가 동시에 들어오면 DB 유일 조건이 막고 건너뛴다(Vercel이 같은 실행을 두 번 보낼 수 있음).
- * AI 요약은 5단계에서 붙인다. 지금은 기본 체크리스트만 두고 generation_status를 failed로 표시한다.
  */
-export async function insertIncidents({ db, planned, runId, sourceItemIds, isSimulated }: InsertInput): Promise<number> {
-  if (planned.length === 0) return 0;
+export async function insertIncidents({ db, planned, runId, sourceItemIds, isSimulated }: InsertInput): Promise<CreatedIncident[]> {
+  if (planned.length === 0) return [];
   const rows = planned.map((plan) => ({
     user_id: plan.userId,
     incident_type: "housing_support",
@@ -61,24 +60,7 @@ export async function insertIncidents({ db, planned, runId, sourceItemIds, isSim
     .upsert(rows, { onConflict: "user_id,dedup_key", ignoreDuplicates: true })
     .select("id, facts");
   if (error) throw new Error(`사건을 만들지 못했습니다: ${error.message}`);
-  await insertDefaultPlans(db, data);
-  return data.length;
-}
-
-async function insertDefaultPlans(db: AdminClient, incidents: { id: string; facts: Json }[]) {
-  if (incidents.length === 0) return;
-  const plans = incidents.map((incident) => {
-    const facts = incident.facts as unknown as PlannedIncident["facts"];
-    return {
-      incident_id: incident.id,
-      plan_type: "application_prep",
-      checklist: buildDefaultChecklist(facts) as unknown as Json,
-      citations: (facts.url ? [{ kind: "notice", url: facts.url }] : []) as Json,
-      generation_status: "failed",
-    };
-  });
-  const { error } = await db.from("response_plans").insert(plans);
-  if (error) throw new Error(`신청 준비 계획을 만들지 못했습니다: ${error.message}`);
+  return data;
 }
 
 /** FR-006 (spec 001): 신청 기간·조건이 바뀐 공고의 기존 사건에 "바뀜"을 표시하고 원문 값을 새로 쓴다 */

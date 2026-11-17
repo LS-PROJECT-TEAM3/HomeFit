@@ -9,8 +9,9 @@ import type { PageFetcher } from "@/watch/myhome.server";
  * - malformed: 한 건의 공고 ID가 비어 있음 (spec 3절 형식 다름)
  * - failure: 연결 실패. 오류에 가짜 키가 섞여 가려지는지 본다 (FR-004)
  * - bulk: 부산 공고 300건 (spec 3절 대량)
+ * - fresh: sample과 같은 내용에 공고 ID만 새로 붙임. 이미 사건이 있어도 새 사건과 AI 초안을 다시 만들어 본다 (C-031)
  */
-export const FIXTURE_NAMES = ["sample", "changed", "malformed", "failure", "bulk"] as const;
+export const FIXTURE_NAMES = ["sample", "changed", "malformed", "failure", "bulk", "fresh"] as const;
 export type FixtureName = (typeof FIXTURE_NAMES)[number];
 
 const baseItems: MyhomeItem[] = sample.response.body.item.map((item) => ({ ...item, pblancId: `SIM-${item.pblancId}` }));
@@ -24,6 +25,7 @@ function shiftDate(yyyymmdd: string | undefined, days: number): string {
 function itemsFor(name: Exclude<FixtureName, "failure">): MyhomeItem[] {
   if (name === "changed") return baseItems.map((item) => ({ ...item, endDe: shiftDate(item.endDe, 1) }));
   if (name === "malformed") return baseItems.map((item, i) => (i === 0 ? { ...item, pblancId: "" } : item));
+  if (name === "fresh") return baseItems.map((item) => ({ ...item, pblancId: `SIM-FRESH-${item.pblancId ?? ""}`.replace("SIM-FRESH-SIM-", "SIM-FRESH-") }));
   if (name === "bulk") {
     // 부산 공고로 만든다: 속도만 보려는 묶음이라 시험 계정(서울 조건)에 사건 300개가 생기지 않게 한다
     const template = baseItems[0];

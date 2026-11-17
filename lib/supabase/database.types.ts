@@ -116,6 +116,10 @@ export type Database = {
     Views: Record<never, never>;
     Functions: {
       approve_incident: { Args: { p_incident_id: string }; Returns: string };
+      collection_status: {
+        Args: { p_source: string };
+        Returns: { last_status: string | null; last_finished_at: string | null; last_success_at: string | null }[];
+      };
       is_admin: { Args: Record<never, never>; Returns: boolean };
       mark_incident_viewed: { Args: { p_incident_id: string }; Returns: undefined };
       reject_incident: { Args: { p_incident_id: string; p_reason: string }; Returns: undefined };

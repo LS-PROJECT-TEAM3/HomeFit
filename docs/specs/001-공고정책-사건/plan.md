@@ -2,7 +2,7 @@
 
 - 기능 ID: 001
 - 상태: 승인됨 (2026-11-17, 새 의존성 포함)
-- 버전: v0.5
+- 버전: v0.7
 - 작성일 / 최종 갱신: 2026-11-17 / 2026-11-17
 - 기준 spec: ./spec.md (v0.1, 승인됨)
 - 근거 문서: docs/ERD.md v1.0, docs/IA.md v1.0, docs/journeys/critical/CUJ-01-명세.md, docs/journeys/edge-cases/거절과-수집오류.md, docs/Intent.md v0.2, CLAUDE.md
@@ -25,7 +25,7 @@ spec 001의 FR-001~015를 6단계로 만든다. Next.js(App Router) 한 프로�
 | 저장·로그인 | Supabase 클라우드 무료 프로젝트 + `@supabase/supabase-js`, `@supabase/ssr` | 2.119.0 / 0.12.7 | Supabase 공식 Next.js 안내의 두 패키지 [https://supabase.com/docs/guides/auth/server-side/nextjs] | 로컬 Supabase(`supabase start`는 Docker 필요 [https://supabase.com/docs/guides/local-development/cli/getting-started]) |
 | 표 만들기 | SQL 마이그레이션 파일(`supabase/migrations/`)을 Supabase 대시보드 SQL 편집기 또는 연결된 Supabase 도구로 적용 | (도구 설치 없음) | 팀원 누구나 같은 SQL로 같은 표를 만든다 | Supabase CLI 3.2.0(로그인·링크가 더 필요, 2차에 검토) |
 | AI | `@anthropic-ai/sdk` | 1.9.0 | CLAUDE.md 스택. 요약·대응안 초안에만 | |
-| AI 모델 | [확인 필요: 5단계 시작 때 `claude-api` 문서로 모델과 비용 확인 뒤 정함] | | | |
+| AI 모델 | `claude-haiku-5-5` (Claude Haiku 5.5), effort `low`, 구조화 출력(JSON 스키마) | 2026-11-17 사용자 결정 | 짧은 요약·체크리스트라 충분하고 비용이 약 1/30(입력 $0.10·출력 $0.50 / 100만 토큰, 건당 약 $0.001 어림). 안전 분류기 거절 때 서버 대체 모델이 없어 기본 체크리스트로 대신함 | Claude Opus 5.5(기본 추천, 건당 약 $0.03~0.04), Sonnet 5.5 |
 | 정기 실행 | Vercel Cron Jobs (`vercel.json`의 `crons`) | (Vercel 플랫폼) | Intent Q11 결정. Hobby는 작업당 하루 1번, 한 시간 안 아무 때나, 재시도 없음, 운영 배포에서만 실행 [https://vercel.com/docs/cron-jobs/manage-cron-jobs] | Supabase 예약 함수 |
 | 함수 시험 | Vitest | 5.1.0 | CLAUDE.md 명령 `npm test`. 순수 함수만 시험해서 화면 시험 패키지(jsdom, testing-library)는 넣지 않는다 [https://nextjs.org/docs/app/guides/testing/vitest] | Next.js 가이드의 전체 목록(지금은 필요 없음) |
 | 배포 | Vercel | | CLAUDE.md. 실제 배포는 "배포해줘" 뒤 | |
@@ -156,12 +156,12 @@ ERD v1.0의 표 중 첫 기능에 필요한 11개만 만든다. 칸 이름과 �
 - [x] 중복·바뀜·실패 확인 + 실제 API 수집 2회
 
 ### 5단계 작업
-- [ ] (시작 때) `claude-api` 문서로 모델·비용 확인 후 사용자에게 알림
-- [ ] 공통 컴포넌트: 상태 배지, 사건 카드, 빈/불러오는 중/실패
-- [ ] 홈, 사건 목록(거르기 주소 유지), 상세(처음 연 시각, 남은 날 수, 원문 링크, 자격 문구)
-- [ ] 대응안 초안(출처, 실패 시 기본 체크리스트)
-- [ ] 승인·거절 모달과 서버 액션, 내 일정·일정 상세
-- [ ] 키보드만으로 승인·거절 가능, 초점 링 보임
+- [x] `claude-api` 문서로 모델·비용 확인 → 사용자가 Claude Haiku 5.5 선택
+- [x] 공통 컴포넌트: 상태 배지(`status.tsx`), 빈/불러오는 중/실패(`states.tsx`), 주 메뉴(`(main)/layout.tsx`)
+- [x] 홈, 사건 목록(거르기 주소 유지, 수집 상태는 DB 함수 `collection_status`), 상세(처음 연 시각, 남은 날 수, 원문 링크, 자격 문구)
+- [x] 대응안 초안: `incident/plan-draft.ts`(시험 먼저)·`plan-draft.server.ts`·`plans.server.ts`, 같은 공고는 한 번만 호출. 실패 시 기본 체크리스트. 실제 AI 응답은 키를 받은 뒤 확인
+- [x] 승인·거절 창(`<dialog>`)과 서버 액션(DB 함수 호출), 내 일정·일정 상세·체크리스트 저장
+- [x] 키보드만으로 승인·거절 가능, 초점 링 보임
 
 ### 6단계 작업
 - [ ] `harness-qa` B로 단계별 결과 정리, `ponytail-review`, 화면 체크리스트
@@ -291,6 +291,8 @@ C·H 번호는 [qa.md](qa.md)에 있다.
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성 |
+| 2026-11-17 | v0.7 | 5단계 끝: 사건 화면. 로그인 화면 밖 페이지를 `app/(main)/`으로 묶어 주 메뉴를 붙임. 마이그레이션 0004(collection_status). 사건 상세는 표 연결 타입이 없어 세 번 나눠 읽음 |
+| 2026-11-17 | v0.6 | 5단계 시작: AI 모델 Claude Haiku 5.5로 결정(사용자). zod를 들이지 않고 JSON 스키마 구조화 출력 + 자체 검사 함수 |
 | 2026-11-17 | v0.5 | 4단계 끝: 수집 흐름. 계획한 `scripts/collect-fixture.ts`는 TypeScript 실행 도구가 더 필요해 빼고 cron 입구의 `?fixture=`로 대신. 겹친 줄 제거 추가. 사건마다 기본 신청 준비 계획을 함께 만듦(AI는 5단계) |
 | 2026-11-17 | v0.4 | 3단계 진행: Supabase 연결, 표·RLS, 로그인·조건 화면. 승인·거절을 DB 함수로(한 번에 처리, 본인만). `/my` 이동은 next.config redirects. 브라우저용 Supabase client는 쓸 곳이 없어 뺌 |
 | 2026-11-17 | v0.3 | 2단계 끝: 순수 함수 5묶음. 실제 응답 확인으로 `Notice.announcementId`(공고 ID) 추가, 사건 중복은 공고 ID로. 시도 이름→코드 표 `watch/sido.ts` 추가 |
