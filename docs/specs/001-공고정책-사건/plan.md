@@ -2,7 +2,7 @@
 
 - 기능 ID: 001
 - 상태: 승인됨 (2026-11-17, 새 의존성 포함)
-- 버전: v0.3
+- 버전: v0.4
 - 작성일 / 최종 갱신: 2026-11-17 / 2026-11-17
 - 기준 spec: ./spec.md (v0.1, 승인됨)
 - 근거 문서: docs/ERD.md v1.0, docs/IA.md v1.0, docs/journeys/critical/CUJ-01-명세.md, docs/journeys/edge-cases/거절과-수집오류.md, docs/Intent.md v0.2, CLAUDE.md
@@ -143,11 +143,11 @@ ERD v1.0의 표 중 첫 기능에 필요한 11개만 만든다. 칸 이름과 �
 - [x] 실패 확인 → 구현 → 통과 (시험 66개)
 
 ### 3단계 작업
-- [ ] (승인 뒤) Supabase 무료 프로젝트 만들기, 키를 `.env.local`에
-- [ ] `0001_first_feature.sql`: 표 11개, 체크 제약(임대료 0 이상 등), RLS 정책, 가입 때 profiles 행 만들기
-- [ ] `lib/supabase/client.ts`, `server.ts`, `proxy.ts`(보호는 `getClaims()`로)
-- [ ] 로그인·가입·첫 설정·조건·계정 화면, 잘못된 값 안내 문구
-- [ ] 계정 A·B 권한 확인
+- [x] Supabase 프로젝트: 계정에 이미 있던 빈 `HomeFit`(도쿄) 사용(사용자 승인). 주소·publishable 키를 `.env.local`에
+- [x] 마이그레이션 0001(표 11개, 체크 제약)·0002(RLS, 가입 트리거, 승인·거절·처음 열람 DB 함수)·0003(보안 점검 반영) 적용. DB 타입 `lib/supabase/database.types.ts`
+- [x] `lib/supabase/server.ts`, `proxy.ts`(보호는 `getClaims()`). 브라우저용 client.ts는 아직 필요 없어 만들지 않음
+- [x] 로그인·가입·첫 설정·조건·계정 화면, 잘못된 값 안내 문구(검사 함수 `incident/condition-form.ts` 시험 먼저). 시군구 선택은 Q18 대기
+- [ ] 계정 A·B 권한 확인 (DB·익명 API는 확인, 두 번째 실제 계정으로 화면·API 확인 남음)
 
 ### 4단계 작업
 - [ ] `collect.server.ts`(실행 기록·단계 기록·공고 저장·사건 만들기), 실패 처리와 키 가리기
@@ -291,5 +291,6 @@ C·H 번호는 [qa.md](qa.md)에 있다.
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성 |
+| 2026-11-17 | v0.4 | 3단계 진행: Supabase 연결, 표·RLS, 로그인·조건 화면. 승인·거절을 DB 함수로(한 번에 처리, 본인만). `/my` 이동은 next.config redirects. 브라우저용 Supabase client는 쓸 곳이 없어 뺌 |
 | 2026-11-17 | v0.3 | 2단계 끝: 순수 함수 5묶음. 실제 응답 확인으로 `Notice.announcementId`(공고 ID) 추가, 사건 중복은 공고 ID로. 시도 이름→코드 표 `watch/sido.ts` 추가 |
 | 2026-11-17 | v0.2 | 1단계 끝: 실제 설치 버전 반영(React 19.3.0, TypeScript 5.9.3, @types/node 24.19.2, Pretendard v1.3.9), 화면 확인 서버 이름 `homefit-web` |
