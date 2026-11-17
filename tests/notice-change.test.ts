@@ -4,6 +4,7 @@ import {
   complexKeyOf,
   diffTracked,
   findNoticeChanges,
+  mergeByAnnouncement,
   trackedValues,
   type ChangeInput,
 } from "@/incident/notice-change";
@@ -126,5 +127,47 @@ describe("changeDedupKey", () => {
   it("정정공고는 새 공고 ID로 키를 만든다", () => {
     const correction = { notice: makeNotice({ announcementId: "NEW" }), kind: "correction" as const, changes: [], relatedAnnouncementId: "OLD" };
     expect(changeDedupKey(source, correction)).toBe("housing_support:myhome_notice:NEW:correction");
+  });
+});
+
+// 12단계 리뷰 2번 (spec 001 v0.3 경계): 한 수집에서 같은 공고·같은 변화 종류는 하나로 합친다
+describe("mergeByAnnouncement", () => {
+  const rentChange = (externalId: string, complexName: string, before: number, after: number) => ({
+    notice: makeNotice({ externalId, announcementId: "A", complexName, monthlyRent: after }),
+    kind: "changed" as const,
+    changes: [{ field: "monthlyRent" as const, before, after }],
+    relatedAnnouncementId: null,
+  });
+
+  it("단지마다 임대료가 다르게 바뀌면 사건 하나에 단지별 전 → 후", () => {
+    const merged = mergeByAnnouncement([rentChange("A-1", "가동", 200000, 210000), rentChange("A-2", "나동", 300000, 320000)]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].changes).toEqual([
+      { field: "monthlyRent", before: 200000, after: 210000, complex: "가동" },
+      { field: "monthlyRent", before: 300000, after: 320000, complex: "나동" },
+    ]);
+  });
+
+  it("단지끼리 같은 변화는 한 줄(단지 이름 없이)", () => {
+    const deadline = (externalId: string, complexName: string) => ({
+      notice: makeNotice({ externalId, announcementId: "A", complexName }),
+      kind: "changed" as const,
+      changes: [{ field: "applyEnd" as const, before: "2026-11-30", after: "2026-12-07" }],
+      relatedAnnouncementId: null,
+    });
+    const merged = mergeByAnnouncement([deadline("A-1", "가동"), deadline("A-2", "나동")]);
+    expect(merged[0].changes).toEqual([{ field: "applyEnd", before: "2026-11-30", after: "2026-12-07" }]);
+  });
+
+  it("다른 공고·다른 종류는 따로", () => {
+    const other = { ...rentChange("B-1", "다동", 1, 2), notice: makeNotice({ externalId: "B-1", announcementId: "B" }) };
+    const correction = { notice: makeNotice({ externalId: "A-9", announcementId: "A" }), kind: "correction" as const, changes: [], relatedAnnouncementId: "OLD" };
+    expect(mergeByAnnouncement([rentChange("A-1", "가동", 1, 2), other, correction])).toHaveLength(3);
+  });
+
+  it("합친 변화의 중복 키는 순서가 달라도 같다(재수집해도 한 번)", () => {
+    const a = mergeByAnnouncement([rentChange("A-1", "가동", 1, 2), rentChange("A-2", "나동", 3, 4)]);
+    const b = mergeByAnnouncement([rentChange("A-2", "나동", 3, 4), rentChange("A-1", "가동", 1, 2)]);
+    expect(changeDedupKey("myhome_notice", a[0])).toBe(changeDedupKey("myhome_notice", b[0]));
   });
 });

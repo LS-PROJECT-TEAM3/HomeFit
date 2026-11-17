@@ -374,7 +374,7 @@ erDiagram
 | policy_conditions, homes, indoor_measurements, interest_areas | 내 행만 읽기·쓰기 | 전체 읽기. 수정은 audit_logs와 함께 서버 함수로만 | 읽기 |
 | sources, runs, run_steps, observations | 볼 수 없음 | 읽기, "지금 한 번 실행" | 읽기·쓰기 |
 | source_items | 로그인하면 읽기(공개 공고라서, 맞는 공고 목록) | 읽기 | 읽기·쓰기 |
-| notification_settings | 내 행만 읽기·쓰기 | **볼 수 없음**(슬랙 이메일은 개인 정보) | 읽기 |
+| notification_settings | 내 행만 읽기, 알림 켜기·끄기(enabled·enabled_at·updated_at)만 수정. 이메일·슬랙 사람 ID는 서버만 씀(0008) | **볼 수 없음**(슬랙 이메일은 개인 정보) | 읽기·쓰기 |
 | notifications | 내 행 읽기 | 읽기(주소 없음) | 쓰기 |
 | incidents, response_plans | 내 행만 읽기 | 전체 읽기 | 쓰기 |
 | incident_actions | 내 사건에만 승인·거절 추가 | 읽기만 (대신 승인 불가) | |
@@ -415,6 +415,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |
 | 2026-11-17 | v1.0 | 승인 |
+| 2026-11-17 | v1.3 | 접근 규칙: notification_settings 이메일·사람 ID는 서버만(0008, 12단계 리뷰 4번, 사용자 결정). 칸 변경 없음 |
 | 2026-11-17 | v1.3 | llm_calls 표 추가(spec 002 AI 호출 기록) |
 | 2026-11-17 | v1.2 | notification_settings: slack_webhook_url를 빼고 slack_email·slack_user_id(PRD v1.3, 팀 슬랙 봇 DM) |
 | 2026-11-17 | v1.1 | 사건 정의 변경(PRD v1.2): notification_settings·notifications 표 추가, source_items에 complex_key·previous_values, incidents.dedup_key·facts 설명 변경, run_steps에 notify 단계, source_items를 로그인 사용자도 읽게 함. 마이홈 응답에서 hsmpNm·sttusNm·beforePblancId 칸을 확인해 complex_key·status_name·before_external_id 추가 |

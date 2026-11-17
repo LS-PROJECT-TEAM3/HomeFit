@@ -55,3 +55,18 @@ describe("planChangeIncidents", () => {
     });
   });
 });
+
+// 12단계 리뷰 2번: 합치기는 사람마다 맞는 단지만 고른 뒤에
+describe("planChangeIncidents 단지 합치기", () => {
+  it("공고의 두 번째 단지만 내 시군구여도 사건이 생기고, 단지 여럿 변화는 사건 하나", () => {
+    const daedeok: ConditionOwner = { userId: "user-d", condition: makeCondition({ sidoCode: "30", sigunguCode: "30230" }) };
+    const changes = [
+      changeOf({ externalId: "A-1", announcementId: "A", sidoCode: "30", sigunguCode: "30200", complexName: "유성" }),
+      changeOf({ externalId: "A-2", announcementId: "A", sidoCode: "30", sigunguCode: "30230", complexName: "대덕" }),
+      changeOf({ externalId: "A-3", announcementId: "A", sidoCode: "30", sigunguCode: "30230", complexName: "대덕2" }),
+    ];
+    const planned = planChangeIncidents({ changes, owners: [daedeok], existingKeys: new Set(), today, sourceCode: source });
+    expect(planned).toHaveLength(1);
+    expect(planned[0].externalId).toBe("A-2");
+  });
+});

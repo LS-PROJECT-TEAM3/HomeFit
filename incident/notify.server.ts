@@ -99,11 +99,14 @@ export async function notifyIncidents(db: AdminClient, created: NotifyCandidate[
   const settings = await loadSettings(db, [...new Set(all.map((c) => c.userId))]);
   const picked = selectToNotify({ incidents: all, settings, records: retries.records });
   const stats: NotifyStats = { sent: 0, failed: 0, retried: picked.filter((p) => retries.records.has(p.incidentId)).length };
+  let slackDown = false;
   for (const userId of new Set(picked.map((p) => p.userId))) {
     const mine = picked.filter((p) => p.userId === userId);
     const slackUserId = settings.get(userId)?.slackUserId ?? "";
     for (const message of buildMessages(mine, appBaseUrl())) {
-      const result = await postSlackMessage(slackUserId, message.text);
+      // 슬랙이 한 번 멈추면 이번 수집의 남은 DM은 부르지 않고 "실패"로 남긴다(다음 수집에 한 번 더). 수집 시간 제한 300초를 지키려고 (리뷰 2026-11-17)
+      const result = slackDown ? { ok: false as const, error: "slack_down_skipped" } : await postSlackMessage(slackUserId, message.text);
+      if (!result.ok && (result.error === "timeout" || result.error === "network_error")) slackDown = true;
       await saveRecords(db, message.incidentIds.map((incidentId) => ({
         incidentId, userId, ok: result.ok, error: result.ok ? null : result.error,
         attempts: (retries.records.get(incidentId)?.attempts ?? 0) + 1,

@@ -11,7 +11,7 @@ import { toKstDate } from "@/watch/kst";
 import { maskSecrets } from "@/watch/mask";
 import { fetchAllMyhomeNotices, type PageFetcher } from "@/watch/myhome.server";
 import { finishRun, recordStep, startRun, type RunTrigger } from "@/watch/run-log.server";
-import { saveSourceItems, type SavedItems } from "@/watch/source-items.server";
+import { commitSourceItems, saveSourceItems, type SavedItems } from "@/watch/source-items.server";
 import type { Notice } from "@/watch/notice";
 
 export const MYHOME_SOURCE = "myhome_notice";
@@ -85,6 +85,8 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
   const drafts = await draftPlans(db, planned.map((plan) => plan.facts), newCallContext(runId));
   const created = await insertIncidents({ db, planned, runId, sourceItemIds: saved.idByExternalId, isSimulated });
   const plans = await insertPlans(db, created, drafts);
+  // 사건·계획을 저장한 뒤에야 이미 있던 공고의 새 값을 쓴다(실패한 날의 변화를 다음 수집이 다시 잡도록)
+  await commitSourceItems(db, saved);
   const newIncidents = created.length;
   // CollectSummary.updatedIncidents: v0.2부터는 "변화가 생긴 공고 수"(사건 수와 다를 수 있음)
   const updatedIncidents = changes.length;

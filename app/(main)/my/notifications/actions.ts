@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { normalizeSlackEmail, UNAVAILABLE } from "@/incident/notify";
 import { lookupSlackUser, postSlackMessage, slackConfigured } from "@/incident/notify.server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 
 export type NotifyState = { error?: string; done?: string; email?: string };
@@ -22,8 +23,9 @@ export async function saveSlackEmail(_prev: NotifyState, formData: FormData): Pr
   if (!parsed.ok) return { error: parsed.message, email: input };
   const found = await lookupSlackUser(parsed.email);
   if (!found.ok) return { error: found.message, email: input };
-  const supabase = await createClient();
-  const { error } = await supabase.from("notification_settings").upsert({
+  // 12단계 리뷰 4번: 슬랙 사람 ID는 서버만 쓴다(마이그레이션 0008). 로그인은 위에서 확인했고, 본인 행만 쓴다
+  const admin = createAdminClient();
+  const { error } = await admin.from("notification_settings").upsert({
     user_id: userId, slack_email: parsed.email, slack_user_id: found.slackUserId, updated_at: new Date().toISOString(),
   });
   if (error) return { error: "저장하지 못했습니다. 잠시 뒤 다시 해 주세요.", email: input };

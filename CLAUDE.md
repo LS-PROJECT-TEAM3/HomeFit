@@ -91,6 +91,11 @@
 - `watch/`: 마이홈 공고 수집. 순수 함수(`myhome.ts`, `notice.ts`, `sido.ts`, `mask.ts`, `kst.ts`), 가짜 응답(`sim-fixtures.ts`), DB·API(`*.server.ts`)
 - `incident/`: 조건 맞추기·중복·체크리스트·AI 초안 검사(순수 함수), 사건·계획·일정 읽고 쓰기(`*.server.ts`)
 - `lib/supabase/`: 서버·관리자 클라이언트, DB 타입
-- `supabase/migrations/`: DB 표·권한 규칙·DB 함수 (0001~0004)
+- `app/(main)/notices/`: 맞는 공고(사건 아님) / `app/(main)/my/notifications/`: 슬랙 알림 설정 / `app/api/sigungu/`: 시군구 목록
+- `incident/notice-change.ts`·`detect.ts`: 공고 변화 → 사건(순수 함수), `matched.ts`: 맞는 공고, `change-text.ts`: 전 → 후 문구, `notify.ts`·`notify.server.ts`: 슬랙 DM
+- `watch/region.ts`·`region.server.ts`: 법정동 시군구 목록(30일 캐시)
+- `lib/llm/`: AI 공급자 구조(gemini·claude·mock, 다시 시도·상한·호출 기록), spec 002
+- `scripts/deploy.mjs`: `npm run deploy` = 운영 배포 후 수집 한 번
+- `supabase/migrations/`: DB 표·권한 규칙·DB 함수 (0001~0008. 0005 공고 변화·알림, 0006 슬랙 이메일, 0007 AI 호출 기록, 0008 슬랙 사람 ID는 서버만)
 - `proxy.ts`: 로그인 세션 새로 고침, 로그인 안 했으면 로그인 화면으로
 - `tests/`: Vitest 시험 (순수 함수)

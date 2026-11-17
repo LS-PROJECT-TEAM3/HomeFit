@@ -3,7 +3,8 @@ import type { Notice } from "@/watch/notice";
 /** 바뀌면 사건이 되는 칸 (문제정의 사건 기준 표 (가), spec 001 v0.2 FR-006) */
 export type TrackedValues = Pick<Notice, "applyStart" | "applyEnd" | "monthlyRent" | "supplyType">;
 export type TrackedField = keyof TrackedValues;
-export type FieldChange = { field: TrackedField; before: string | number | null; after: string | number | null };
+/** complex: 한 공고의 단지마다 값이 다르게 바뀌었을 때만 단지 이름 (12단계 리뷰 2번) */
+export type FieldChange = { field: TrackedField; before: string | number | null; after: string | number | null; complex?: string | null };
 
 /** changed: 칸이 바뀜 / correction: 정정공고 / relaxed: 같은 단지 완화·추가모집·재공고 */
 export type ChangeKind = "changed" | "correction" | "relaxed";
@@ -93,6 +94,32 @@ export function findNoticeChanges(input: ChangeInput): NoticeChange[] {
 export function changeDedupKey(sourceCode: string, change: NoticeChange): string {
   const base = `housing_support:${sourceCode}:${change.notice.announcementId}`;
   if (change.kind !== "changed") return `${base}:${change.kind}`;
-  const after = change.changes.map((c) => [c.field, c.after]);
+  const after = change.changes.map((c) => (c.complex ? [c.field, c.after, c.complex] : [c.field, c.after]));
   return `${base}:changed:${JSON.stringify(after)}`;
+}
+
+function sameChanges(a: readonly FieldChange[], b: readonly FieldChange[]): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function mergeChanged(group: NoticeChange[]): NoticeChange {
+  const sorted = [...group].sort((a, b) => a.notice.externalId.localeCompare(b.notice.externalId));
+  const first = sorted[0];
+  // 단지끼리 같은 변화면 한 줄, 다르면 단지별로 (spec 001 v0.3 경계)
+  if (sorted.every((c) => sameChanges(c.changes, first.changes))) return { ...first, changes: first.changes };
+  const changes = sorted.flatMap((c) => c.changes.map((f) => ({ ...f, complex: c.notice.complexName ?? c.notice.externalId })));
+  return { ...first, changes };
+}
+
+/**
+ * 12단계 리뷰 2번 (spec 001 v0.3 경계): 한 수집에서 같은 공고·같은 변화 종류는 사건 하나로 합친다.
+ * 단지마다 임대료가 다르게 바뀌어도 사람마다 사건·알림이 한 번만 간다.
+ */
+export function mergeByAnnouncement(changes: readonly NoticeChange[]): NoticeChange[] {
+  const groups = new Map<string, NoticeChange[]>();
+  for (const change of changes) {
+    const key = `${change.notice.announcementId}|${change.kind}`;
+    groups.set(key, [...(groups.get(key) ?? []), change]);
+  }
+  return [...groups.values()].map((group) => (group[0].kind === "changed" ? mergeChanged(group) : group[0]));
 }

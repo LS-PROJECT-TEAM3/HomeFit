@@ -1,5 +1,5 @@
 import { matchesCondition, type PolicyCondition } from "@/incident/match";
-import { changeDedupKey, type ChangeKind, type FieldChange, type NoticeChange } from "@/incident/notice-change";
+import { changeDedupKey, mergeByAnnouncement, type ChangeKind, type FieldChange, type NoticeChange } from "@/incident/notice-change";
 import type { Notice } from "@/watch/notice";
 
 export type ConditionOwner = { userId: string; condition: PolicyCondition };
@@ -33,10 +33,12 @@ export function planChangeIncidents({ changes, owners, existingKeys, today, sour
   const seen = new Set(existingKeys);
   const planned: PlannedIncident[] = [];
   for (const { userId, condition } of owners) {
-    for (const change of changes) {
+    // 단지마다 시군구·임대료가 달라서, 이 사람에게 맞는 단지만 고른 뒤 공고·종류별로 하나로 합친다 (12단계 리뷰 2번)
+    const mine = mergeByAnnouncement(changes.filter((change) => matchesCondition(change.notice, condition, today)));
+    for (const change of mine) {
       const dedupKey = changeDedupKey(sourceCode, change);
       const key = `${userId}|${dedupKey}`;
-      if (seen.has(key) || !matchesCondition(change.notice, condition, today)) continue;
+      if (seen.has(key)) continue;
       seen.add(key);
       const { kind, changes: fields, relatedAnnouncementId } = change;
       planned.push({

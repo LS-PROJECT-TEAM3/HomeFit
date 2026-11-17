@@ -29,7 +29,7 @@ export function describeChange(change: IncidentFacts["change"]): ChangeText | nu
     return { lines: ["같은 단지에 자격 완화·추가 모집·재공고가 올라왔습니다"], note: "바뀐 내용은 공고문에서 확인해 주세요." };
   }
   return {
-    lines: change.changes.map((c) => `${FIELD_LABEL[c.field]} ${show(c.field, c.before)} → ${show(c.field, c.after)}`),
+    lines: change.changes.map((c) => `${c.complex ? `${c.complex} ` : ""}${FIELD_LABEL[c.field]} ${show(c.field, c.before)} → ${show(c.field, c.after)}`),
     note: null,
   };
 }

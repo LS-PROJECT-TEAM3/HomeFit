@@ -9,6 +9,9 @@ import { fixtureFetcher, isFixtureName } from "@/watch/sim-fixtures";
  * 근거: https://vercel.com/docs/cron-jobs/manage-cron-jobs
  * 개발 중에는 ?fixture=sample 처럼 가짜 응답 묶음으로 돌릴 수 있다(운영 배포에서는 막음).
  */
+// 수집 + AI 초안(최대 12건) + 슬랙 DM이 한 함수 안에서 끝나야 한다. 이 프로젝트(fluid compute) 무료 플랜의 최대 300초 (리뷰 2026-11-17)
+export const maxDuration = 300;
+
 export async function GET(request: Request) {
   await connection(); // 요청마다 새로 돈다(Cache Components에서 미리 그리지 않음)
 

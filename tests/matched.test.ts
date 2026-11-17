@@ -71,3 +71,10 @@ describe("describeChange", () => {
     expect(describeChange(undefined)).toBeNull();
   });
 });
+
+describe("describeChange 단지별", () => {
+  it("단지 이름이 있으면 줄 앞에 붙인다", () => {
+    const text = describeChange({ kind: "changed", changes: [{ field: "monthlyRent", before: 200000, after: 210000, complex: "가동" }], relatedAnnouncementId: null });
+    expect(text?.lines).toEqual(["가동 월 임대료 200,000원 → 210,000원"]);
+  });
+});

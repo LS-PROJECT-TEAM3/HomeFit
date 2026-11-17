@@ -15,22 +15,24 @@ export type SavedItems = {
   seenAnnouncementIds: Set<string>;
   /** 이번 수집 전에 본 단지 키 중 새 공고와 겹치는 것 (FR-016 완화 재공고) */
   seenComplexKeys: Set<string>;
+  /** 이미 있던 공고의 새 값. 사건·계획을 저장한 **뒤에** commitSourceItems로 쓴다 (리뷰 2026-11-17) */
+  pendingRows: ReturnType<typeof toRow>[];
 };
 
-type Existing = { hash: string; values: TrackedValues };
+type Existing = { id: string; hash: string; values: TrackedValues };
 
 async function loadExisting(db: AdminClient, sourceCode: string, externalIds: string[]) {
   const existing = new Map<string, Existing>();
   if (externalIds.length === 0) return existing;
   const { data, error } = await db
     .from("source_items")
-    .select("external_id, content_hash, apply_start, apply_end, monthly_rent, supply_type")
+    .select("id, external_id, content_hash, apply_start, apply_end, monthly_rent, supply_type")
     .eq("source_code", sourceCode)
     .in("external_id", externalIds);
   if (error) throw new Error(`저장된 공고를 읽지 못했습니다: ${error.message}`);
   for (const row of data) {
     const values = { applyStart: row.apply_start, applyEnd: row.apply_end, monthlyRent: row.monthly_rent, supplyType: row.supply_type };
-    existing.set(row.external_id, { hash: row.content_hash, values });
+    existing.set(row.external_id, { id: row.id, hash: row.content_hash, values });
   }
   return existing;
 }
@@ -89,26 +91,43 @@ function toRow(sourceCode: string, notice: Notice, previous: Existing | undefine
   };
 }
 
-/** FR-003, FR-006, FR-016 (spec 001 v0.2): 공고를 저장하고, 저장 전 값과 이미 본 공고·단지를 함께 돌려준다 */
+/**
+ * FR-003, FR-006, FR-016 (spec 001 v0.2): 처음 본 공고만 지금 저장하고(사건에 ID가 필요), 이미 있던 공고의 새 값은 미뤄 둔다.
+ * 먼저 덮어쓰면, 사건·계획 저장이 실패한 날 다음 수집이 새 값과 비교해 그 변화를 영영 놓친다 (리뷰 2026-11-17).
+ */
 export async function saveSourceItems(db: AdminClient, sourceCode: string, notices: Notice[]): Promise<SavedItems> {
   const existing = await loadExisting(db, sourceCode, notices.map((n) => n.externalId));
-  const seenBefore = await loadSeenBefore(db, sourceCode, notices.filter((n) => !existing.has(n.externalId)));
+  const fresh = notices.filter((n) => !existing.has(n.externalId));
+  const seenBefore = await loadSeenBefore(db, sourceCode, fresh);
   const now = new Date().toISOString();
-  const rows = notices.map((notice) => toRow(sourceCode, notice, existing.get(notice.externalId), now));
-  const { data, error } = rows.length
-    ? await db.from("source_items").upsert(rows, { onConflict: "source_code,external_id" }).select("id, external_id, content_hash")
+  const freshRows = fresh.map((notice) => toRow(sourceCode, notice, undefined, now));
+  const { data, error } = freshRows.length
+    // 크론이 두 번 겹쳐 같은 새 공고를 넣어도 실패하지 않게 upsert
+    ? await db.from("source_items").upsert(freshRows, { onConflict: "source_code,external_id" }).select("id, external_id")
     : { data: [], error: null };
   if (error) throw new Error(`공고를 저장하지 못했습니다: ${error.message}`);
 
-  const saved: SavedItems = { idByExternalId: new Map(), newIds: new Set(), changedIds: new Set(), previousByExternalId: new Map(), ...seenBefore };
+  const saved: SavedItems = {
+    idByExternalId: new Map(), newIds: new Set(), changedIds: new Set(), previousByExternalId: new Map(), ...seenBefore, pendingRows: [],
+  };
   for (const row of data) {
     saved.idByExternalId.set(row.external_id, row.id);
-    const previous = existing.get(row.external_id);
-    if (previous === undefined) saved.newIds.add(row.id);
-    else {
-      saved.previousByExternalId.set(row.external_id, previous.values);
-      if (previous.hash !== row.content_hash) saved.changedIds.add(row.id);
-    }
+    saved.newIds.add(row.id);
+  }
+  for (const notice of notices) {
+    const previous = existing.get(notice.externalId);
+    if (!previous) continue;
+    saved.idByExternalId.set(notice.externalId, previous.id);
+    saved.previousByExternalId.set(notice.externalId, previous.values);
+    if (previous.hash !== noticeFingerprint(notice)) saved.changedIds.add(previous.id);
+    saved.pendingRows.push(toRow(sourceCode, notice, previous, now));
   }
   return saved;
+}
+
+/** 이미 있던 공고의 새 값을 쓴다. 사건·계획을 저장한 뒤에 부른다 */
+export async function commitSourceItems(db: AdminClient, saved: SavedItems): Promise<void> {
+  if (saved.pendingRows.length === 0) return;
+  const { error } = await db.from("source_items").upsert(saved.pendingRows, { onConflict: "source_code,external_id" });
+  if (error) throw new Error(`공고 새 값을 저장하지 못했습니다: ${error.message}`);
 }
