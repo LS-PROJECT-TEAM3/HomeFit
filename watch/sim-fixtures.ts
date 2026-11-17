@@ -14,8 +14,9 @@ import type { PageFetcher } from "@/watch/myhome.server";
  * - relaxed: sample의 부산 공고와 같은 단지의 "자격완화" 공고 한 건 (FR-016, C-044)
  * - extended: sample과 같은데 마감일이 7일 늦음. 이미 본 변화와 다른 새 변화를 만들 때 쓴다 (spec 002 C-013)
  * - later: 마감일이 14일 늦음. 팔로우 확인용 새 변화 (spec 001 v0.5 C-062)
+ * - bulk-changed: bulk와 같은데 마감일이 3일 늦음. bulk 공고를 팔로우한 계정의 변화 사건 확인 (H-007)
  */
-export const FIXTURE_NAMES = ["sample", "changed", "malformed", "failure", "bulk", "fresh", "correction", "relaxed", "extended", "later"] as const;
+export const FIXTURE_NAMES = ["sample", "changed", "malformed", "failure", "bulk", "fresh", "correction", "relaxed", "extended", "later", "bulk-changed"] as const;
 export type FixtureName = (typeof FIXTURE_NAMES)[number];
 
 // 이전 공고 ID도 SIM-을 붙여 실제 공고와 이어지지 않게 한다
@@ -45,6 +46,7 @@ function itemsFor(name: Exclude<FixtureName, "failure">): MyhomeItem[] {
     const [busan] = baseItems;
     return [{ ...busan, pblancId: "SIM-RELAX-1", houseSn: 0, sttusNm: "일반공고", beforePblancId: "", pblancNm: `${busan.hsmpNm} 국민임대 자격완화 예비입주자 모집` }];
   }
+  if (name === "bulk-changed") return itemsFor("bulk").map((item) => ({ ...item, endDe: shiftDate(item.endDe, 3) }));
   if (name === "bulk") {
     // 부산 공고로 만든다: 속도만 보려는 묶음이라 시험 계정(서울 조건)에 사건 300개가 생기지 않게 한다
     const template = baseItems[0];
