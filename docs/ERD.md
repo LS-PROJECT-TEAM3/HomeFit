@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-17 (v1.1, 승인 2026-11-17)
+- 최종 갱신: 2026-11-17 (v1.2, 승인 2026-11-17)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -104,8 +104,9 @@ erDiagram
 | 필드 | 타입 | 필수 | 설명 | 출처 |
 |---|---|---|---|---|
 | user_id | uuid (PK, FK profiles) | ✔ | 한 사람에 하나 | [PRD FR-37] |
-| slack_webhook_url | text | | 본인 슬랙 수신 웹훅 주소. `https://hooks.slack.com/`로 시작하는 것만 받는다. 비밀값처럼 다룬다: 화면에는 끝 4자리만 보이고, 관리자도 읽지 못한다 | [PRD FR-37] [IA MY_030500_TB] |
-| enabled | boolean | ✔ | 기본 false. 켜는 것이 알림 승인 | [PRD FR-37, 8절] |
+| slack_email | text | | 팀 슬랙 워크스페이스에서 쓰는 이메일. 개인 정보라 본인만 읽고 관리자도 읽지 못한다 | [PRD FR-37] [IA MY_030500_TB] |
+| slack_user_id | text | | 봇이 이메일로 찾은 슬랙 사람 ID. DM을 보낼 곳. 이메일을 바꾸면 다시 찾는다 | [PRD FR-37] |
+| enabled | boolean | ✔ | 기본 false. 켜는 것이 알림 승인. 슬랙 사람 ID가 없으면 켤 수 없다 | [PRD FR-37, 8절] |
 | enabled_at | timestamptz | | 마지막으로 켠 시각(알림 승인 시각) | [PRD 8절] |
 | updated_at | timestamptz | ✔ | | [PRD FR-37] |
 
@@ -305,7 +306,7 @@ erDiagram
 | channel | text: `slack` | ✔ | | [PRD FR-37] |
 | status | text: `sent` / `failed` | ✔ | | [PRD FR-37] |
 | attempts | integer | ✔ | 보낸 횟수. 실패는 다음 수집에 한 번 더(최대 2) | [PRD FR-37] |
-| last_error | text | | 실패 이유. 웹훅 주소는 가린 뒤 저장 | [PRD FR-37, FR-27] |
+| last_error | text | | 실패 이유. 봇 토큰·이메일은 가린 뒤 저장 | [PRD FR-37, FR-27] |
 | sent_at | timestamptz | | 보낸 시각 | [PRD FR-37] |
 | created_at | timestamptz | ✔ | | |
 
@@ -356,7 +357,7 @@ erDiagram
 | policy_conditions, homes, indoor_measurements, interest_areas | 내 행만 읽기·쓰기 | 전체 읽기. 수정은 audit_logs와 함께 서버 함수로만 | 읽기 |
 | sources, runs, run_steps, observations | 볼 수 없음 | 읽기, "지금 한 번 실행" | 읽기·쓰기 |
 | source_items | 로그인하면 읽기(공개 공고라서, 맞는 공고 목록) | 읽기 | 읽기·쓰기 |
-| notification_settings | 내 행만 읽기·쓰기 | **볼 수 없음**(웹훅 주소는 비밀값) | 읽기 |
+| notification_settings | 내 행만 읽기·쓰기 | **볼 수 없음**(슬랙 이메일은 개인 정보) | 읽기 |
 | notifications | 내 행 읽기 | 읽기(주소 없음) | 쓰기 |
 | incidents, response_plans | 내 행만 읽기 | 전체 읽기 | 쓰기 |
 | incident_actions | 내 사건에만 승인·거절 추가 | 읽기만 (대신 승인 불가) | |
@@ -389,11 +390,12 @@ erDiagram
 
 ## 실제 DB 대조
 DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과를 한 줄로 적는다(P3-16).
-- 2026-11-17 (마이그레이션 0001~0005): `source_items`(칸 20개, v1.1 칸 complex_key·status_name·before_external_id·previous_values 포함), `notification_settings`(5개), `notifications`(9개)가 이 문서 표와 이름이 같다(information_schema 조회). 첫 기능 밖 표(homes 등)는 아직 만들지 않았다.
+- 2026-11-17 (마이그레이션 0001~0005): `source_items`(칸 20개, v1.1 칸 complex_key·status_name·before_external_id·previous_values 포함), `notification_settings`(6개, 0006에서 slack_email·slack_user_id), `notifications`(9개)가 이 문서 표와 이름이 같다(information_schema 조회). 첫 기능 밖 표(homes 등)는 아직 만들지 않았다.
 
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |
 | 2026-11-17 | v1.0 | 승인 |
+| 2026-11-17 | v1.2 | notification_settings: slack_webhook_url를 빼고 slack_email·slack_user_id(PRD v1.3, 팀 슬랙 봇 DM) |
 | 2026-11-17 | v1.1 | 사건 정의 변경(PRD v1.2): notification_settings·notifications 표 추가, source_items에 complex_key·previous_values, incidents.dedup_key·facts 설명 변경, run_steps에 notify 단계, source_items를 로그인 사용자도 읽게 함. 마이홈 응답에서 hsmpNm·sttusNm·beforePblancId 칸을 확인해 complex_key·status_name·before_external_id 추가 |

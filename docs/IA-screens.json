@@ -20,7 +20,7 @@
     {"menu_code": "MY", "no": [3, 2, 2], "path": ["홈", "내 정보", "내 집", "하자 기록"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "2차", "status": "신규", "url": "/my/home/defects", "note": "입주 때와 사는 동안의 하자(누수, 곰팡이, 고장) 기록과 사진"},
     {"menu_code": "MY", "no": [3, 3, 0], "path": ["홈", "내 정보", "관심 지역"], "type": "탭", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/my/areas", "menu_entry": true, "note": "시군구, 주택 유형, 면적, 계약 형태. 시세(관심 지역) 사건의 기준"},
     {"menu_code": "MY", "no": [3, 4, 0], "path": ["홈", "내 정보", "계정"], "type": "탭", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/my/account", "menu_entry": true, "note": "로그아웃, 탈퇴"},
-    {"menu_code": "MY", "no": [3, 5, 0], "path": ["홈", "내 정보", "알림"], "type": "탭", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/my/notifications", "note": "슬랙 수신 웹훅 주소, 알림 켜기·끄기, 시험 메시지 보내기. 켜는 것이 알림 승인"},
+    {"menu_code": "MY", "no": [3, 5, 0], "path": ["홈", "내 정보", "알림"], "type": "탭", "login": "필요", "dev": "개발", "priority": "MVP", "status": "신규", "url": "/my/notifications", "note": "팀 슬랙 이메일(기본값 로그인 이메일), 알림 켜기·끄기, 시험 메시지 보내기. 켜는 것이 알림 승인"},
 
     {"menu_code": "CP", "no": [4, 0, 0], "path": ["홈", "집 비교"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "2차", "status": "신규", "url": "/compare", "menu_entry": true, "note": "관심 주택 목록"},
     {"menu_code": "CP", "no": [4, 1, 0], "path": ["홈", "집 비교", "관심 주택 등록"], "type": "페이지", "login": "필요", "dev": "개발", "priority": "2차", "status": "신규", "url": "/compare/new", "menu_entry": true, "note": "월세·보증금·관리비(포함 항목)·주소(시군구)·주택 유형·면적 직접 입력"},

@@ -1,10 +1,6 @@
-import { planNewIncidents } from "@/incident/detect";
-import {
-  insertIncidents,
-  loadConditionOwners,
-  loadExistingKeys,
-  markUpdatedIncidents,
-} from "@/incident/create.server";
+import { planChangeIncidents } from "@/incident/detect";
+import { insertIncidents, loadConditionOwners, loadExistingKeys } from "@/incident/create.server";
+import { findNoticeChanges } from "@/incident/notice-change";
 import { draftPlans, insertPlans } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import { toKstDate } from "@/watch/kst";
@@ -58,16 +54,20 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
   await saveObservations(db, runId, collected.notices, saved, isSimulated);
   await recordStep(db, runId, { name: "compare", status: "succeeded", itemsIn: collected.notices.length, itemsOut: saved.newIds.size + saved.changedIds.size, detail: { new: saved.newIds.size, changed: saved.changedIds.size } });
 
-  const planned = planNewIncidents({
-    notices: collected.notices, owners: await loadConditionOwners(db), existingKeys: await loadExistingKeys(db),
-    today: toKstDate(now), sourceCode: MYHOME_SOURCE,
+  // FR-005, FR-006, FR-016 (spec 001 v0.2): 처음 보인 공고는 맞는 공고일 뿐, 변화만 사건이 된다
+  const today = toKstDate(now);
+  const changes = findNoticeChanges({ notices: collected.notices, ...saved, today });
+  const planned = planChangeIncidents({
+    changes, owners: await loadConditionOwners(db), existingKeys: await loadExistingKeys(db), today, sourceCode: MYHOME_SOURCE,
   });
   const drafts = await draftPlans(planned.map((plan) => plan.facts));
   const created = await insertIncidents({ db, planned, runId, sourceItemIds: saved.idByExternalId, isSimulated });
   const plans = await insertPlans(db, created, drafts);
   const newIncidents = created.length;
-  const updatedIncidents = await markUpdatedIncidents(db, saved.changedIds);
-  await recordStep(db, runId, { name: "detect", status: "succeeded", itemsIn: collected.notices.length, itemsOut: newIncidents, detail: { updated: updatedIncidents } });
+  // CollectSummary.updatedIncidents: v0.2부터는 "변화가 생긴 공고 수"(사건 수와 다를 수 있음)
+  const updatedIncidents = changes.length;
+  const byKind = Object.fromEntries(["changed", "correction", "relaxed"].map((kind) => [kind, changes.filter((c) => c.kind === kind).length]));
+  await recordStep(db, runId, { name: "detect", status: "succeeded", itemsIn: collected.notices.length, itemsOut: newIncidents, detail: { changes: byKind } });
   await recordStep(db, runId, { name: "draft_plan", status: newIncidents ? "succeeded" : "skipped", itemsIn: newIncidents, itemsOut: newIncidents, detail: { ai_drafted: plans.drafted, ai_failed: plans.failed, ai_failure_reasons: plans.failureReasons } });
   await recordStep(db, runId, { name: "await_approval", status: newIncidents ? "waiting" : "skipped", itemsOut: newIncidents });
   return { notices: collected.notices.length, newIncidents, updatedIncidents };

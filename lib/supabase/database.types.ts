@@ -1,4 +1,4 @@
-// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0005 기준)을 짧게 옮긴 것.
+// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0006 기준)을 짧게 옮긴 것.
 // 표를 바꾸면 Supabase 도구의 "generate TypeScript types"로 다시 만들어 이 파일을 바꾼다.
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -67,7 +67,7 @@ type ScheduleItemRow = {
 
 // 0005: 슬랙 알림 (ERD v1.1)
 type NotificationSettingRow = {
-  user_id: string; slack_webhook_url: string | null; enabled: boolean; enabled_at: string | null; updated_at: string;
+  user_id: string; slack_email: string | null; slack_user_id: string | null; enabled: boolean; enabled_at: string | null; updated_at: string;
 };
 
 type NotificationRow = {
@@ -127,7 +127,7 @@ export type Database = {
       >;
       notification_settings: Table<
         NotificationSettingRow,
-        Optional<NotificationSettingRow, "slack_webhook_url" | "enabled" | "enabled_at" | "updated_at">
+        Optional<NotificationSettingRow, "slack_email" | "slack_user_id" | "enabled" | "enabled_at" | "updated_at">
       >;
       notifications: Table<
         NotificationRow,

@@ -52,7 +52,7 @@ export async function insertIncidents({ db, planned, runId, sourceItemIds, isSim
     source_item_id: sourceItemIds.get(plan.externalId) ?? null,
     run_id: runId,
     dedup_key: plan.dedupKey,
-    facts: plan.facts as unknown as Json, // Notice는 JSON으로 바꿀 수 있는 값만 가진다
+    facts: plan.facts as unknown as Json, // IncidentFacts는 JSON으로 바꿀 수 있는 값만 가진다
     is_simulated: isSimulated,
   }));
   const { data, error } = await db
@@ -61,25 +61,4 @@ export async function insertIncidents({ db, planned, runId, sourceItemIds, isSim
     .select("id, facts");
   if (error) throw new Error(`사건을 만들지 못했습니다: ${error.message}`);
   return data;
-}
-
-/** FR-006 (spec 001): 신청 기간·조건이 바뀐 공고의 기존 사건에 "바뀜"을 표시하고 원문 값을 새로 쓴다 */
-export async function markUpdatedIncidents(db: AdminClient, changedItemIds: Set<string>): Promise<number> {
-  if (changedItemIds.size === 0) return 0;
-  const { data: items, error: readError } = await db
-    .from("source_items")
-    .select("id, raw")
-    .in("id", [...changedItemIds]);
-  if (readError) throw new Error(`바뀐 공고를 읽지 못했습니다: ${readError.message}`);
-  let updated = 0;
-  for (const item of items) {
-    const { data, error } = await db
-      .from("incidents")
-      .update({ is_updated: true, facts: item.raw })
-      .eq("source_item_id", item.id)
-      .select("id");
-    if (error) throw new Error(`바뀐 사건을 갱신하지 못했습니다: ${error.message}`);
-    updated += data.length;
-  }
-  return updated;
 }
