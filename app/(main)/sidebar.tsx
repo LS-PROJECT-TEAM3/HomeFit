@@ -10,7 +10,7 @@ import styles from "./main.module.css";
 type Item = { href: "/" | "/compare" | "/qc" | "/energy" | "/policy" | "/incidents" | "/knowledge" | "/schedule" | "/my/home" | "/admin"; label: string; icon: IconName };
 
 // spec 004 v0.2 FR-001: 기획안 9절 화면 7개 + 내 일정·내 정보. 화면 이름은 IA v1.4 용어
-// 관리자 화면은 사용자 메뉴에 두지 않는다(사용자 결정 2026-11-18: 관리자 전용 페이지를 따로 만든다)
+// 관리자 메뉴는 관리자에게만 보인다(사용자 결정 2026-11-18: "관리자 탭 저런 식이라면 추가해도 됨")
 const MAIN: Item[] = [
   { href: "/", label: "홈", icon: "home" },
   { href: "/compare", label: "집 비교", icon: "compare" },
@@ -24,6 +24,7 @@ const MINE: Item[] = [
   { href: "/schedule", label: "내 일정", icon: "calendar" },
   { href: "/my/home", label: "내 정보", icon: "user" },
 ];
+const ADMIN: Item = { href: "/admin", label: "관리자", icon: "shield" };
 
 function NavLink({ item, active, badge, onPick }: { item: Item; active: boolean; badge?: number; onPick: () => void }) {
   return (
@@ -43,6 +44,7 @@ export function Sidebar({ newAlerts, isAdmin }: { newAlerts: number; isAdmin: bo
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+  const mine = isAdmin ? [...MINE, ADMIN] : MINE;
   return (
     <aside className={styles.sidebar}>
       <div className={styles.sidebarTop}>
@@ -59,7 +61,7 @@ export function Sidebar({ newAlerts, isAdmin }: { newAlerts: number; isAdmin: bo
           ))}
         </ul>
         <ul className={`${styles.navList} ${styles.navMine}`}>
-          {MINE.map((item) => (
+          {mine.map((item) => (
             <NavLink key={item.href} item={item} active={isActivePath(pathname, item.href === "/my/home" ? "/my" : item.href)} onPick={close} />
           ))}
         </ul>

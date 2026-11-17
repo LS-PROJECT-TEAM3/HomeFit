@@ -1,30 +1,51 @@
 "use client";
 
+import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import styles from "./chat-widget.module.css";
 
-// spec 004 v0.2 FR-007 (사용자 요청 2026-11-18 "AI 도우미뿐만 아니라 챗봇도"): 모든 화면에 뜨는 챗봇 창의 틀.
-// 무엇을 근거로 답할지(spec 004 Q4)가 정해지기 전이라 답을 지어내지 않고 "아직 연결 전"이라고만 말한다
-type Message = { from: "me" | "bot"; text: string };
+// spec 004 v0.3 FR-007 (사용자 결정 2026-11-18): 모든 화면의 챗봇. 내 처리 기록과 공공데이터로만 답하고, 답마다 출처를 보인다
+type Source = { label: string; title: string; href?: string };
+type Message = { from: "me" | "bot"; text: string; sources?: Source[]; isMock?: boolean; failed?: boolean };
 
-const NOT_READY = "챗봇 답변은 아직 연결 전입니다. 무엇을 근거로 답할지 정한 뒤 붙입니다. 지금은 AI 도우미의 처리 기록과 공공데이터 출처를 봐 주세요.";
+const WELCOME: Message = { from: "bot", text: "안녕하세요. HomeFit 챗봇입니다. 내 알림·일정 기록과 공공데이터(마이홈 공고, 기상청 예보)로 답해 드립니다. 예: \"청년 전세임대 마감이 언제야?\"" };
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
-  const [messages, setMessages] = useState<Message[]>([{ from: "bot", text: "안녕하세요. HomeFit 챗봇입니다. 주거 지원 공고, 결로, 주거비에 대해 물어보세요." }]);
+  const [pending, setPending] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const input = useRef<HTMLInputElement>(null);
+  const list = useRef<HTMLOListElement>(null);
 
   useEffect(() => {
     if (open) input.current?.focus();
   }, [open]);
 
-  const send = () => {
+  useEffect(() => {
+    list.current?.scrollTo({ top: list.current.scrollHeight });
+  }, [messages]);
+
+  const send = async () => {
     const question = text.trim();
-    if (!question) return;
-    setMessages((prev) => [...prev, { from: "me", text: question }, { from: "bot", text: NOT_READY }]);
+    if (!question || pending) return;
+    setMessages((prev) => [...prev, { from: "me", text: question }]);
     setText("");
+    setPending(true);
+    try {
+      const response = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question }) });
+      const body = (await response.json()) as { answer?: string; sources?: Source[]; isMock?: boolean; error?: string };
+      const reply: Message = response.ok && body.answer
+        ? { from: "bot", text: body.answer, sources: body.sources ?? [], isMock: body.isMock }
+        : { from: "bot", text: body.error ?? "답을 만들지 못했습니다. 잠시 뒤 다시 물어봐 주세요.", failed: true };
+      setMessages((prev) => [...prev, reply]);
+    } catch {
+      setMessages((prev) => [...prev, { from: "bot", text: "연결이 끊겼습니다. 잠시 뒤 다시 물어봐 주세요.", failed: true }]);
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
@@ -32,21 +53,32 @@ export function ChatWidget() {
       {open ? (
         <section id="chat-panel" className={styles.panel} aria-label="HomeFit 챗봇" onKeyDown={(e) => e.key === "Escape" && setOpen(false)}>
           <header className={styles.head}>
-            <strong>HomeFit 챗봇</strong> <span className={styles.note}>(틀만 있음)</span>
+            <strong>HomeFit 챗봇</strong> <span className={styles.note}>내 기록·공공데이터로 답함</span>
             <button type="button" className={styles.close} onClick={() => setOpen(false)} aria-label="챗봇 닫기">✕</button>
           </header>
-          <ol className={styles.messages} aria-live="polite">
+          <ol ref={list} className={styles.messages} aria-live="polite">
             {messages.map((m, i) => (
               <li key={i} className={m.from === "me" ? styles.me : styles.bot}>
-                <span className={styles.who}>{m.from === "me" ? "나" : "챗봇"}</span>
+                <span className={styles.who}>{m.from === "me" ? "나" : m.isMock ? "챗봇 (시험용 mock 답)" : "챗봇"}</span>
                 {m.text}
+                {m.sources && m.sources.length > 0 ? (
+                  <ul className={styles.sources}>
+                    {m.sources.map((s, j) => (
+                      <li key={j}>
+                        <span className={styles.sourceLabel}>{s.label}</span>{" "}
+                        {s.href ? <Link href={s.href as Route}>{s.title}</Link> : s.title}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </li>
             ))}
+            {pending ? <li className={styles.bot} role="status"><span className={styles.who}>챗봇</span>기록과 공공데이터를 찾는 중…</li> : null}
           </ol>
-          <form className={styles.form} onSubmit={(e) => { e.preventDefault(); send(); }}>
+          <form className={styles.form} onSubmit={(e) => { e.preventDefault(); void send(); }}>
             <label htmlFor="chat-input" className={styles.srOnly}>질문</label>
-            <input id="chat-input" ref={input} className={styles.input} value={text} onChange={(e) => setText(e.target.value)} placeholder="예: 결로는 왜 생기나요?" maxLength={300} />
-            <button type="submit" className={styles.send}>보내기</button>
+            <input id="chat-input" ref={input} className={styles.input} value={text} onChange={(e) => setText(e.target.value)} placeholder="예: 결로 알림에 뭘 했지?" maxLength={300} />
+            <button type="submit" className={styles.send} disabled={pending}>{pending ? "…" : "보내기"}</button>
           </form>
         </section>
       ) : null}

@@ -337,7 +337,7 @@ erDiagram
 | run_id | uuid (FK runs) | | 어느 수집 실행에서 불렀나. 수집 밖(시험 메시지 등)이면 비움 | [spec 002 FR-004] |
 | provider | text: `gemini` / `claude` / `mock` | ✔ | 공급자. 나중에 `groq`·`openrouter`를 더할 수 있다 | [spec 002 FR-001] |
 | model | text | | 모델 이름. 설정이 없어 부르지 못했으면 비움 | [spec 002 FR-004] |
-| purpose | text: `application_plan` / `notice_summary` / `response_plan` | ✔ | 용도(신청 준비 계획 / 공고 요약, v1.4 / 습도·결로 대응 계획, 마이그레이션 0011). 기록 찾기·위키 챗봇이 생기면 값을 더한다 | [spec 002 FR-004] [spec 003 FR-007] |
+| purpose | text: `application_plan` / `notice_summary` / `response_plan` / `chat_answer` | ✔ | 용도(신청 준비 계획 / 공고 요약, v1.4 / 습도·결로 대응 계획, 마이그레이션 0011). 기록 찾기·위키 챗봇이 생기면 값을 더한다 | [spec 002 FR-004] [spec 003 FR-007] |
 | ok | boolean | ✔ | 성공 여부 | [spec 002 FR-004] |
 | error_kind | text: `config` / `auth` / `rate_limit` / `timeout` / `refused` / `invalid_json` / `invalid_shape` / `server` / `unknown` | | 실패 종류(성공이면 비움) | [spec 002 FR-002] |
 | attempts | integer | ✔ | 시도 횟수(한도 초과로 다시 시도한 것 포함) | [spec 002 FR-005] |
@@ -436,6 +436,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-18 | v1.6 | llm_calls.purpose에 `chat_answer`(챗봇 답변, 마이그레이션 0014) |
 | 2026-11-18 | v1.6 | policy_conditions.target_groups(대상) 추가. 사용자 결정 2026-11-18 |
 | 2026-11-17 | v1.5 | homes.maintenance_fee(월 관리비) 추가. 홈 "월 예상 주거비"(PRD v1.6 FR-13) 계산용 |
 | 2026-11-17 | v1.4 | llm_calls.purpose에 `response_plan` 추가(습도·결로 대응 계획 AI 초안, 마이그레이션 0011). 표·칸 변경 없음 |
