@@ -1,3 +1,4 @@
+import type { TargetGroup } from "@/incident/match";
 import type { ConditionOwner, PlannedIncident } from "@/incident/detect";
 import type { CreatedIncident } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
@@ -7,7 +8,7 @@ import type { Json } from "@/lib/supabase/database.types";
 export async function loadConditionOwners(db: AdminClient): Promise<ConditionOwner[]> {
   const { data, error } = await db
     .from("policy_conditions")
-    .select("user_id, sido_code, sigungu_code, supply_types, max_monthly_rent, age");
+    .select("user_id, sido_code, sigungu_code, supply_types, max_monthly_rent, age, target_groups");
   if (error) throw new Error(`사용자 조건을 읽지 못했습니다: ${error.message}`);
   return data.map((row) => ({
     userId: row.user_id,
@@ -15,6 +16,7 @@ export async function loadConditionOwners(db: AdminClient): Promise<ConditionOwn
       sidoCode: row.sido_code,
       sigunguCode: row.sigungu_code,
       supplyTypes: row.supply_types,
+      targetGroups: row.target_groups as TargetGroup[],
       maxMonthlyRent: row.max_monthly_rent,
       age: row.age,
     },

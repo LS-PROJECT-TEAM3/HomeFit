@@ -10,6 +10,8 @@ import styles from "@/app/_components/form.module.css";
 
 // 마이홈 실제 응답의 공급 유형 이름 (spec 001 Q6). "모두"가 기본값
 const SUPPLY_TYPES = ["국민임대", "행복주택", "영구임대", "공공임대", "전세임대", "매입임대"];
+// ERD policy_conditions.target_groups 값과 화면 이름 (GLOSSARY 대상)
+const TARGET_OPTIONS = [["youth", "청년·사회초년생"], ["newlywed", "신혼·신생아"], ["multichild", "다자녀"], ["elderly", "고령자"]] as const;
 
 type Props = { initial: PolicyCondition | null; next: "/" | "stay"; submitLabel: string };
 
@@ -19,6 +21,7 @@ function toInput(condition: PolicyCondition | null): ConditionFormInput {
     sidoCode: condition?.sidoCode ?? "",
     sigunguCode: condition?.sigunguCode ?? "",
     supplyTypes: condition?.supplyTypes ?? ["ALL"],
+    targetGroups: condition?.targetGroups ?? [],
     maxMonthlyRent: condition?.maxMonthlyRent?.toString() ?? "",
     age: condition?.age?.toString() ?? "",
   };
@@ -79,6 +82,17 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
             <input type="checkbox" name="supplyTypes" value={type} defaultChecked={picked.includes(type)} /> {type}
           </label>
         ))}
+      </fieldset>
+
+      {/* spec 001 v0.6 대상: 공고 제목으로 거른다. 자격 판정이 아니다 (GLOSSARY 대상) */}
+      <fieldset className={styles.checks}>
+        <legend className={styles.label}>대상 (선택)</legend>
+        {TARGET_OPTIONS.map(([value, label]) => (
+          <label key={value} className={styles.check}>
+            <input type="checkbox" name="targetGroups" value={value} defaultChecked={values.targetGroups.includes(value)} /> {label}
+          </label>
+        ))}
+        <p className={styles.help}>고르면 다른 대상만 적힌 공고(예: 신혼·신생아 전세임대)를 숨깁니다. 비우면 모두 보입니다. 자격은 공고문에서 확인해 주세요.</p>
       </fieldset>
 
       <div className={styles.field}>

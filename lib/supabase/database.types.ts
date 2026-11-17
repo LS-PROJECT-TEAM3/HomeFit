@@ -1,4 +1,4 @@
-// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0012 기준)을 짧게 옮긴 것.
+// Supabase가 만든 DB 타입(2026-11-17, 마이그레이션 0001~0013 기준)을 짧게 옮긴 것.
 // 표를 바꾸면 Supabase 도구의 "generate TypeScript types"로 다시 만들어 이 파일을 바꾼다.
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -13,7 +13,7 @@ type ProfileRow = { id: string; role: string; display_name: string | null; creat
 
 type PolicyConditionRow = {
   user_id: string; sido_code: string; sigungu_code: string | null; supply_types: string[];
-  max_monthly_rent: number | null; age: number | null; created_by: string; updated_at: string;
+  max_monthly_rent: number | null; age: number | null; created_by: string; updated_at: string; target_groups: string[];
 };
 
 // ERD homes, indoor_measurements (마이그레이션 0010, spec 003)
@@ -110,7 +110,7 @@ export type Database = {
       profiles: Table<ProfileRow, Optional<ProfileRow, "role" | "display_name" | "created_at">>;
       policy_conditions: Table<
         PolicyConditionRow,
-        Optional<PolicyConditionRow, "sigungu_code" | "supply_types" | "max_monthly_rent" | "age" | "updated_at">
+        Optional<PolicyConditionRow, "sigungu_code" | "supply_types" | "max_monthly_rent" | "age" | "target_groups" | "updated_at">
       >;
       homes: Table<HomeRow, Optional<HomeRow, "id" | "contract_type" | "deposit" | "monthly_rent" | "maintenance_fee" | "contract_end_date" | "updated_at">>;
       indoor_measurements: Table<IndoorMeasurementRow, Optional<IndoorMeasurementRow, "id" | "created_at">>;

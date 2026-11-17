@@ -10,6 +10,7 @@ import type { CreatedIncident } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import { toKstDate } from "@/watch/kst";
 import { maskSecrets } from "@/watch/mask";
+import { onlyVirtualWhenSimulating, parseVirtualUserIds } from "@/watch/simulation";
 import { fetchAllMyhomeNotices, type PageFetcher } from "@/watch/myhome.server";
 import { finishRun, recordStep, startRun, type RunTrigger } from "@/watch/run-log.server";
 import { commitSourceItems, saveSourceItems, type SavedItems } from "@/watch/source-items.server";
@@ -80,7 +81,10 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
   const today = toKstDate(now);
   const changes = findNoticeChanges({ notices: collected.notices, ...saved, today });
   const planned = planChangeIncidents({
-    changes, owners: await loadConditionOwners(db), existingKeys: await loadExistingKeys(db), today, sourceCode: MYHOME_SOURCE,
+    changes,
+    // 사용자 결정(2026-11-18): 시뮬레이션은 가상 계정에만
+    owners: onlyVirtualWhenSimulating(await loadConditionOwners(db), trigger, parseVirtualUserIds(process.env.SIMULATION_USER_IDS)),
+    existingKeys: await loadExistingKeys(db), today, sourceCode: MYHOME_SOURCE,
     follows: await loadFollows(db, MYHOME_SOURCE), // spec 001 v0.5: 팔로우한 공고만
   });
   // spec 002 FR-006: 한 번 수집의 AI 호출 상한·대기 예산

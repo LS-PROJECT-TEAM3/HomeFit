@@ -1,10 +1,12 @@
-import { ALL_SUPPLY_TYPES, type PolicyCondition } from "@/incident/match";
+import { ALL_SUPPLY_TYPES, TARGET_GROUPS, type PolicyCondition, type TargetGroup } from "@/incident/match";
 import { isKnownSidoCode } from "@/watch/sido";
 
 export type ConditionFormInput = {
   sidoCode: string;
   sigunguCode: string;
   supplyTypes: readonly string[];
+  /** spec 001 v0.6 대상(체크한 것만). 비우면 모두 */
+  targetGroups: readonly string[];
   maxMonthlyRent: string;
   age: string;
 };
@@ -62,6 +64,8 @@ export function parseConditionForm(input: ConditionFormInput): ConditionFormResu
       supplyTypes: normalizeSupplyTypes(input.supplyTypes),
       maxMonthlyRent: rent,
       age,
+      // 목록 밖 값은 버린다(DB도 막는다, 마이그레이션 0013)
+      targetGroups: [...new Set(input.targetGroups)].filter((group): group is TargetGroup => (TARGET_GROUPS as readonly string[]).includes(group)),
     },
   };
 }

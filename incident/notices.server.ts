@@ -1,5 +1,6 @@
+import { isSimulatedNotice, parseVirtualUserIds } from "@/watch/simulation";
 import { listMatchedNotices, type FollowDecision, type MatchedNotice } from "@/incident/matched";
-import type { PolicyCondition } from "@/incident/match";
+import type { PolicyCondition, TargetGroup } from "@/incident/match";
 import { createClient, requireUserId } from "@/lib/supabase/server";
 import type { Notice } from "@/watch/notice";
 
@@ -16,12 +17,12 @@ async function myCondition(userId: string): Promise<PolicyCondition | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("policy_conditions")
-    .select("sido_code, sigungu_code, supply_types, max_monthly_rent, age")
+    .select("sido_code, sigungu_code, supply_types, max_monthly_rent, age, target_groups")
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error("조건을 불러오지 못했습니다.");
   if (!data) return null;
-  return { sidoCode: data.sido_code, sigunguCode: data.sigungu_code, supplyTypes: data.supply_types, maxMonthlyRent: data.max_monthly_rent, age: data.age };
+  return { sidoCode: data.sido_code, sigunguCode: data.sigungu_code, supplyTypes: data.supply_types, maxMonthlyRent: data.max_monthly_rent, age: data.age, targetGroups: data.target_groups as TargetGroup[] };
 }
 
 export type MatchedResult = { hasCondition: boolean; items: MatchedNotice[] };
@@ -39,11 +40,16 @@ export async function listMyMatchedNotices(today: string): Promise<MatchedResult
     .from("source_items")
     .select("raw")
     .eq("source_code", "myhome_notice")
-    .eq("sido_code", condition.sidoCode)
+    // spec 001 v0.6: 전세임대(시군구 없음)는 전국 공고라 시도와 상관없이 가져와 matchesCondition이 고른다
+    .or(`sido_code.eq.${condition.sidoCode},supply_type.eq.전세임대`)
     .or(`apply_end.is.null,apply_end.gte.${daysBefore(today, EXPIRED_DAYS_SHOWN)}`)
     .limit(1000);
   if (error) throw new Error("맞는 공고를 불러오지 못했습니다.");
-  const notices = data.map((row) => row.raw as unknown as Notice); // raw는 Notice로 저장했다 (watch/source-items.server.ts)
+  // 사용자 결정(2026-11-18): 실제 계정에는 가짜 공고(SIM-)를 보이지 않는다. 가상 계정만 본다
+  const virtual = parseVirtualUserIds(process.env.SIMULATION_USER_IDS).has(userId);
+  const notices = data
+    .map((row) => row.raw as unknown as Notice) // raw는 Notice로 저장했다 (watch/source-items.server.ts)
+    .filter((notice) => virtual || !isSimulatedNotice(notice.externalId));
   // FR-020 (spec 001 v0.5): 내 팔로우·관심 없음
   const follows = await supabase.from("notice_follows").select("announcement_id, decision").eq("user_id", userId).eq("source_code", "myhome_notice");
   if (follows.error) throw new Error("맞는 공고를 불러오지 못했습니다.");

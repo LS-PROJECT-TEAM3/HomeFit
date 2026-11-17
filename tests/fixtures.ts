@@ -29,6 +29,7 @@ export function makeCondition(overrides: Partial<PolicyCondition> = {}): PolicyC
     supplyTypes: ["ALL"],
     maxMonthlyRent: 300000,
     age: 26,
+    targetGroups: [],
     ...overrides,
   };
 }

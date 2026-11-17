@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { parseConditionForm } from "@/incident/condition-form";
 
 // FR-002 (spec 001): 조건 입력 검사. 오류 문구는 "무엇이 안 됐는지 + 할 일" (.claude/rules/code.md 오류 처리)
-const valid = { sidoCode: "11", sigunguCode: "", supplyTypes: ["ALL"], maxMonthlyRent: "", age: "" };
+const valid = { sidoCode: "11", sigunguCode: "", supplyTypes: ["ALL"], maxMonthlyRent: "", age: "", targetGroups: [] as string[] };
 
 describe("parseConditionForm", () => {
   it("시도만 고르면 저장할 값이 된다. 공급 유형은 '모두'", () => {
     expect(parseConditionForm({ ...valid, supplyTypes: [] })).toEqual({
       ok: true,
-      value: { sidoCode: "11", sigunguCode: null, supplyTypes: ["ALL"], maxMonthlyRent: null, age: null },
+      value: { sidoCode: "11", sigunguCode: null, supplyTypes: ["ALL"], maxMonthlyRent: null, age: null, targetGroups: [] },
     });
   });
 
@@ -68,5 +68,13 @@ describe("parseConditionForm", () => {
   it("여러 칸이 틀리면 칸마다 문구를 준다", () => {
     const result = parseConditionForm({ ...valid, sidoCode: "", maxMonthlyRent: "-5" });
     expect(!result.ok && Object.keys(result.errors).sort()).toEqual(["maxMonthlyRent", "sidoCode"]);
+  });
+});
+
+// spec 001 v0.6: 대상은 목록 안의 값만, 겹치면 하나로
+describe("parseConditionForm 대상", () => {
+  it("youth만 고르면 youth, 목록 밖 값은 버림", () => {
+    const result = parseConditionForm({ ...valid, targetGroups: ["youth", "youth", "castle"] });
+    expect(result.ok && result.value.targetGroups).toEqual(["youth"]);
   });
 });

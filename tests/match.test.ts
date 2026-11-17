@@ -78,3 +78,37 @@ describe("matchesCondition", () => {
     expect(matchesCondition(makeNotice({ applyEnd: null }), makeCondition(), today)).toBe(true);
   });
 });
+
+// spec 001 v0.6 FR-005 (사용자 결정 2026-11-18)
+describe("matchesCondition 전세임대 전국 공고", () => {
+  const youthJeonse = makeNotice({ title: "2026년 청년 전세임대 1순위 입주자 수시모집", sidoCode: "11", sigunguCode: null, supplyType: "전세임대", monthlyRent: null });
+  it("전세임대이고 시군구가 없으면 다른 시도 조건에도 맞는다", () => {
+    expect(matchesCondition(youthJeonse, makeCondition({ sidoCode: "30", sigunguCode: "30200" }), today)).toBe(true);
+  });
+  it("전세임대라도 시군구가 있으면 지금처럼 지역으로", () => {
+    const local = { ...youthJeonse, sigunguCode: "11680" };
+    expect(matchesCondition(local, makeCondition({ sidoCode: "30", sigunguCode: null }), today)).toBe(false);
+  });
+  it("다른 유형(국민임대)은 지금처럼 시도로", () => {
+    const national = { ...youthJeonse, supplyType: "국민임대" };
+    expect(matchesCondition(national, makeCondition({ sidoCode: "30", sigunguCode: null }), today)).toBe(false);
+  });
+});
+
+describe("matchesCondition 대상", () => {
+  const condition = makeCondition({ sidoCode: "11", sigunguCode: null, targetGroups: ["youth"] });
+  const titled = (title: string) => makeNotice({ title, sigunguCode: null });
+  it("청년을 고르면 신혼·신생아·다자녀·고령자만 적힌 공고는 숨김", () => {
+    expect(matchesCondition(titled("2026년 신혼·신생아 전세임대 I 입주자 수시모집 공고"), condition, today)).toBe(false);
+    expect(matchesCondition(titled("2026 다자녀 전세임대 입주자 수시모집 공고"), condition, today)).toBe(false);
+    expect(matchesCondition(titled("인제서화 고령자복지주택(국민임대) 추가 입주자 모집"), condition, today)).toBe(false);
+  });
+  it("청년이 적혔거나(여럿 함께 포함) 대상 낱말이 없으면 보임", () => {
+    expect(matchesCondition(titled("2026년 청년 전세임대 1순위 입주자 수시모집"), condition, today)).toBe(true);
+    expect(matchesCondition(titled("[청년신혼부부매입임대리츠주택] 입주자격완화"), condition, today)).toBe(true);
+    expect(matchesCondition(titled("대전광역시 유성구 국민임대 예비입주자모집공고"), condition, today)).toBe(true);
+  });
+  it("대상을 고르지 않으면(빈 목록) 모두 보임", () => {
+    expect(matchesCondition(titled("2026년 신혼·신생아 전세임대 I"), makeCondition({ sidoCode: "11", sigunguCode: null, targetGroups: [] }), today)).toBe(true);
+  });
+});

@@ -56,6 +56,7 @@ erDiagram
 | sigungu_code | text | | 시군구 코드. 비면 시도 전체 | [IA MY_030100_TB] |
 | supply_types | text[] | ✔ | 공급 유형. 기본값 "모두". 값 목록은 마이홈 응답 확인 뒤 정함 (Q6) | [PRD FR-02] [CUJ-01 명세 1단계] |
 | max_monthly_rent | integer (원) | | 월 임대료 상한. 0 이상 | [PRD FR-02] |
+| target_groups | text[]: `youth` / `newlywed` / `multichild` / `elderly` | ✔ | 대상(기본 빈 목록 = 모두). 공고 제목의 대상 낱말로 맞춤 공고를 거른다(v1.6, 마이그레이션 0013) | [PRD FR-02 v1.7] [GLOSSARY 대상] |
 | age | integer | | 나이. 정책 조건 비교용 | [IA MY_030100_TB] |
 | created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
 | updated_at | timestamptz | ✔ | 마지막 저장 시각 | [평가항목 P3-10] |
@@ -435,6 +436,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-18 | v1.6 | policy_conditions.target_groups(대상) 추가. 사용자 결정 2026-11-18 |
 | 2026-11-17 | v1.5 | homes.maintenance_fee(월 관리비) 추가. 홈 "월 예상 주거비"(PRD v1.6 FR-13) 계산용 |
 | 2026-11-17 | v1.4 | llm_calls.purpose에 `response_plan` 추가(습도·결로 대응 계획 AI 초안, 마이그레이션 0011). 표·칸 변경 없음 |
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |

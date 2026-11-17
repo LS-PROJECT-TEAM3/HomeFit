@@ -21,6 +21,7 @@ function readForm(formData: FormData): ConditionFormInput {
     sidoCode: String(formData.get("sidoCode") ?? ""),
     sigunguCode: String(formData.get("sigunguCode") ?? ""),
     supplyTypes: formData.getAll("supplyTypes").map(String),
+    targetGroups: formData.getAll("targetGroups").map(String),
     maxMonthlyRent: String(formData.get("maxMonthlyRent") ?? ""),
     age: String(formData.get("age") ?? ""),
   };
@@ -41,6 +42,7 @@ export async function saveConditions(_prev: ConditionState, formData: FormData):
     sido_code: parsed.value.sidoCode,
     sigungu_code: parsed.value.sigunguCode,
     supply_types: [...parsed.value.supplyTypes],
+    target_groups: [...parsed.value.targetGroups],
     max_monthly_rent: parsed.value.maxMonthlyRent,
     age: parsed.value.age,
     created_by: userId,

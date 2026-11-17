@@ -12,6 +12,7 @@ import type { AdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
 import type { ForecastFetcher } from "@/watch/kma.server";
 import { maskSecrets } from "@/watch/mask";
+import { onlyVirtualWhenSimulating, parseVirtualUserIds } from "@/watch/simulation";
 import { finishRun, recordStep, startRun, type RunTrigger } from "@/watch/run-log.server";
 import { collectForecasts, type Collected } from "@/watch/weather-collect";
 
@@ -84,7 +85,8 @@ function maskFailures(failed: Collected["failed"]): Json {
 async function runSteps(input: CollectInput, runId: string): Promise<Omit<WeatherSummary, "runId" | "status">> {
   const { db, fetchForecast, trigger, now } = input;
   const isSimulated = trigger === "simulation";
-  const homes = await loadHomesForCheck(db, now);
+  // 사용자 결정(2026-11-18): 시뮬레이션(가짜 예보)은 가상 계정의 집에만
+  const homes = onlyVirtualWhenSimulating(await loadHomesForCheck(db, now), trigger, parseVirtualUserIds(process.env.SIMULATION_USER_IDS));
   if (homes.length === 0) {
     await recordStep(db, runId, { name: "collect", status: "skipped", itemsIn: 0, itemsOut: 0, detail: { reason: "읽을 집 없음" } });
     return { sigungu: 0, newIncidents: 0, updatedIncidents: 0 };
