@@ -1,0 +1,85 @@
+import { describe, expect, it } from "vitest";
+import { parseHomeForm, parseMeasurementForm } from "@/incident/home-form";
+
+// FR-001, FR-002 (spec 003): 내 집·측정값 입력 검사. 오류 문구는 "무엇이 안 됐는지 + 할 일"
+const home = { sidoCode: "30", sigunguCode: "30200", housingType: "officetel", exclusiveArea: "20", windowType: "unknown" };
+
+describe("parseHomeForm", () => {
+  it("네 칸만 넣어도 저장할 값이 된다. 창 '모름' 허용", () => {
+    expect(parseHomeForm(home)).toEqual({
+      ok: true,
+      value: { sigunguCode: "30200", housingType: "officetel", exclusiveAreaM2: 20, windowType: "unknown" },
+    });
+  });
+
+  it("면적은 소수와 앞뒤 공백을 읽는다", () => {
+    const result = parseHomeForm({ ...home, exclusiveArea: " 25.5 " });
+    expect(result.ok && result.value.exclusiveAreaM2).toBe(25.5);
+  });
+
+  it("면적 0, 301, 글자는 거부하고 할 일을 알려 준다", () => {
+    for (const exclusiveArea of ["0", "301", "스무평", ""]) {
+      const result = parseHomeForm({ ...home, exclusiveArea });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.errors.exclusiveArea).toBe("전용면적은 1~300㎡ 사이 숫자로 입력해 주세요. 예: 20");
+    }
+  });
+
+  it("면적 1과 300은 허용", () => {
+    expect(parseHomeForm({ ...home, exclusiveArea: "1" }).ok).toBe(true);
+    expect(parseHomeForm({ ...home, exclusiveArea: "300" }).ok).toBe(true);
+  });
+
+  it("시군구가 없거나 시도와 안 맞으면 거부", () => {
+    expect(parseHomeForm({ ...home, sigunguCode: "" })).toMatchObject({ ok: false, errors: { sigunguCode: expect.stringContaining("시군구") } });
+    expect(parseHomeForm({ ...home, sigunguCode: "11110" })).toMatchObject({ ok: false, errors: { sigunguCode: expect.any(String) } });
+  });
+
+  it("시도가 비어 있으면 시군구도 거부(리뷰 4번)", () => {
+    expect(parseHomeForm({ ...home, sidoCode: "" })).toMatchObject({ ok: false, errors: { sigunguCode: expect.any(String) } });
+  });
+
+  it("주택 유형·창 종류가 목록 밖이면 거부", () => {
+    expect(parseHomeForm({ ...home, housingType: "castle" }).ok).toBe(false);
+    expect(parseHomeForm({ ...home, windowType: "triple" }).ok).toBe(false);
+  });
+});
+
+describe("parseMeasurementForm", () => {
+  const now = new Date("2026-11-18T09:00:00+09:00");
+  const input = { temperature: "22", humidity: "65", measuredAt: "2026-11-18T08:30" };
+
+  it("온도·습도·측정 시각(KST 입력)을 저장할 값으로", () => {
+    expect(parseMeasurementForm(input, now)).toEqual({
+      ok: true,
+      value: { temperatureC: 22, humidityPct: 65, measuredAt: "2026-11-17T23:30:00.000Z" },
+    });
+  });
+
+  it("온도 -10과 45, 습도 0과 100은 허용", () => {
+    expect(parseMeasurementForm({ ...input, temperature: "-10", humidity: "0" }, now).ok).toBe(true);
+    expect(parseMeasurementForm({ ...input, temperature: "45", humidity: "100" }, now).ok).toBe(true);
+  });
+
+  it("온도 -11·46, 습도 -1·101은 허용 범위를 알려 주며 거부", () => {
+    for (const temperature of ["-11", "46", "따뜻"]) {
+      const result = parseMeasurementForm({ ...input, temperature }, now);
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.errors.temperature).toBe("실내 온도는 -10~45°C 사이로 입력해 주세요.");
+    }
+    for (const humidity of ["-1", "101", ""]) {
+      const result = parseMeasurementForm({ ...input, humidity }, now);
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.errors.humidity).toBe("실내 습도는 0~100% 사이로 입력해 주세요.");
+    }
+  });
+
+  it("측정 시각이 지금보다 늦거나 형식이 틀리면 거부", () => {
+    const future = parseMeasurementForm({ ...input, measuredAt: "2026-11-18T09:01" }, now);
+    expect(future.ok).toBe(false);
+    if (!future.ok) expect(future.errors.measuredAt).toBe("측정 시각은 지금보다 늦을 수 없습니다.");
+    const broken = parseMeasurementForm({ ...input, measuredAt: "어제" }, now);
+    expect(broken.ok).toBe(false);
+    if (!broken.ok) expect(broken.errors.measuredAt).toBe("측정 시각 형식이 맞지 않습니다. 2026-11-18 08:30처럼 입력해 주세요.");
+  });
+});

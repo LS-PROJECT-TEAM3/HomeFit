@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { normalizeMyhomeItem, parseMyhomeResponse, sidoCodeFromName } from "@/watch/myhome";
+import { isKnownSidoCode } from "@/watch/sido";
 
 // 2026-11-17 실제 응답에서 남긴 시험 자료 (watch/fixtures/myhome-sample.json)
 const sample = JSON.parse(readFileSync("watch/fixtures/myhome-sample.json", "utf-8"));
@@ -73,12 +74,22 @@ describe("sidoCodeFromName", () => {
     ["전북특별자치도", "52"],
     ["전라북도", "52"],
     ["제주특별자치도", "50"],
+    // 리뷰 2번(spec 003 1단계): 광주·전남은 전남광주통합특별시(12)로 합쳐졌다. 법정동 API도 29·46에 "데이터없음"
+    ["전남광주통합특별시", "12"],
+    ["광주광역시", "12"],
+    ["전라남도", "12"],
   ])("%s → %s", (name, code) => {
     expect(sidoCodeFromName(name)).toBe(code);
   });
 
   it("모르는 이름은 null", () => {
     expect(sidoCodeFromName("없는도")).toBeNull();
+  });
+
+  it("시도 목록에 옛 코드 29·46은 없고 12가 있다", () => {
+    expect(isKnownSidoCode("12")).toBe(true);
+    expect(isKnownSidoCode("29")).toBe(false);
+    expect(isKnownSidoCode("46")).toBe(false);
   });
 });
 
