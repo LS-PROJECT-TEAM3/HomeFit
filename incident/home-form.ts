@@ -6,7 +6,8 @@ export const HOUSING_TYPES = ["apartment", "officetel", "row_house", "detached"]
 export type HousingType = (typeof HOUSING_TYPES)[number];
 export const WINDOW_TYPES: readonly WindowType[] = ["single", "double", "unknown"];
 
-export type HomeFormInput = { sidoCode: string; sigunguCode: string; housingType: string; exclusiveArea: string; windowType: string };
+/** areaUnit: "m2" | "pyeong" (사용자 요청 2026-11-17: 평으로도 입력). 저장은 늘 ㎡ */
+export type HomeFormInput = { sidoCode: string; sigunguCode: string; housingType: string; exclusiveArea: string; areaUnit: string; windowType: string };
 export type HomeValue = { sigunguCode: string; housingType: HousingType; exclusiveAreaM2: number; windowType: WindowType };
 type HomeField = "sigunguCode" | "housingType" | "exclusiveArea" | "windowType";
 export type HomeFormResult = { ok: true; value: HomeValue } | { ok: false; errors: Partial<Record<HomeField, string>> };
@@ -20,6 +21,7 @@ const MESSAGES = {
   sigungu: "시군구를 골라 주세요. 날씨 예보를 읽을 지역입니다.",
   housingType: "주택 유형을 목록에서 골라 주세요.",
   area: "전용면적은 1~300㎡ 사이 숫자로 입력해 주세요. 예: 20",
+  areaPyeong: "전용면적은 0.3~90.7평 사이 숫자로 입력해 주세요. 예: 6",
   windowType: "창 종류를 골라 주세요. 모르면 '모름'을 고르면 됩니다.",
   temperature: "실내 온도는 -10~45°C 사이로 입력해 주세요.",
   humidity: "실내 습도는 0~100% 사이로 입력해 주세요.",
@@ -33,6 +35,16 @@ function toNumber(raw: string): number {
   return /^-?\d+(\.\d+)?$/.test(text) ? Number(text) : Number.NaN;
 }
 
+// 1평 = 400/121㎡ (계량에 관한 법률 시행령의 환산)
+const SQUARE_METERS_PER_PYEONG = 400 / 121;
+
+/** 입력 면적 → ㎡(소수 둘째 자리). 숫자가 아니면 NaN */
+function toSquareMeters(raw: string, unit: string): number {
+  const value = toNumber(raw);
+  if (unit !== "pyeong") return value;
+  return Math.round(value * SQUARE_METERS_PER_PYEONG * 100) / 100;
+}
+
 function inRange(value: number, min: number, max: number): boolean {
   return !Number.isNaN(value) && value >= min && value <= max;
 }
@@ -43,8 +55,8 @@ export function parseHomeForm(input: HomeFormInput): HomeFormResult {
   // 시도가 비면 startsWith("")가 늘 참이라 따로 막는다(리뷰 4번)
   if (input.sidoCode === "" || !/^\d{5}$/.test(sigungu) || !sigungu.startsWith(input.sidoCode)) errors.sigunguCode = MESSAGES.sigungu;
   if (!(HOUSING_TYPES as readonly string[]).includes(input.housingType)) errors.housingType = MESSAGES.housingType;
-  const area = toNumber(input.exclusiveArea);
-  if (!inRange(area, 1, 300)) errors.exclusiveArea = MESSAGES.area;
+  const area = toSquareMeters(input.exclusiveArea, input.areaUnit);
+  if (!inRange(area, 1, 300)) errors.exclusiveArea = input.areaUnit === "pyeong" ? MESSAGES.areaPyeong : MESSAGES.area;
   if (!(WINDOW_TYPES as readonly string[]).includes(input.windowType)) errors.windowType = MESSAGES.windowType;
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return {

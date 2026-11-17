@@ -7,3 +7,8 @@ const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 export function toKstDate(now: Date): string {
   return new Date(now.getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
 }
+
+/** 한국 시각 "YYYY-MM-DDTHH:mm"(화면 datetime-local 칸 값). spec 003 FR-002 */
+export function toKstDateTime(at: Date): string {
+  return new Date(at.getTime() + KST_OFFSET_MS).toISOString().slice(0, 16);
+}

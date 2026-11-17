@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseHomeForm, parseMeasurementForm } from "@/incident/home-form";
 
 // FR-001, FR-002 (spec 003): 내 집·측정값 입력 검사. 오류 문구는 "무엇이 안 됐는지 + 할 일"
-const home = { sidoCode: "30", sigunguCode: "30200", housingType: "officetel", exclusiveArea: "20", windowType: "unknown" };
+const home = { sidoCode: "30", sigunguCode: "30200", housingType: "officetel", exclusiveArea: "20", areaUnit: "m2", windowType: "unknown" };
 
 describe("parseHomeForm", () => {
   it("네 칸만 넣어도 저장할 값이 된다. 창 '모름' 허용", () => {
@@ -23,6 +23,23 @@ describe("parseHomeForm", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) expect(result.errors.exclusiveArea).toBe("전용면적은 1~300㎡ 사이 숫자로 입력해 주세요. 예: 20");
     }
+  });
+
+  it("평으로 넣으면 ㎡로 바꿔 저장한다(1평 = 400/121㎡, 소수 둘째 자리) — 사용자 요청 2026-11-17", () => {
+    const result = parseHomeForm({ ...home, exclusiveArea: "10", areaUnit: "pyeong" });
+    expect(result.ok && result.value.exclusiveAreaM2).toBe(33.06);
+  });
+
+  it("평 범위는 ㎡ 1~300과 같고 문구도 평으로", () => {
+    const tooBig = parseHomeForm({ ...home, exclusiveArea: "91", areaUnit: "pyeong" });
+    expect(tooBig.ok).toBe(false);
+    if (!tooBig.ok) expect(tooBig.errors.exclusiveArea).toBe("전용면적은 0.3~90.7평 사이 숫자로 입력해 주세요. 예: 6");
+    expect(parseHomeForm({ ...home, exclusiveArea: "90", areaUnit: "pyeong" }).ok).toBe(true);
+  });
+
+  it("모르는 단위는 ㎡로 본다", () => {
+    const result = parseHomeForm({ ...home, exclusiveArea: "20", areaUnit: "" });
+    expect(result.ok && result.value.exclusiveAreaM2).toBe(20);
   });
 
   it("면적 1과 300은 허용", () => {

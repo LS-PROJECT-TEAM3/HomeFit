@@ -37,3 +37,19 @@
   border-radius: var(--radius-card);
   padding: var(--space-2);
 }
+
+/* spec 003 내 집 화면: 측정값 목록과 안내 */
+.section + .section {
+  margin-top: var(--space-2);
+}
+
+.list {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-2);
+  line-height: 1.7;
+}
+
+.note {
+  margin-top: var(--space-2);
+  color: var(--color-muted-text);
+}

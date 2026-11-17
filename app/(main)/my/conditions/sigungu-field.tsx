@@ -13,8 +13,11 @@ function loadOf(sidoCode: string, result: Result | null): Load {
   return result.items ? { state: "ready", items: result.items } : { state: "failed" };
 }
 
+type Props = { sidoCode: string; initial: string; error?: string; label?: string; emptyLabel?: string };
+
 // FR-002 (spec 001 v0.3): 고른 시도에 속한 시군구만 고른다. 비우면 "시도 전체"
-export function SigunguField({ sidoCode, initial, error }: { sidoCode: string; initial: string; error?: string }) {
+// spec 003 FR-001: 내 집 화면도 같이 쓴다(시군구 필수라 이름표만 바꿈)
+export function SigunguField({ sidoCode, initial, error, label = "시군구 (선택)", emptyLabel = "시도 전체" }: Props) {
   const [result, setResult] = useState<Result | null>(null);
   const [value, setValue] = useState(initial);
   const load = loadOf(sidoCode, result);
@@ -41,11 +44,11 @@ export function SigunguField({ sidoCode, initial, error }: { sidoCode: string; i
   const items = load.state === "ready" ? load.items : [];
   return (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor="sigunguCode">시군구 (선택)</label>
+      <label className={styles.label} htmlFor="sigunguCode">{label}</label>
       <select id="sigunguCode" name="sigunguCode" value={shown} onChange={(e) => setValue(e.target.value)}
         className={styles.input} disabled={load.state !== "ready"}
         aria-invalid={Boolean(error)} aria-describedby="sigunguCode-help sigunguCode-error">
-        <option value="">시도 전체</option>
+        <option value="">{emptyLabel}</option>
         {items.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}
       </select>
       {/* 목록을 못 불러와 칸이 잠겨도 저장된 값은 그대로 보낸다 */}
