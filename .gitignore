@@ -16,3 +16,13 @@ _workspace/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Next.js·npm (create-next-app 기본값에서 가져옴)
+/.next/
+/out/
+/build
+/coverage
+*.pem
+npm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
