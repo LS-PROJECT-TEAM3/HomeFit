@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-17 (v1.2, 승인 2026-11-17)
+- 최종 갱신: 2026-11-17 (v1.3, spec 002 승인과 함께 2026-11-17)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -310,6 +310,23 @@ erDiagram
 | sent_at | timestamptz | | 보낸 시각 | [PRD FR-37] |
 | created_at | timestamptz | ✔ | | |
 
+#### llm_calls — AI 호출 기록 (spec 002)
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| id | uuid (PK) | ✔ | | [spec 002 FR-004] |
+| run_id | uuid (FK runs) | | 어느 수집 실행에서 불렀나. 수집 밖(시험 메시지 등)이면 비움 | [spec 002 FR-004] |
+| provider | text: `gemini` / `claude` / `mock` | ✔ | 공급자. 나중에 `groq`·`openrouter`를 더할 수 있다 | [spec 002 FR-001] |
+| model | text | | 모델 이름. 설정이 없어 부르지 못했으면 비움 | [spec 002 FR-004] |
+| purpose | text: `application_plan` | ✔ | 용도(신청 준비 계획). 기록 찾기·위키 챗봇이 생기면 값을 더한다 | [spec 002 FR-004] |
+| ok | boolean | ✔ | 성공 여부 | [spec 002 FR-004] |
+| error_kind | text: `config` / `auth` / `rate_limit` / `timeout` / `refused` / `invalid_json` / `invalid_shape` / `server` / `unknown` | | 실패 종류(성공이면 비움) | [spec 002 FR-002] |
+| attempts | integer | ✔ | 시도 횟수(한도 초과로 다시 시도한 것 포함) | [spec 002 FR-005] |
+| latency_ms | integer | ✔ | 처음 부른 때부터 끝날 때까지(기다린 시간 포함) | [spec 002 FR-004] |
+| input_tokens, output_tokens | integer | | 공급자가 알려 준 토큰 수. 모르면 비움 | [spec 002 FR-004] |
+| created_at | timestamptz | ✔ | | |
+
+보낸 글·받은 글·키는 저장하지 않는다(spec 002 FR-004, FR-008). 오류 설명은 실행 기록에 가린 뒤 남긴다.
+
 ## 화면별로 읽고 쓰는 표 (IA MVP 화면)
 | 화면 ID | 화면 | 읽는 표 | 쓰는 표 | PRD |
 |---|---|---|---|---|
@@ -366,6 +383,7 @@ erDiagram
 | audit_logs | 볼 수 없음 | 추가·읽기. 수정·삭제 불가 | |
 | wiki_chunks, chat_logs | 볼 수 없음 | 챗봇 사용, 내 질문 기록 | 위키 반영 |
 | eval_results | 볼 수 없음 | 읽기 | 쓰기 |
+| llm_calls | 볼 수 없음 | 읽기 | 쓰기 |
 
 - 서버 키(service role)는 서버 환경변수에만 둔다(FR-27). 화면 코드에는 공개 키만 쓴다.
 - 이 규칙은 화면, 서버 API, DB 세 곳에서 모두 확인한다(P3-14, 예외 경로 E4).
@@ -397,5 +415,6 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |
 | 2026-11-17 | v1.0 | 승인 |
+| 2026-11-17 | v1.3 | llm_calls 표 추가(spec 002 AI 호출 기록) |
 | 2026-11-17 | v1.2 | notification_settings: slack_webhook_url를 빼고 slack_email·slack_user_id(PRD v1.3, 팀 슬랙 봇 DM) |
 | 2026-11-17 | v1.1 | 사건 정의 변경(PRD v1.2): notification_settings·notifications 표 추가, source_items에 complex_key·previous_values, incidents.dedup_key·facts 설명 변경, run_steps에 notify 단계, source_items를 로그인 사용자도 읽게 함. 마이홈 응답에서 hsmpNm·sttusNm·beforePblancId 칸을 확인해 complex_key·status_name·before_external_id 추가 |
