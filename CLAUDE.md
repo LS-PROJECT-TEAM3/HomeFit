@@ -60,6 +60,7 @@
 - 시험: `npm test` (Vitest). 함께: `npx tsc --noEmit`, `npm run lint`, `npm run build`
 - 화면 확인: `.claude/launch.json`의 `homefit-web` 서버 (`npm run dev`, 포트 3000). 세션을 다른 폴더에서 열었으면 이름으로 켤 때 그 폴더의 서버가 켜질 수 있으니, 이미 켜 둔 http://localhost:3000 을 직접 연다
 - 수집 손으로 돌리기(개발): `Authorization: Bearer <CRON_SECRET>`를 붙여 `/api/cron/myhome` 호출. 가짜 공고는 `?fixture=sample|changed|malformed|failure|bulk|fresh`
+- AI 공급자: `.env.local`의 `AI_PROVIDER`(gemini/claude/mock). 시험은 mock만, 호출 기록은 DB `llm_calls`
 
 ## 디자인
 기본선은 `.claude/rules/design.md`. 여기에는 이 프로젝트의 취향만 적는다.

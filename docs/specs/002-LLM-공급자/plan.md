@@ -16,7 +16,7 @@ AI 호출을 "공통 요청 → 공급자 → 공통 답" 하나의 길로 모�
 |---|---|---|---|---|
 | Gemini 호출 | REST `POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`, 헤더 `x-goog-api-key`, `fetch` | (플랫폼) | 새 라이브러리 없음. 답의 토큰은 `usageMetadata.promptTokenCount`·`candidatesTokenCount`, 끝난 이유는 `candidates[].finishReason`(문서 확인) | `@google/genai` SDK(같은 일을 하는 SDK를 둘 들이지 않는다), Interactions API(`/v1beta/interactions`, 문서 예제는 이쪽이지만 헤더 `Api-Revision`이 붙는 새 API라 안정성을 키로 먼저 확인) |
 | Gemini 모델 | `GEMINI_MODEL` 환경변수, 기본값 `gemini-3.5-flash-lite` | 2026-11-17 문서의 안정판 | 문서가 "가장 빠르고 싼 3.5 모델", 새 프로젝트에 권장. 무료 한도는 문서에 숫자가 없어 AI Studio에서 키로 확인(Q22) | `gemini-2.5-flash`(지원 종료 예정) |
-| Gemini JSON | `generationConfig.responseMimeType: "application/json"` + `responseJsonSchema` | | spec FR-003. 이 칸 이름은 문서 요약으로만 확인해, 1단계에서 실제 키로 한 번 불러 확정하고 1절을 고친다 | |
+| Gemini JSON | `generationConfig.responseMimeType: "application/json"` + `responseJsonSchema` | | spec FR-003. **2026-11-17 실제 키로 확인**: generateContent 200, finishReason STOP, JSON이 스키마 모양대로, 토큰은 `usageMetadata.promptTokenCount`·`candidatesTokenCount`, 키의 모델 목록에 `gemini-3.5-flash-lite` 있음 | |
 | Claude 호출 | `@anthropic-ai/sdk` | 1.9.0 (설치됨) | 지금 코드 그대로(`output_config.format` JSON 스키마, effort low) | |
 | 시험 | Vitest | 5.1.0 | 공급자는 `fetch`·SDK 호출 함수를 인자로 받아 가짜로 바꾼다. 실제 네트워크 0 | |
 
@@ -85,7 +85,7 @@ lib/llm/
 - [~] 가짜 수집으로 SC-001(확인). SC-003·008은 mock 실패·상한을 개발 서버에서 흉내 낼 방법이 없어 함수 시험으로만, SC-004는 .env.local을 바꿔야 해 4단계에서
 
 ### 4단계 작업
-- [ ] 실제 Gemini 키로 한 번 불러 JSON 칸 이름·토큰·429 모양 확인, 1절 고침
+- [x] 실제 Gemini 키로 한 번 불러 JSON 칸 이름·토큰 확인, 1절 고침(2026-11-17, 응답 1.9초). 429 모양은 한도를 일부러 넘기지 않아 문서·함수 시험으로만
 - [ ] AI Studio에서 그 모델의 무료 한도를 보고 상한(20) 조정(Q22)
 - [ ] README(환경변수, 공급자 바꾸는 법), CLAUDE.md 스택·"명령"(설정 파일이라 보여 주고 승인)
 

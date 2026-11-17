@@ -8,25 +8,28 @@
 3. `.env.example`을 `.env.local`로 복사하고 값을 채웁니다. 값은 팀 비공개 채널로만 주고받고, 저장소에 올리지 않습니다.
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`: Supabase 프로젝트 "HomeFit"
    - `DATA_GO_KR_SERVICE_KEY`: 공공데이터포털 인증키(마이홈 공고)
-   - `ANTHROPIC_API_KEY`: Claude 실습 키. 없어도 앱은 돌고, 신청 준비 계획만 AI 요약 없이 기본 체크리스트로 나옵니다
+   - `AI_PROVIDER`: AI 공급자. `gemini`(개발, 무료) / `claude`(배포) / `mock`(실제 API를 부르지 않음). 비우면 개발·시험은 mock, 운영 배포는 AI 없이 기본 체크리스트
+   - `GEMINI_API_KEY`(Google AI Studio 무료 키), `GEMINI_MODEL`(비우면 `gemini-3.5-flash-lite`), `ANTHROPIC_API_KEY`(Claude 실습 키). 키가 없거나 AI가 실패해도 앱은 돌고, 신청 준비 계획만 기본 체크리스트로 나옵니다
+   - `SLACK_BOT_TOKEN`: 팀 슬랙 봇 토큰(슬랙 알림, 개발 중)
    - `CRON_SECRET`: 정기 수집 입구를 지키는 아무 긴 문자열
 4. `npm run dev` → http://localhost:3000
 5. 수집을 손으로 한 번 돌리기(개발 중):
    - 실제 공고: `curl -H "Authorization: Bearer <CRON_SECRET>" http://localhost:3000/api/cron/myhome`
-   - 가짜 공고 묶음: 주소 끝에 `?fixture=sample` (그 밖에 `changed`, `malformed`, `failure`, `bulk`, `fresh`. 운영 배포에서는 막힘)
+   - 가짜 공고 묶음: 주소 끝에 `?fixture=sample` (그 밖에 `changed`, `extended`, `correction`, `relaxed`, `malformed`, `failure`, `bulk`, `fresh`. 운영 배포에서는 막힘)
 
 ## 시험
 - `npm test` (Vitest, 순수 함수 시험)
 - `npx tsc --noEmit` (타입 검사), `npm run lint`, `npm run build`
+- 시험은 실제 AI API를 부르지 않습니다(mock). 공급자를 바꾸려면 `.env.local`의 `AI_PROVIDER`만 바꿉니다. AI 호출 수·시간·토큰·실패는 DB `llm_calls`에 남습니다(관리자만 읽음). 구조는 `lib/llm/`, 설명은 [spec 002](docs/specs/002-LLM-공급자/spec.md)
 
 ## 지금 되는 기능 (기능 001 공고·정책 사건)
 - 회원가입·로그인·로그아웃, 첫 설정과 "내 정보"에서 공고 조건(시도, 공급 유형, 월 임대료 상한, 나이) 입력
 - 마이홈 공공임대 모집공고를 하루 한 번 수집(Vercel Cron, 매일 00:00 UTC = 오전 9시), 실패는 수집 오류로 기록
-- 조건에 맞는 새 공고 → 사건 생성(같은 공고는 사람마다 한 번), 공고 내용이 바뀌면 "바뀜" 표시
+- 조건에 맞는 공고의 **변화**(접수 기간·임대료·공급 유형이 바뀜, 정정공고, 같은 단지 완화·재공고) → 사건 생성(같은 변화는 사람마다 한 번). 처음 보이는 공고는 사건이 아님(맞는 공고 화면은 개발 중)
 - 홈 대시보드(새 사건·승인 대기·다가오는 일정), 사건 목록(상태·기간 거르기, 수집 상태 안내), 사건 상세(공고 원문 값, 남은 날, 신청 준비 계획)
 - 승인하면 체크리스트와 마감일이 내 일정에 들어가고, 거절하면 사유만 남고 일정은 그대로
 - 남의 사건·일정은 볼 수 없음(관리자도 남의 사건은 승인·거절 못 함)
-- 아직 안 되는 것: 습도·결로 위험, 전월세 시세 변화, 기록 찾기 챗봇, 시군구 선택(Q18). Claude 키가 만료돼 AI 요약은 잠시 꺼져 있음(`docs/Intent.md` Q19)
+- 아직 안 되는 것: 습도·결로 위험, 전월세 시세 변화, 기록 찾기 챗봇, 시군구 선택(Q18). AI 요약은 개발 중 Gemini 무료 플랜으로 동작(spec 002), 배포는 Claude 키가 오면 `AI_PROVIDER=claude`
 
 ## 기획 문서
 `docs/Intent.md`부터 읽습니다. 무엇을, 왜, 어디까지 만드는지와 다른 문서로 가는 지도가 있습니다.
