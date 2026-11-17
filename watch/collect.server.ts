@@ -5,7 +5,7 @@ import {
   loadExistingKeys,
   markUpdatedIncidents,
 } from "@/incident/create.server";
-import { insertPlans } from "@/incident/plans.server";
+import { draftPlans, insertPlans } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import { toKstDate } from "@/watch/kst";
 import { maskSecrets } from "@/watch/mask";
@@ -62,11 +62,12 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
     notices: collected.notices, owners: await loadConditionOwners(db), existingKeys: await loadExistingKeys(db),
     today: toKstDate(now), sourceCode: MYHOME_SOURCE,
   });
+  const drafts = await draftPlans(planned.map((plan) => plan.facts));
   const created = await insertIncidents({ db, planned, runId, sourceItemIds: saved.idByExternalId, isSimulated });
+  const plans = await insertPlans(db, created, drafts);
   const newIncidents = created.length;
   const updatedIncidents = await markUpdatedIncidents(db, saved.changedIds);
   await recordStep(db, runId, { name: "detect", status: "succeeded", itemsIn: collected.notices.length, itemsOut: newIncidents, detail: { updated: updatedIncidents } });
-  const plans = await insertPlans(db, created);
   await recordStep(db, runId, { name: "draft_plan", status: newIncidents ? "succeeded" : "skipped", itemsIn: newIncidents, itemsOut: newIncidents, detail: { ai_drafted: plans.drafted, ai_failed: plans.failed, ai_failure_reasons: plans.failureReasons } });
   await recordStep(db, runId, { name: "await_approval", status: newIncidents ? "waiting" : "skipped", itemsOut: newIncidents });
   return { notices: collected.notices.length, newIncidents, updatedIncidents };

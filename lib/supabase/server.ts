@@ -34,3 +34,10 @@ export async function currentUserId(): Promise<string | null> {
   const { data } = await supabase.auth.getClaims();
   return typeof data?.claims?.sub === "string" ? data.claims.sub : null;
 }
+
+/** 로그인이 꼭 필요한 읽기에서 쓴다. 로그인이 끝났으면 던져서 화면이 오류를 보이게 한다 */
+export async function requireUserId(): Promise<string> {
+  const userId = await currentUserId();
+  if (!userId) throw new Error("로그인이 끝났습니다. 다시 로그인해 주세요.");
+  return userId;
+}

@@ -66,7 +66,8 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
     detail = await getIncidentDetail(id, userId);
     // FR-009: 처음 열면 승인 대기로 바꾸고 처음 연 시각을 남긴다(대표 KPI). 본인 사건에서만 DB 함수가 바꾼다
     if (detail?.isMine && detail.status === "new") {
-      await (await createClient()).rpc("mark_incident_viewed", { p_incident_id: id });
+      const { error } = await (await createClient()).rpc("mark_incident_viewed", { p_incident_id: id });
+      if (error) throw error; // 처음 연 시각은 대표 KPI라 실패를 숨기지 않는다 (리뷰 2026-11-17)
       detail = { ...detail, status: "pending" };
     }
   } catch {

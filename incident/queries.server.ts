@@ -1,9 +1,10 @@
 import type { ChecklistItem } from "@/incident/checklist";
 import { periodStart, type IncidentFilter } from "@/incident/filter";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, requireUserId } from "@/lib/supabase/server";
 import type { Notice } from "@/watch/notice";
 
-// 사건 화면이 읽는 자료. 모두 로그인한 사용자 권한(RLS)으로 읽어 내 것만 나온다 (FR-014)
+// 사건 화면이 읽는 자료. 로그인한 사용자 권한(RLS)으로 읽는다 (FR-014).
+// RLS는 관리자에게 모든 사건을 보여 주므로 목록·건수는 user_id로 내 것만 거른다 (FR-007, 리뷰 2026-11-17)
 // 읽기 실패는 던져서 화면이 "조회 실패"를 보이게 한다(빈 목록으로 숨기지 않음, P3-12)
 
 export type IncidentSummary = {
@@ -20,10 +21,11 @@ function toSummary(row: { id: string; status: string; facts: unknown; is_updated
 }
 
 export async function listIncidents(filter: IncidentFilter, now: Date): Promise<IncidentSummary[]> {
-  const supabase = await createClient();
+  const [supabase, userId] = await Promise.all([createClient(), requireUserId()]);
   let query = supabase
     .from("incidents")
     .select("id, status, facts, is_updated, is_simulated, detected_at")
+    .eq("user_id", userId)
     .order("detected_at", { ascending: false })
     .limit(PAGE_SIZE);
   if (filter.status !== "all") query = query.eq("status", filter.status);
@@ -35,10 +37,11 @@ export async function listIncidents(filter: IncidentFilter, now: Date): Promise<
 }
 
 export async function countOpenIncidents(): Promise<{ newCount: number; pendingCount: number }> {
-  const supabase = await createClient();
+  const [supabase, userId] = await Promise.all([createClient(), requireUserId()]);
+  const mine = () => supabase.from("incidents").select("id", { count: "exact", head: true }).eq("user_id", userId);
   const [fresh, pending] = await Promise.all([
-    supabase.from("incidents").select("id", { count: "exact", head: true }).eq("status", "new"),
-    supabase.from("incidents").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    mine().eq("status", "new"),
+    mine().eq("status", "pending"),
   ]);
   if (fresh.error || pending.error) throw new Error("사건 수를 불러오지 못했습니다.");
   return { newCount: fresh.count ?? 0, pendingCount: pending.count ?? 0 };

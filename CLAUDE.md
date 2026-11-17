@@ -56,9 +56,9 @@
 - 안내서에만 있는 것: `docs/plan.md`(조각 표), `docs/qa.md`(전체 QA 모음), `docs/data-sources.md`, `docs/connectors.md`, `docs/agents.md`, `docs/flow.md`, `docs/wiki-chat.md`, `docs/debug-note.md`
 
 ## 명령
-- 시험: `npm test` (Vitest)
-- 화면 확인: `.claude/launch.json`의 `web` 서버 (`npm run dev`, 포트 3000)
-- (Next.js 프로젝트를 만드는 첫 plan 단계에서 실제로 돌려 보고 맞춘다)
+- 시험: `npm test` (Vitest). 함께: `npx tsc --noEmit`, `npm run lint`, `npm run build`
+- 화면 확인: `.claude/launch.json`의 `homefit-web` 서버 (`npm run dev`, 포트 3000). 세션을 다른 폴더에서 열었으면 이름으로 켤 때 그 폴더의 서버가 켜질 수 있으니, 이미 켜 둔 http://localhost:3000 을 직접 연다
+- 수집 손으로 돌리기(개발): `Authorization: Bearer <CRON_SECRET>`를 붙여 `/api/cron/myhome` 호출. 가짜 공고는 `?fixture=sample|changed|malformed|failure|bulk|fresh`
 
 ## 디자인
 기본선은 `.claude/rules/design.md`. 여기에는 이 프로젝트의 취향만 적는다.
@@ -81,4 +81,14 @@
 - [rules/git-security.md §배포] 직접 요청 없는 배포 금지 → 그대로 지키되, 서비스와 발표 슬라이드 배포가 제출 필수임을 일정에 넣는다
 
 ## 현재 코드
-- (개발을 시작하면 파일별 역할을 한 줄씩 적는다)
+- `app/(auth)/`: 로그인·가입·로그아웃 화면과 서버 액션
+- `app/(main)/`: 로그인 뒤 화면. 홈 대시보드, `incidents/`(사건 목록·상세·승인·거절), `schedule/`(내 일정·체크리스트), `my/`(조건·계정), `onboarding/`(첫 설정)
+- `app/_components/`: 상태 배지, 빈 화면·불러오는 중·오류 표시
+- `app/api/cron/myhome/`: 정기 수집 입구 (`vercel.json` 매일 00:00 UTC)
+- `app/tokens.css`: 디자인 토큰 한곳
+- `watch/`: 마이홈 공고 수집. 순수 함수(`myhome.ts`, `notice.ts`, `sido.ts`, `mask.ts`, `kst.ts`), 가짜 응답(`sim-fixtures.ts`), DB·API(`*.server.ts`)
+- `incident/`: 조건 맞추기·중복·체크리스트·AI 초안 검사(순수 함수), 사건·계획·일정 읽고 쓰기(`*.server.ts`)
+- `lib/supabase/`: 서버·관리자 클라이언트, DB 타입
+- `supabase/migrations/`: DB 표·권한 규칙·DB 함수 (0001~0004)
+- `proxy.ts`: 로그인 세션 새로 고침, 로그인 안 했으면 로그인 화면으로
+- `tests/`: Vitest 시험 (순수 함수)

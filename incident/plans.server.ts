@@ -1,5 +1,5 @@
 import { buildDefaultChecklist } from "@/incident/checklist";
-import { composeChecklist } from "@/incident/plan-draft";
+import { buildPlanPrompt, composeChecklist } from "@/incident/plan-draft";
 import { draftPlan, type DraftResult } from "@/incident/plan-draft.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
@@ -27,23 +27,29 @@ function planRow(incidentId: string, notice: Notice, result: DraftResult | undef
   };
 }
 
-/**
- * FR-010 (spec 001): 새 사건마다 신청 준비 계획을 만든다.
- * 같은 공고는 사용자가 여럿이어도 Claude를 한 번만 부르고, 한도를 지키려고 차례대로 부른다.
- */
-export async function insertPlans(db: AdminClient, incidents: CreatedIncident[]): Promise<PlanStats> {
-  if (incidents.length === 0) return { drafted: 0, failed: 0, failureReasons: [] };
-  const notices = new Map<string, Notice>();
-  for (const incident of incidents) {
-    const notice = incident.facts as unknown as Notice; // facts는 Notice로 저장했다 (incident/detect.ts)
-    notices.set(notice.announcementId, notice);
-  }
-  const drafts = new Map<string, DraftResult>();
-  for (const [announcementId, notice] of notices) drafts.set(announcementId, await draftPlan(notice));
+/** 공고 내용별 초안. 같은 공고라도 단지마다 임대료·공급 유형이 다르면 따로 만든다 (리뷰 2026-11-17) */
+export type Drafts = Map<string, DraftResult>;
 
+/**
+ * FR-010 (spec 001): 새로 만들 사건의 초안을 사건을 저장하기 **전에** 받는다.
+ * 느린 Claude 호출이 사건 저장과 계획 저장 사이에 끼면, 시간 제한에 걸렸을 때 계획 없는 사건이 남는다.
+ * AI에 보내는 내용이 같으면 한 번만 부르고, 한도를 지키려고 차례대로 부른다.
+ */
+export async function draftPlans(notices: readonly Notice[]): Promise<Drafts> {
+  const drafts: Drafts = new Map();
+  for (const notice of notices) {
+    const key = buildPlanPrompt(notice);
+    if (!drafts.has(key)) drafts.set(key, await draftPlan(notice));
+  }
+  return drafts;
+}
+
+/** FR-010 (spec 001): 방금 만든 사건마다 신청 준비 계획을 저장한다 */
+export async function insertPlans(db: AdminClient, incidents: CreatedIncident[], drafts: Drafts): Promise<PlanStats> {
+  if (incidents.length === 0) return { drafted: 0, failed: 0, failureReasons: [] };
   const rows = incidents.map((incident) => {
-    const notice = incident.facts as unknown as Notice;
-    return planRow(incident.id, notice, drafts.get(notice.announcementId));
+    const notice = incident.facts as unknown as Notice; // facts는 Notice로 저장했다 (incident/detect.ts)
+    return planRow(incident.id, notice, drafts.get(buildPlanPrompt(notice)));
   });
   const { error } = await db.from("response_plans").insert(rows);
   if (error) throw new Error(`신청 준비 계획을 만들지 못했습니다: ${error.message}`);
