@@ -2,6 +2,7 @@ import { planChangeIncidents } from "@/incident/detect";
 import { insertIncidents, loadConditionOwners, loadExistingKeys } from "@/incident/create.server";
 import { findNoticeChanges } from "@/incident/notice-change";
 import { draftPlans, insertPlans } from "@/incident/plans.server";
+import { newCallContext } from "@/lib/llm/call.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import { toKstDate } from "@/watch/kst";
 import { maskSecrets } from "@/watch/mask";
@@ -25,7 +26,10 @@ type CollectInput = { db: AdminClient; fetchPage: PageFetcher; trigger: RunTrigg
 
 // 오류 메시지에서 가릴 키들 (FR-004, PRD FR-27)
 function secretsToMask(): string[] {
-  return [process.env.DATA_GO_KR_SERVICE_KEY ?? "", process.env.SUPABASE_SECRET_KEY ?? ""];
+  return [
+    process.env.DATA_GO_KR_SERVICE_KEY ?? "", process.env.SUPABASE_SECRET_KEY ?? "",
+    process.env.GEMINI_API_KEY ?? "", process.env.ANTHROPIC_API_KEY ?? "", // spec 002 FR-008
+  ];
 }
 
 async function saveObservations(db: AdminClient, runId: string, notices: Notice[], saved: SavedItems, isSimulated: boolean) {
@@ -60,7 +64,8 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
   const planned = planChangeIncidents({
     changes, owners: await loadConditionOwners(db), existingKeys: await loadExistingKeys(db), today, sourceCode: MYHOME_SOURCE,
   });
-  const drafts = await draftPlans(planned.map((plan) => plan.facts));
+  // spec 002 FR-006: 한 번 수집의 AI 호출 상한·대기 예산
+  const drafts = await draftPlans(db, planned.map((plan) => plan.facts), newCallContext(runId));
   const created = await insertIncidents({ db, planned, runId, sourceItemIds: saved.idByExternalId, isSimulated });
   const plans = await insertPlans(db, created, drafts);
   const newIncidents = created.length;
@@ -68,7 +73,7 @@ async function runSteps(input: CollectInput, runId: string): Promise<Omit<Collec
   const updatedIncidents = changes.length;
   const byKind = Object.fromEntries(["changed", "correction", "relaxed"].map((kind) => [kind, changes.filter((c) => c.kind === kind).length]));
   await recordStep(db, runId, { name: "detect", status: "succeeded", itemsIn: collected.notices.length, itemsOut: newIncidents, detail: { changes: byKind } });
-  await recordStep(db, runId, { name: "draft_plan", status: newIncidents ? "succeeded" : "skipped", itemsIn: newIncidents, itemsOut: newIncidents, detail: { ai_drafted: plans.drafted, ai_failed: plans.failed, ai_failure_reasons: plans.failureReasons } });
+  await recordStep(db, runId, { name: "draft_plan", status: newIncidents ? "succeeded" : "skipped", itemsIn: newIncidents, itemsOut: newIncidents, detail: { ai_provider: process.env.AI_PROVIDER || "(비어 있음)", ai_drafted: plans.drafted, ai_failed: plans.failed, ai_skipped_by_limit: plans.skipped, ai_failure_reasons: plans.failureReasons } });
   await recordStep(db, runId, { name: "await_approval", status: newIncidents ? "waiting" : "skipped", itemsOut: newIncidents });
   return { notices: collected.notices.length, newIncidents, updatedIncidents };
 }

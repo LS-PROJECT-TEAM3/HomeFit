@@ -43,7 +43,9 @@ function Plan({ detail }: { detail: IncidentDetail }) {
       {plan?.aiOk && plan.summary ? (
         <>
           <p>{plan.summary}</p>
-          <p className={styles.source}>AI 요약 · 근거: 위 공고 원문 값{plan.citations[0] ? ` (${plan.citations[0].label})` : ""}</p>
+          <p className={styles.source}>
+            {plan.isMock ? "시험용 요약(mock, 실제 AI가 쓴 글이 아님)" : "AI 요약"} · 근거: 위 공고 원문 값{plan.citations[0] ? ` (${plan.citations[0].label})` : ""}
+          </p>
         </>
       ) : (
         <p className={styles.notice}>요약을 만들지 못했습니다. 원문을 확인해 주세요.</p>

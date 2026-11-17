@@ -1,55 +1,34 @@
-import Anthropic from "@anthropic-ai/sdk";
-import {
-  PLAN_JSON_SCHEMA,
-  PLAN_SYSTEM_PROMPT,
-  buildPlanPrompt,
-  parsePlanDraft,
-  type PlanDraft,
-} from "@/incident/plan-draft";
+import { PLAN_JSON_SCHEMA, PLAN_SYSTEM_PROMPT, buildPlanPrompt, parsePlanDraft, type PlanDraft } from "@/incident/plan-draft";
+import { callLlm } from "@/lib/llm/call.server";
+import type { CallContext } from "@/lib/llm/call";
+import type { AdminClient } from "@/lib/supabase/admin";
 import type { Notice } from "@/watch/notice";
 
-// plan 001 §1: 사용자 결정(2026-11-17)으로 Claude Haiku 5.5. 짧은 요약이라 effort low
-export const PLAN_MODEL = "claude-haiku-5-5";
-const TIMEOUT_MS = 30_000;
+const MAX_OUTPUT_TOKENS = 4000;
 
-export type DraftResult = { ok: true; draft: PlanDraft; model: string } | { ok: false; reason: string };
-
-let client: Anthropic | null = null;
-function anthropic(): Anthropic | null {
-  if (!process.env.ANTHROPIC_API_KEY) return null;
-  client ??= new Anthropic({ timeout: TIMEOUT_MS, maxRetries: 1 });
-  return client;
-}
-
-function firstText(message: Anthropic.Message): string | null {
-  for (const block of message.content) if (block.type === "text") return block.text;
-  return null;
-}
+export type DraftResult =
+  | { ok: true; draft: PlanDraft; model: string }
+  | { ok: false; reason: string; skipped: boolean };
 
 /**
- * FR-010 (spec 001): 공고 하나의 요약·체크리스트 초안. 어떤 실패든 { ok: false }로 돌려
- * 부르는 쪽이 기본 체크리스트를 쓰게 한다(화면은 원문 값과 승인·거절 버튼을 그대로 보임).
+ * FR-010 (spec 001), FR-010 (spec 002): 공고 하나의 요약·체크리스트 초안.
+ * 어느 공급자든 공통 길(callLlm)로 부르고, 어떤 실패든 { ok: false }로 돌려 부르는 쪽이 기본 체크리스트를 쓰게 한다.
+ * Q23 (spec 002): 공고 원문 값만 보낸다(buildPlanPrompt). 사용자 정보는 넣지 않는다.
  */
-export async function draftPlan(notice: Notice): Promise<DraftResult> {
-  const api = anthropic();
-  if (!api) return { ok: false, reason: "ANTHROPIC_API_KEY 없음" };
-  try {
-    const message = await api.messages.create({
-      model: PLAN_MODEL,
-      max_tokens: 4000,
+export async function draftPlan(db: AdminClient, notice: Notice, ctx: CallContext): Promise<DraftResult> {
+  const result = await callLlm(db, {
+    request: {
+      purpose: "application_plan",
       system: PLAN_SYSTEM_PROMPT,
-      messages: [{ role: "user", content: buildPlanPrompt(notice) }],
-      output_config: { effort: "low", format: { type: "json_schema", schema: PLAN_JSON_SCHEMA } },
-    });
-    // 안전 분류기 거절·길이 초과는 실패로 본다 (Haiku 5.5는 서버 대체 모델이 없음)
-    if (message.stop_reason !== "end_turn") return { ok: false, reason: `stop_reason ${message.stop_reason}` };
-    const text = firstText(message);
-    const draft = text ? parsePlanDraft(JSON.parse(text)) : null;
-    return draft ? { ok: true, draft, model: message.model } : { ok: false, reason: "응답 모양이 다름" };
-  } catch (error) {
-    if (error instanceof Anthropic.RateLimitError) return { ok: false, reason: "호출 한도 초과" };
-    if (error instanceof Anthropic.APIError) return { ok: false, reason: `API 오류 ${error.status ?? ""}` };
-    if (error instanceof SyntaxError) return { ok: false, reason: "JSON이 아님" };
-    return { ok: false, reason: error instanceof Error ? error.message : "알 수 없는 오류" };
-  }
+      prompt: buildPlanPrompt(notice),
+      schema: PLAN_JSON_SCHEMA as unknown as Record<string, unknown>, // 읽기 전용 상수를 공통 모양(객체)으로 넘긴다
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
+    },
+    parse: parsePlanDraft,
+    ctx,
+  });
+  if (result.ok) return { ok: true, draft: result.data, model: `${result.provider}:${result.model ?? "?"}` };
+  const skipped = "skipped" in result && result.skipped === true;
+  const who = result.provider ? `${result.provider} ` : "";
+  return { ok: false, reason: skipped ? result.message : `${who}${result.kind}: ${result.message}`, skipped };
 }

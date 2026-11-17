@@ -60,7 +60,7 @@ export async function myhomeCollectionStatus(): Promise<CollectionStatus> {
 export type IncidentDetail = IncidentSummary & {
   isMine: boolean;
   firstViewedAt: string | null;
-  plan: { id: string; summary: string | null; checklist: ChecklistItem[]; citations: { label: string; url: string }[]; aiOk: boolean } | null;
+  plan: { id: string; summary: string | null; checklist: ChecklistItem[]; citations: { label: string; url: string }[]; aiOk: boolean; isMock: boolean } | null;
   actions: { action: string; reason: string | null; createdAt: string }[];
   /** 승인으로 생긴 내 일정 (FR-011) */
   scheduleId: string | null;
@@ -77,7 +77,7 @@ export async function getIncidentDetail(id: string, userId: string): Promise<Inc
   if (error) throw new Error("사건을 불러오지 못했습니다.");
   if (!data) return null;
   const [plans, actions, schedule] = await Promise.all([
-    supabase.from("response_plans").select("id, ai_summary, checklist, citations, generation_status").eq("incident_id", id).maybeSingle(),
+    supabase.from("response_plans").select("id, ai_summary, checklist, citations, generation_status, model").eq("incident_id", id).maybeSingle(),
     supabase.from("incident_actions").select("action, reason, created_at").eq("incident_id", id).order("created_at"),
     supabase.from("schedule_items").select("id").eq("incident_id", id).maybeSingle(),
   ]);
@@ -91,6 +91,8 @@ export async function getIncidentDetail(id: string, userId: string): Promise<Inc
       ? {
           id: plan.id, summary: plan.ai_summary, checklist: plan.checklist as ChecklistItem[],
           citations: plan.citations as { label: string; url: string }[], aiOk: plan.generation_status === "succeeded",
+          // spec 002 plan §5: mock 요약을 진짜 요약으로 착각하지 않게 표시한다
+          isMock: plan.model?.startsWith("mock:") ?? false,
         }
       : null,
     actions: actions.data.map((a) => ({ action: a.action, reason: a.reason, createdAt: a.created_at })),

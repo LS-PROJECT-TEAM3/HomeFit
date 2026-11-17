@@ -80,9 +80,9 @@ lib/llm/
 - [ ] `mask`에 `GEMINI_API_KEY`·`ANTHROPIC_API_KEY` 더하기
 
 ### 3단계 작업
-- [ ] `draftPlan`을 `callLlm`으로, 모델 이름 `공급자:모델`
-- [ ] 수집이 실행 ID와 상한을 넘김, 실행 기록 `draft_plan`에 공급자·건너뜀 수
-- [ ] 가짜 수집으로 SC-001·003·004·008
+- [x] `draftPlan`을 `callLlm`으로, 모델 이름 `공급자:모델`
+- [x] 수집이 실행 ID와 상한을 넘김, 실행 기록 `draft_plan`에 공급자·건너뜀 수. Gemini·Claude 키도 오류 문구에서 가림. 사건 상세에 mock 요약 표시
+- [~] 가짜 수집으로 SC-001(확인). SC-003·008은 mock 실패·상한을 개발 서버에서 흉내 낼 방법이 없어 함수 시험으로만, SC-004는 .env.local을 바꿔야 해 4단계에서
 
 ### 4단계 작업
 - [ ] 실제 Gemini 키로 한 번 불러 JSON 칸 이름·토큰·429 모양 확인, 1절 고침
