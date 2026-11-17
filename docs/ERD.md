@@ -1,9 +1,9 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-17 (v1.0, 승인 2026-11-17)
+- 최종 갱신: 2026-11-17 (v1.1, 승인 2026-11-17)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
-- 범위: PRD Must(FR-01~27)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
+- 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
 ## 관계도
 ```mermaid
@@ -13,6 +13,7 @@ erDiagram
     PROFILES ||--o| HOMES : "내 집"
     HOMES ||--o{ INDOOR_MEASUREMENTS : "측정값"
     PROFILES ||--o{ INTEREST_AREAS : "관심 지역"
+    PROFILES ||--o| NOTIFICATION_SETTINGS : "슬랙 알림 설정"
 
     SOURCES ||--o{ RUNS : "수집 실행"
     RUNS ||--o{ RUN_STEPS : "단계"
@@ -27,6 +28,7 @@ erDiagram
     INCIDENTS ||--o{ INCIDENT_ACTIONS : "처리 이력"
     RESPONSE_PLANS ||--o| SCHEDULE_ITEMS : "승인하면"
     INCIDENTS ||--o{ KNOWLEDGE_CHUNKS : "기록 찾기"
+    INCIDENTS ||--o{ NOTIFICATIONS : "알림"
 
     PROFILES ||--o{ AUDIT_LOGS : "관리자 수정"
     PROFILES ||--o{ CHAT_LOGS : "위키 챗봇"
@@ -98,6 +100,15 @@ erDiagram
 | created_by | uuid | ✔ | | [평가항목 P3-10] |
 | created_at | timestamptz | ✔ | | [평가항목 P3-10] |
 
+#### notification_settings — 슬랙 알림 설정
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| user_id | uuid (PK, FK profiles) | ✔ | 한 사람에 하나 | [PRD FR-37] |
+| slack_webhook_url | text | | 본인 슬랙 수신 웹훅 주소. `https://hooks.slack.com/`로 시작하는 것만 받는다. 비밀값처럼 다룬다: 화면에는 끝 4자리만 보이고, 관리자도 읽지 못한다 | [PRD FR-37] [IA MY_030500_TB] |
+| enabled | boolean | ✔ | 기본 false. 켜는 것이 알림 승인 | [PRD FR-37, 8절] |
+| enabled_at | timestamptz | | 마지막으로 켠 시각(알림 승인 시각) | [PRD 8절] |
+| updated_at | timestamptz | ✔ | | [PRD FR-37] |
+
 ### 수집
 
 #### sources — 수집 출처
@@ -128,7 +139,7 @@ erDiagram
 | id | uuid (PK) | ✔ | | [평가항목 P3-08] |
 | run_id | uuid (FK runs) | ✔ | | [평가항목 P3-08] |
 | step_order | integer | ✔ | 흐름 화면에서 상자 순서 | [PRD FR-23] |
-| step_name | text: `collect` / `compare` / `detect` / `draft_plan` / `await_approval` / `record` | ✔ | 수집 → 비교 → 사건 판단 → 대응안 초안 → 승인 대기 → 기록 | [IA 핵심 흐름] [PRD FR-23] |
+| step_name | text: `collect` / `compare` / `detect` / `draft_plan` / `notify` / `await_approval` / `record` | ✔ | 수집 → 비교 → 사건 판단 → 대응안 초안 → 알림 → 승인 대기 → 기록. `notify`는 보낸·실패한 알림 수 | [IA 핵심 흐름] [PRD FR-23] |
 | status | text: `succeeded` / `failed` / `waiting` / `skipped` | ✔ | `waiting`은 승인 대기(주황 점선) | [CLAUDE.md 디자인 "흐름 화면 상태 색"] |
 | items_in | integer | | 들어온 건수 | [PRD FR-23 "분기 건수"] |
 | items_out | integer | | 다음 단계로 간 건수 | [PRD FR-23 "분기 건수"] |
@@ -148,7 +159,11 @@ erDiagram
 | announced_at | date | | 공고일. 대표 KPI의 시작점 | [PRD 3절 KPI] |
 | apply_start, apply_end | date | | 신청 기간 | [PRD FR-15] |
 | url | text | | 원문 공고 링크 | [CUJ-01 명세 3단계] |
-| content_hash | text | ✔ | 기간·조건이 바뀌었는지 비교용 | [PRD FR-10 "기존 사건 갱신"] |
+| content_hash | text | ✔ | 접수 기간·월 임대료·공급 유형이 바뀌었는지 비교용 | [PRD FR-10] |
+| complex_key | text | | 같은 단지를 알아보는 값. 마이홈 `hsmpNm`(단지 이름) + 시군구 코드 | [PRD FR-10] |
+| status_name | text | | 공고 상태. 마이홈 `sttusNm`(예: "정정공고") | [PRD FR-10] |
+| before_external_id | text | | 고치기 전 공고 ID. 마이홈 `beforePblancId`. 이미 본 공고를 가리키면 정정 사건 | [PRD FR-10] |
+| previous_values | jsonb | | 바로 앞 수집 때의 접수 기간·월 임대료·공급 유형. 사건 상세의 "전 → 후" | [PRD FR-10] |
 | raw | jsonb | ✔ | 원본 응답 | [ERD 결정 2] |
 | first_seen_at, last_seen_at | timestamptz | ✔ | | [PRD FR-10] |
 
@@ -182,10 +197,10 @@ erDiagram
 | target_id | uuid | | homes.id 또는 interest_areas.id | [문제정의 중복 기준] |
 | source_item_id | uuid (FK source_items) | | 공고·정책 사건의 근거 | [PRD FR-10] |
 | run_id | uuid (FK runs) | ✔ | 만든 실행 | [PRD FR-23] |
-| dedup_key | text | ✔ | (user_id, dedup_key) 유일. 공고: 공고 ID / 습도: 집 + 48시간 구간 / 시세: 대상 + 연월 | [PRD FR-10~12] [문제정의 중복 기준] |
+| dedup_key | text | ✔ | (user_id, dedup_key) 유일. 공고: 공고 ID + 바뀐 뒤 content_hash(같은 변화는 한 번) 또는 재공고 공고 ID / 습도: 집 + 48시간 구간 / 시세: 대상 + 연월 | [PRD FR-10~12] [문제정의 중복 기준] |
 | status | text: `new` / `pending` / `approved` / `rejected` | ✔ | 새 사건 → 승인 대기 → 승인·거절 | [IA 공통 컴포넌트 "상태 배지"] |
-| facts | jsonb | ✔ | 바뀐 것: 원문 값, 측정값·추정값(이슬점, 표면 온도, 중간값, 거래 수), 출처, 수집 시각 | [PRD FR-15] [GLOSSARY 측정값·추정값] |
-| is_updated | boolean | ✔ | 기간·조건이 바뀌어 갱신됨("바뀜" 표시) | [CUJ-01 명세 E5] |
+| facts | jsonb | ✔ | 바뀐 것: 원문 값, 공고면 바뀐 칸과 전 → 후 값·변화 종류(기간·임대료·공급 유형·완화 재공고), 측정값·추정값(이슬점, 표면 온도, 중간값, 거래 수), 출처, 수집 시각 | [PRD FR-15] [GLOSSARY 측정값·추정값] |
+| is_updated | boolean | ✔ | v1.0의 "기존 사건 갱신" 표시. v1.1부터 공고 변화는 새 사건이라 새 행은 false. 지난 행 때문에 남김 | [CUJ-01 명세 E5] |
 | is_simulated | boolean | ✔ | 시뮬레이터 사건 | [PRD FR-24] |
 | detected_at | timestamptz | ✔ | 사건 생성 시각 | [PRD FR-10] |
 | first_viewed_at | timestamptz | | 사용자가 상세를 처음 연 시각. 대표 KPI의 끝점 | [PRD 3절 KPI] |
@@ -281,10 +296,23 @@ erDiagram
 | duplicate_count | integer | ✔ | 중복 사건 수(KPI 3) | [PRD 3절 KPI] |
 | created_at | timestamptz | ✔ | | |
 
+#### notifications — 알림 기록
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| id | uuid (PK) | ✔ | | [PRD FR-37] |
+| incident_id | uuid (FK incidents) | ✔ | (incident_id, channel) 유일 → 같은 사건은 한 번만 보냄 | [PRD FR-37] |
+| user_id | uuid (FK profiles) | ✔ | | [PRD FR-37] |
+| channel | text: `slack` | ✔ | | [PRD FR-37] |
+| status | text: `sent` / `failed` | ✔ | | [PRD FR-37] |
+| attempts | integer | ✔ | 보낸 횟수. 실패는 다음 수집에 한 번 더(최대 2) | [PRD FR-37] |
+| last_error | text | | 실패 이유. 웹훅 주소는 가린 뒤 저장 | [PRD FR-37, FR-27] |
+| sent_at | timestamptz | | 보낸 시각 | [PRD FR-37] |
+| created_at | timestamptz | ✔ | | |
+
 ## 화면별로 읽고 쓰는 표 (IA MVP 화면)
 | 화면 ID | 화면 | 읽는 표 | 쓰는 표 | PRD |
 |---|---|---|---|---|
-| HM_000000_PG | 홈 | incidents, schedule_items, indoor_measurements, policy_conditions | | FR-13 |
+| HM_000000_PG | 홈 | incidents, schedule_items, indoor_measurements, policy_conditions, source_items(맞는 공고 수) | | FR-13, FR-36 |
 | MB_010000_PG, MB_010100_PG | 로그인, 회원가입 | auth.users | auth.users, profiles | FR-01 |
 | MB_010200_PG | 첫 설정 | policy_conditions | policy_conditions, homes | FR-02 |
 | IC_020000_PG | 사건 | incidents, runs(수집 오류 표시) | | FR-14 |
@@ -296,6 +324,8 @@ erDiagram
 | MY_030201_MD | 실내 온습도 입력 | indoor_measurements | indoor_measurements | FR-04 |
 | MY_030300_TB | 관심 지역 | interest_areas | interest_areas | FR-05 |
 | MY_030400_TB | 계정 | profiles | auth.users(로그아웃·탈퇴) | FR-01 |
+| MY_030500_TB | 알림 | notification_settings | notification_settings | FR-37 |
+| NT_080000_PG | 맞는 공고 | source_items, policy_conditions | | FR-36 |
 | KN_050000_PG | 기록 찾기 | knowledge_chunks, incidents | | FR-18 |
 | SC_060000_PG, SC_060100_PG | 내 일정, 일정 상세 | schedule_items | schedule_items.checklist_state | FR-16 |
 | AD_070000_PG | 관리자 | profiles.role | | FR-19 |
@@ -314,6 +344,7 @@ erDiagram
 | 이슬점, 추정 창 표면 온도 | 습도·결로 판단 순수 함수. 결과는 incidents.facts에 남김 | [문제정의 사건 기준 표] |
 | 최근 3개월 중간값, 거래 수 | 시세 판단 순수 함수. 결과는 incidents.facts에 남김 | [문제정의 사건 기준 표] |
 | 신청 마감까지 남은 날 수, "마감 지남" | 화면 | [PRD FR-15, FR-16] |
+| 맞는 공고 목록 | source_items와 policy_conditions를 조건 맞추기 순수 함수로 비교. 따로 저장하지 않음 | [PRD FR-36] |
 | 출처별 연속 실패 수 | runs 조회 | [PRD FR-21] |
 | 하루 질문 수 | chat_logs 조회 | [PRD FR-26] |
 | 사건 기준값(10%, ±20%, 48시간, 습도 기준) | 코드 설정. DB에 두지 않음 | [문제정의 사건 기준 표] |
@@ -323,7 +354,10 @@ erDiagram
 |---|---|---|---|
 | profiles | 내 행 읽기·이름 수정. role은 못 바꿈 | 전체 읽기 | |
 | policy_conditions, homes, indoor_measurements, interest_areas | 내 행만 읽기·쓰기 | 전체 읽기. 수정은 audit_logs와 함께 서버 함수로만 | 읽기 |
-| sources, runs, run_steps, observations, source_items | 볼 수 없음 | 읽기, "지금 한 번 실행" | 읽기·쓰기 |
+| sources, runs, run_steps, observations | 볼 수 없음 | 읽기, "지금 한 번 실행" | 읽기·쓰기 |
+| source_items | 로그인하면 읽기(공개 공고라서, 맞는 공고 목록) | 읽기 | 읽기·쓰기 |
+| notification_settings | 내 행만 읽기·쓰기 | **볼 수 없음**(웹훅 주소는 비밀값) | 읽기 |
+| notifications | 내 행 읽기 | 읽기(주소 없음) | 쓰기 |
 | incidents, response_plans | 내 행만 읽기 | 전체 읽기 | 쓰기 |
 | incident_actions | 내 사건에만 승인·거절 추가 | 읽기만 (대신 승인 불가) | |
 | schedule_items | 내 행 읽기, 체크 상태 수정 | 읽기 | 승인 때 생성 |
@@ -354,10 +388,12 @@ erDiagram
 | Q7 | 관리자가 출처 수집을 끄고 켤 수 있어야 하나 | sources.enabled | [IA AD_070200_TB] |
 
 ## 실제 DB 대조
-DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과를 한 줄로 적는다(P3-16). 아직 DB 없음.
+DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과를 한 줄로 적는다(P3-16).
+- 2026-11-17 (마이그레이션 0001~0005): `source_items`(칸 20개, v1.1 칸 complex_key·status_name·before_external_id·previous_values 포함), `notification_settings`(5개), `notifications`(9개)가 이 문서 표와 이름이 같다(information_schema 조회). 첫 기능 밖 표(homes 등)는 아직 만들지 않았다.
 
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-17 | v0.1 | 첫 작성. PRD Must(FR-01~27) 범위, 표 19개 |
 | 2026-11-17 | v1.0 | 승인 |
+| 2026-11-17 | v1.1 | 사건 정의 변경(PRD v1.2): notification_settings·notifications 표 추가, source_items에 complex_key·previous_values, incidents.dedup_key·facts 설명 변경, run_steps에 notify 단계, source_items를 로그인 사용자도 읽게 함. 마이홈 응답에서 hsmpNm·sttusNm·beforePblancId 칸을 확인해 complex_key·status_name·before_external_id 추가 |
