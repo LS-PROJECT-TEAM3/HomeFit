@@ -8,7 +8,8 @@ export type MyHome = {
 };
 export type MyMeasurement = { id: string; temperatureC: number; humidityPct: number; measuredAt: string };
 
-const RECENT_MEASUREMENTS = 5;
+// 내 집 목록과 홈·집 점검의 습도 추이 그래프가 함께 쓴다 (spec 004 v0.2)
+const RECENT_MEASUREMENTS = 7;
 
 /** 내 집과 최근 측정값. 없으면 null·빈 목록, 읽기 실패는 던진다(빈 값으로 숨기지 않음) */
 export async function loadMyHome(userId: string): Promise<{ home: MyHome | null; measurements: MyMeasurement[] }> {

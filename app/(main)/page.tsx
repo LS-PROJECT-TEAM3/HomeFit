@@ -5,7 +5,7 @@ import { LoadError, Loading } from "@/app/_components/states";
 import { currentUserId } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import { loadHomeDashboard, type HomeDashboard } from "./dashboard-load";
-import { AlertsCard, DecisionCard, EnvironmentCard, HomeInfoCard, HousingCostCard } from "./home-cards";
+import { AlertsCard, DecisionCard, EnvironmentCard, HomeInfoCard, HousingCostCard, ScheduleCard, TimelineCard } from "./home-cards";
 import styles from "./page.module.css";
 
 async function Dashboard() {
@@ -27,12 +27,14 @@ async function Dashboard() {
       <HousingCostCard data={data} />
       <EnvironmentCard data={data} now={now} />
       <AlertsCard data={data} />
-      <DecisionCard data={data} today={today} />
+      <DecisionCard data={data} />
+      <TimelineCard data={data} />
+      <ScheduleCard data={data} today={today} />
     </div>
   );
 }
 
-// IA HM_000000_PG 홈 v1.4 (spec 003 v0.2 FR-010, PRD v1.6 FR-13): "내 집" 중심 벤토 카드 5개, 숫자를 누르면 그 목록으로
+// IA HM_000000_PG 홈 v1.4 (spec 003 v0.2 FR-010, PRD v1.6 FR-13, spec 004 v0.2 FR-006): "내 집" 중심 벤토 대시보드, 숫자를 누르면 그 목록으로
 export default function HomePage() {
   return (
     <main className={styles.main}>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SectionTabs } from "@/app/_components/section-tabs";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { LoadError, Loading } from "@/app/_components/states";
@@ -27,12 +27,8 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>관리자</h1>
-      <nav aria-label="관리자 메뉴">
-        <ul className={styles.list} style={{ display: "flex", flexWrap: "wrap", gap: "8px 16px", listStyle: "none", paddingLeft: 0 }}>
-          {TABS.map(([href, label]) => <li key={href}><Link href={href}>{label}</Link></li>)}
-        </ul>
-      </nav>
-      <div className={styles.section}>
+      <SectionTabs label="관리자 메뉴" tabs={TABS.map(([href, label]) => ({ href, label }))} />
+      <div>
         <Suspense fallback={<Loading />}>
           <Gate>{children}</Gate>
         </Suspense>

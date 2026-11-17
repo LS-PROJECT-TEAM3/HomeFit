@@ -1,32 +1,37 @@
-import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { ChatWidget } from "@/app/_components/chat-widget";
+import { countOpenIncidents } from "@/incident/queries.server";
+import { createClient } from "@/lib/supabase/server";
+import { Sidebar } from "./sidebar";
 import styles from "./main.module.css";
 
-// IA 네비게이션 모델: 로그인한 사용자 화면의 주 메뉴. 집 비교·집 점검·AI 도우미·관리자는 "전체 메뉴"에서 연다(spec 004)
-const MENU = [
-  { href: "/", label: "홈" },
-  { href: "/incidents", label: "위험·기회 알림" }, // IA v1.4 화면 이름 (spec 003 FR-012)
-  { href: "/notices", label: "맞춤 공고" }, // IA NT_080000_PG (spec 001 v0.2)
-  { href: "/schedule", label: "내 일정" },
-  { href: "/my/conditions", label: "내 정보" },
-  { href: "/menu", label: "전체 메뉴" }, // spec 004: 기획안 9절 화면 모음(IA "더 보기")
-];
+/** 사이드바의 새 알림 수와 관리자 메뉴. 못 읽어도 메뉴는 그대로 보인다(숫자만 빠짐) */
+async function SidebarWithCounts() {
+  await connection();
+  let newAlerts = 0;
+  let isAdmin = false;
+  try {
+    const [counts, admin] = await Promise.all([countOpenIncidents(), (await createClient()).rpc("is_admin")]);
+    newAlerts = counts.newCount;
+    isAdmin = admin.data === true;
+  } catch {
+    // 숫자·관리자 메뉴만 빠지고 메뉴는 그대로
+  }
+  return <Sidebar newAlerts={newAlerts} isAdmin={isAdmin} />;
+}
 
+// IA 네비게이션 모델 (spec 004 v0.2 FR-001): PC는 왼쪽 사이드바, 휴대폰은 위쪽 메뉴 버튼. 화면마다 하위 항목은 위쪽 탭
 export default function MainLayout({ children }: LayoutProps<"/">) {
   return (
-    <>
-      <header className={styles.header}>
-        <Link href="/" className={styles.brand}>HomeFit AI</Link>
-        <nav aria-label="주 메뉴">
-          <ul className={styles.menu}>
-            {MENU.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className={styles.menuLink}>{item.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </header>
-      {children}
-    </>
+    <div className={styles.shell}>
+      {/* 사이드바는 주소를 읽어(usePathname) 지금 화면을 표시하므로, 기다리는 동안은 주소를 읽지 않는 빈 틀을 둔다(빌드 오류 방지) */}
+      <Suspense fallback={<aside className={styles.sidebar} aria-hidden="true" />}>
+        <SidebarWithCounts />
+      </Suspense>
+      <div className={styles.content}>{children}</div>
+      {/* spec 004 v0.2 FR-007: 모든 화면에 뜨는 챗봇 창(틀) */}
+      <ChatWidget />
+    </div>
   );
 }

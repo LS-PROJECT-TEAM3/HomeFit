@@ -1,5 +1,6 @@
+/* 홈 대시보드: 벤토 카드 (CLAUDE.md 디자인, spec 004 v0.2 FR-006). 색·간격은 app/tokens.css 변수만 */
 .main {
-  max-width: 960px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: var(--space-3) var(--space-1);
 }
@@ -9,18 +10,34 @@
   font-size: var(--font-size-xl);
 }
 
-/* 대시보드만 벤토 카드 (CLAUDE.md 디자인) */
+/* 휴대폰 1열, 태블릿 2열, PC 4열. 큰 카드는 2칸 */
 .bento {
   display: grid;
-  /* 휴대폰(375px)에서는 한 줄에 카드 하나: 금액이 중간에 끊기지 않게 (spec 003 5단계 화면 확인) */
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-1);
+}
+
+@media (min-width: 640px) {
+  .bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .span2 {
+    grid-column: span 2;
+  }
 }
 
 .card {
   display: flex;
   flex-direction: column;
   gap: var(--space-half);
+  min-width: 0;
   padding: var(--space-2);
   background: var(--color-card);
   border: 1px solid var(--color-border);
@@ -35,10 +52,6 @@ a.card:hover {
   border-color: var(--color-primary);
 }
 
-.wide {
-  grid-column: 1 / -1;
-}
-
 .callout {
   border-color: var(--color-accent);
 }
@@ -50,10 +63,16 @@ a.card:hover {
   color: var(--color-muted-text);
 }
 
+.headline {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
 .number {
   white-space: nowrap;
   font-size: var(--font-size-number);
   font-weight: 700;
+  line-height: 1.1;
   color: var(--color-primary);
 }
 
@@ -67,4 +86,116 @@ a.card:hover {
   padding-left: 1.2em;
   display: grid;
   gap: var(--space-half);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-half) var(--space-1);
+  margin: 0;
+}
+
+.facts dt {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted-text);
+}
+
+.facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* 월세·관리비 막대: 색과 함께 아래 글자(■ 월세 …)로도 구분 */
+.bar {
+  display: flex;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-muted-bg);
+}
+
+.barRent,
+.keyRent {
+  background: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.barFee,
+.keyFee {
+  background: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.keyRent,
+.keyFee {
+  background: none;
+}
+
+.envRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.riskChip {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border: 1px solid var(--color-danger);
+  border-radius: 999px;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pair {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background: var(--color-primary-hover);
+}
+
+.timeline {
+  display: grid;
+  gap: var(--space-half);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px var(--space-half);
+  padding-left: var(--space-half);
+  border-left: 3px solid var(--color-border);
+}
+
+.kind {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-muted-text);
+}
+
+.timelineMeta {
+  grid-column: 1 / -1;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted-text);
 }

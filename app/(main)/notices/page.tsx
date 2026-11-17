@@ -1,3 +1,4 @@
+import { PolicyTabs } from "@/app/_components/policy-tabs";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -52,6 +53,8 @@ export default function NoticesPage() {
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>맞춤 공고</h1>
+      {/* spec 004 v0.2: 기획안 Work & Policy 탭 */}
+      <PolicyTabs />
       <p className={styles.meta}>내 조건에 맞는 공고입니다. 눌러서 요약을 보고 팔로우할지 정하세요. 팔로우한 공고의 접수 기간·임대료가 바뀌거나 정정공고가 올라오면 주거 기회 알림으로 알려 드립니다.</p>
       <Suspense fallback={<Loading />}>
         <MatchedList />

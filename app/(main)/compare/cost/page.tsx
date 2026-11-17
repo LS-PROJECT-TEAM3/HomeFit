@@ -8,7 +8,7 @@ import { currentUserId } from "@/lib/supabase/server";
 import { loadMyHome } from "../../my/home/load";
 import styles from "@/app/_components/hub.module.css";
 
-export const metadata = { title: "실질 주거비 비교 | HomeFit AI" };
+export const metadata = { title: "실질 비용 비교 | 집 비교 | HomeFit AI" };
 
 function won(value: number | null): string {
   return value === null ? "—" : `${value.toLocaleString("ko-KR")}원`;
@@ -53,12 +53,11 @@ async function CostTable() {
 // IA CP_040200_PG 실질 주거비 비교 (PRD FR-28 알파). spec 004 뼈대: 내 집 줄만 실제 값
 export default function CompareCostPage() {
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>실질 주거비 비교</h1>
+    <>
       <SkeletonNotice>내 집 줄은 내 집 화면에 넣은 월세·관리비로 채웁니다. 관심 주택·에너지비·교통비는 다음 단계입니다.</SkeletonNotice>
       <Suspense fallback={<Loading />}>
         <CostTable />
       </Suspense>
-    </main>
+    </>
   );
 }

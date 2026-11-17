@@ -15,8 +15,8 @@ const FIELDS = [
 // IA CP_040100_PG 관심 주택 등록 (PRD FR-28). spec 004 뼈대: 칸 모양만, 저장하지 않는다
 export default function CompareNewPage() {
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>관심 주택 등록</h1>
+    <section className={styles.card} aria-labelledby="new-title">
+      <h2 id="new-title">관심 주택 등록</h2>
       <SkeletonNotice>입력 칸 모양만 있습니다. 저장(ERD interest_homes)은 다음 단계에서 만들기 때문에 지금은 저장 버튼이 꺼져 있습니다.</SkeletonNotice>
       <form className={styles.form} aria-describedby="compare-new-help">
         {FIELDS.map(([name, label, placeholder]) => (
@@ -28,6 +28,6 @@ export default function CompareNewPage() {
         <button type="button" className={styles.input} disabled>저장 (다음 단계)</button>
       </form>
       <p id="compare-new-help" className={styles.muted}>상세 주소는 받지 않습니다. 시군구까지만 넣습니다.</p>
-    </main>
+    </section>
   );
 }

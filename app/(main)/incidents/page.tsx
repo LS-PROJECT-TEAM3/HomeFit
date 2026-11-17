@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { SectionTabs } from "@/app/_components/section-tabs";
 import { Empty, LoadError, Loading } from "@/app/_components/states";
 import { isIncidentStatus, SimulatedBadge, StatusBadge, UpdatedBadge } from "@/app/_components/status";
 import { summarizeChange } from "@/incident/change-text";
@@ -59,7 +60,7 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
               <Link href="/notices">맞춤 공고 보기</Link>
             </>
           ) : (
-            "거른 조건에 맞는 알림이 없습니다."
+            "필터 조건에 맞는 알림이 없습니다."
           )}
         </Empty>
       ) : (
@@ -95,23 +96,20 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
 
 async function Filtered({ searchParams }: { searchParams: PageProps<"/incidents">["searchParams"] }) {
   const filter = parseIncidentFilter(await searchParams);
+  const tabHref = (status: string) => (status === "all" ? "/incidents" : `/incidents?status=${status}`);
   return (
     <>
-      {/* FR-008: GET 폼이라 거르기 값이 주소에 남아 새로고침해도 유지된다 */}
+      {/* spec 004 v0.2: 상태는 탭으로(기획안 Incident Center: 새 알림·승인 대기·처리 이력). 필터 값은 주소에 남는다(FR-008) */}
+      <SectionTabs label="알림 상태" tabs={STATUS_OPTIONS.map(([value, label]) => ({ href: tabHref(value), label }))} activeHref={tabHref(filter.status)} />
       <form className={styles.filters} method="get">
-        <label>
-          상태{" "}
-          <select name="status" defaultValue={filter.status} className={styles.select}>
-            {STATUS_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
-        </label>
+        {filter.status !== "all" ? <input type="hidden" name="status" value={filter.status} /> : null}
         <label>
           기간{" "}
           <select name="period" defaultValue={filter.period} className={styles.select}>
             {PERIOD_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </label>
-        <button type="submit" className={styles.apply}>거르기</button>
+        <button type="submit" className={styles.apply}>필터 적용</button>
       </form>
       <Suspense fallback={<Loading />}>
         <IncidentList filter={filter} />

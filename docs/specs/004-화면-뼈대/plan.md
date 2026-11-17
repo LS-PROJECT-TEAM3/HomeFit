@@ -50,4 +50,5 @@
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-18 | v0.2 | 앱 틀: `app/(main)/sidebar.tsx`(사이드바·휴대폰 메뉴), `app/_components/section-tabs.tsx`(화면별 탭), `navigation.ts`(지금 메뉴·그래프 점, 시험 6개), `humidity-trend.tsx`, `chat-widget.tsx`. 화면마다 layout.tsx에 탭. 홈 벤토 4열·타임라인·일정. /menu 삭제 |
 | 2026-11-18 | v0.1 | 사용자 지시로 승인 없이 작성·구현 |

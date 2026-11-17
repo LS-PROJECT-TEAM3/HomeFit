@@ -1,3 +1,4 @@
+import { PolicyTabs } from "@/app/_components/policy-tabs";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -43,6 +44,8 @@ export default function SchedulePage() {
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>내 일정</h1>
+      {/* spec 004 v0.2: 기획안 Work & Policy 탭 */}
+      <PolicyTabs />
       <Suspense fallback={<Loading />}>
         <ScheduleList />
       </Suspense>
