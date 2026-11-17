@@ -6,7 +6,7 @@ const TABS: Tab[] = [
   { href: "/qc", label: "결로 위험 시뮬레이터" },
   { href: "/qc/checklist", label: "입주 전 품질 점검", note: "뼈대" },
   { href: "/qc/records", label: "주거환경·하자 기록" },
-  { href: "/qc/building", label: "건축물 기본 정보", note: "범위 밖" },
+  { href: "/qc/building", label: "건축물 기본 정보" },
 ];
 
 export default function QcLayout({ children }: LayoutProps<"/qc">) {

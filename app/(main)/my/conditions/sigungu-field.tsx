@@ -13,11 +13,12 @@ function loadOf(sidoCode: string, result: Result | null): Load {
   return result.items ? { state: "ready", items: result.items } : { state: "failed" };
 }
 
-type Props = { sidoCode: string; initial: string; error?: string; label?: string; emptyLabel?: string };
+/** onPick: 고를 때 알려 줌(spec 004 v0.4 건축물 조회가 읍면동 목록을 바꾸려고 씀) */
+type Props = { sidoCode: string; initial: string; error?: string; label?: string; emptyLabel?: string; onPick?: (code: string) => void };
 
 // FR-002 (spec 001 v0.3): 고른 시도에 속한 시군구만 고른다. 비우면 "시도 전체"
 // spec 003 FR-001: 내 집 화면도 같이 쓴다(시군구 필수라 이름표만 바꿈)
-export function SigunguField({ sidoCode, initial, error, label = "시군구 (선택)", emptyLabel = "시도 전체" }: Props) {
+export function SigunguField({ sidoCode, initial, error, label = "시군구 (선택)", emptyLabel = "시도 전체", onPick }: Props) {
   const [result, setResult] = useState<Result | null>(null);
   const [value, setValue] = useState(initial);
   const load = loadOf(sidoCode, result);
@@ -45,7 +46,7 @@ export function SigunguField({ sidoCode, initial, error, label = "시군구 (선
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor="sigunguCode">{label}</label>
-      <select id="sigunguCode" name="sigunguCode" value={shown} onChange={(e) => setValue(e.target.value)}
+      <select id="sigunguCode" name="sigunguCode" value={shown} onChange={(e) => { setValue(e.target.value); onPick?.(e.target.value); }}
         className={styles.input} disabled={load.state !== "ready"}
         aria-invalid={Boolean(error)} aria-describedby="sigunguCode-help sigunguCode-error">
         <option value="">{emptyLabel}</option>
