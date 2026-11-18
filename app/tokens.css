@@ -26,6 +26,9 @@
   --color-status-failed: #dc2626;
   --color-status-waiting: #ea580c;
   --color-status-off: #64748b;
+  /* spec 011 누진 구간 그래프 2·3구간 바탕(글자 #1e293b와 명암비 4.5 이상) */
+  --color-tier-2: #cfdcf3;
+  --color-tier-3: #b4c8ec;
 
   /* 글꼴: Pretendard 하나로 한글·영문·숫자 */
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
