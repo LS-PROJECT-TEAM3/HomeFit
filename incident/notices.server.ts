@@ -57,7 +57,7 @@ export async function listMyMatchedNotices(today: string): Promise<MatchedResult
   return { hasCondition: true, items: listMatchedNotices({ notices, condition, today, decisions }) };
 }
 
-export type NoticeDetail = { notices: Notice[]; myIncidents: { id: string; status: string }[]; myDecision: FollowDecision | null };
+export type NoticeDetail = { notices: Notice[]; myIncidents: { id: string; status: string }[]; myDecision: FollowDecision | null; myScheduleId: string | null };
 
 /**
  * FR-017 수용 기준 4·5 (spec 001 v0.4): 공고 하나(단지 여럿)의 원문 값과, 이 공고로 생긴 내 사건.
@@ -66,13 +66,15 @@ export type NoticeDetail = { notices: Notice[]; myIncidents: { id: string; statu
 export async function getNoticeDetail(announcementId: string): Promise<NoticeDetail | null> {
   const userId = await requireUserId();
   const supabase = await createClient();
-  const [items, incidents, follow] = await Promise.all([
+  const [items, incidents, follow, schedule] = await Promise.all([
     supabase.from("source_items").select("raw").eq("source_code", "myhome_notice").like("external_id", `${announcementId}-%`).limit(50),
     supabase.from("incidents").select("id, status").eq("user_id", userId).eq("facts->>announcementId", announcementId).order("detected_at", { ascending: false }),
     supabase.from("notice_follows").select("decision").eq("user_id", userId).eq("source_code", "myhome_notice").eq("announcement_id", announcementId).maybeSingle(),
+    // spec 007 FR-001: 이 공고를 이미 내 일정에 넣었나
+    supabase.from("schedule_items").select("id").eq("user_id", userId).eq("source_code", "myhome_notice").eq("announcement_id", announcementId).maybeSingle(),
   ]);
-  if (items.error || incidents.error || follow.error) throw new Error("공고를 불러오지 못했습니다.");
+  if (items.error || incidents.error || follow.error || schedule.error) throw new Error("공고를 불러오지 못했습니다.");
   const notices = items.data.map((row) => row.raw as unknown as Notice);
   if (notices.length === 0) return null;
-  return { notices, myIncidents: incidents.data, myDecision: (follow.data?.decision as FollowDecision | undefined) ?? null };
+  return { notices, myIncidents: incidents.data, myDecision: (follow.data?.decision as FollowDecision | undefined) ?? null, myScheduleId: schedule.data?.id ?? null };
 }

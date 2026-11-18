@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import type { FollowDecision } from "@/incident/matched";
-import { followNotice, ignoreNotice } from "./actions";
+import { addNoticeToSchedule, followNotice, ignoreNotice } from "./actions";
 import styles from "../../incidents/[id]/detail.module.css";
 
 const LABEL: Record<FollowDecision | "new", string> = {
@@ -12,7 +13,9 @@ const LABEL: Record<FollowDecision | "new", string> = {
 };
 
 // IA NT_080100_PG 공고 상세의 팔로우 승인·거절, NT_080101_MD 공고 거절 (FR-020, spec 001 v0.5)
-export function FollowPanel({ announcementId, initial }: { announcementId: string; initial: FollowDecision | null }) {
+type Props = { announcementId: string; initial: FollowDecision | null; initialScheduleId: string | null };
+
+export function FollowPanel({ announcementId, initial, initialScheduleId }: Props) {
   const [decision, setDecision] = useState<FollowDecision | "new">(initial ?? "new");
   const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -46,6 +49,7 @@ export function FollowPanel({ announcementId, initial }: { announcementId: strin
           </button>
         ) : null}
       </div>
+      <ScheduleButton announcementId={announcementId} followed={decision === "follow"} initialScheduleId={initialScheduleId} />
       <dialog ref={dialog} className={styles.dialog} aria-labelledby="ignore-title">
         <h2 id="ignore-title">이 공고를 관심 없음으로 할까요?</h2>
         <p>이 공고가 바뀌어도 알림이 생기지 않습니다. 나중에 다시 팔로우할 수 있습니다.</p>
@@ -59,5 +63,29 @@ export function FollowPanel({ announcementId, initial }: { announcementId: strin
         </div>
       </dialog>
     </section>
+  );
+}
+
+// spec 007 FR-001: 팔로우한 공고를 알림 없이 내 일정에. 누를 때만(사용자 승인)
+function ScheduleButton({ announcementId, followed, initialScheduleId }: { announcementId: string; followed: boolean; initialScheduleId: string | null }) {
+  const [scheduleId, setScheduleId] = useState<string | null>(initialScheduleId);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  if (scheduleId) return <p role="status">내 일정에 있음 · <Link href={`/schedule/${scheduleId}`}>일정 보기</Link></p>;
+  if (!followed) return null;
+  const add = () =>
+    startTransition(async () => {
+      const result = await addNoticeToSchedule(announcementId);
+      setError(result.error ?? null);
+      if (result.scheduleId) setScheduleId(result.scheduleId);
+    });
+  return (
+    <div>
+      {error ? <p className={styles.error} role="alert">{error}</p> : null}
+      <button type="button" className={styles.approve} disabled={pending} onClick={add}>
+        {pending ? "처리 중…" : "내 일정에 추가"}
+      </button>
+      <p className={styles.notice}>알림이 없어도 신청 마감과 준비 체크리스트를 내 일정에 넣습니다.</p>
+    </div>
   );
 }

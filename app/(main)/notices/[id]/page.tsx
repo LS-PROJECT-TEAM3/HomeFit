@@ -97,7 +97,7 @@ async function Detail({ params }: { params: PageProps<"/notices/[id]">["params"]
       <Suspense fallback={<section className={styles.card}><p role="status">요약을 만드는 중…</p></section>}>
         <Summary announcementId={announcementId} notice={notice} />
       </Suspense>
-      <FollowPanel announcementId={announcementId} initial={detail.myDecision} />
+      <FollowPanel announcementId={announcementId} initial={detail.myDecision} initialScheduleId={detail.myScheduleId} />
       <section className={styles.card} aria-labelledby="watch-title">
         <h2 id="watch-title" className={styles.sectionTitle}>이 공고로 생긴 내 알림</h2>
         {detail.myIncidents.length === 0 ? (
@@ -117,7 +117,7 @@ async function Detail({ params }: { params: PageProps<"/notices/[id]">["params"]
   );
 }
 
-// IA NT_080100_PG 공고 상세 (FR-017 수용 기준 4·5, FR-020, FR-021, spec 001 v0.5). 승인은 팔로우이고 일정에 넣지 않는다
+// IA NT_080100_PG 공고 상세 (FR-017 수용 기준 4·5, FR-020, FR-021, spec 001 v0.5). 승인은 팔로우. 일정은 팔로우 뒤 따로 눌러 넣는다(spec 007)
 export default function NoticeDetailPage({ params }: PageProps<"/notices/[id]">) {
   return (
     <main className={styles.main}>

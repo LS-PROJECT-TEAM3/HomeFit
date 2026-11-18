@@ -1,7 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { buildDefaultChecklist } from "@/incident/checklist";
 import type { FollowDecision } from "@/incident/matched";
+import { addToScheduleError } from "@/incident/schedule-origin";
+import type { Json } from "@/lib/supabase/database.types";
+import type { Notice } from "@/watch/notice";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 
 export type FollowState = { decision?: FollowDecision; error?: string };
@@ -33,4 +38,25 @@ export async function followNotice(announcementId: string): Promise<FollowState>
 export async function ignoreNotice(announcementId: string, reason: string): Promise<FollowState> {
   const trimmed = reason.trim().slice(0, MAX_REASON);
   return decide(announcementId, "ignore", trimmed === "" ? null : trimmed);
+}
+
+export type AddToScheduleState = { scheduleId?: string; error?: string };
+
+/**
+ * spec 007 FR-001~003 (PRD FR-16 v1.9): 팔로우한 공고를 알림 없이 내 일정에. 누르는 것이 사용자의 승인이다.
+ * 팔로우 여부·중복은 DB 함수(add_notice_to_schedule)가 누른 사람 권한으로 다시 검사한다.
+ */
+export async function addNoticeToSchedule(announcementId: string): Promise<AddToScheduleState> {
+  const userId = await currentUserId();
+  if (!userId) redirect("/login");
+  if (!announcementId) return { error: addToScheduleError("notice_not_found") };
+  const supabase = await createClient();
+  const item = await supabase.from("source_items").select("raw").eq("source_code", "myhome_notice").like("external_id", `${announcementId}-%`).order("apply_end", { ascending: false, nullsFirst: false }).limit(1).maybeSingle();
+  if (item.error) return { error: addToScheduleError("") };
+  if (!item.data) return { error: addToScheduleError("notice_not_found") };
+  const checklist = buildDefaultChecklist(item.data.raw as unknown as Notice); // raw는 Notice로 저장했다
+  const { data, error } = await supabase.rpc("add_notice_to_schedule", { p_announcement_id: announcementId, p_checklist: checklist as unknown as Json });
+  if (error) return { error: addToScheduleError(error.message) };
+  revalidatePath("/schedule");
+  return { scheduleId: data };
 }
