@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { connection } from "next/server";
 import { LoadError } from "@/app/_components/states";
 import { createClient } from "@/lib/supabase/server";
@@ -48,13 +49,14 @@ export default async function AdminWatchPage() {
       </div>
       <p className={styles.muted}>지금 한 번 실행은 실제 API를 부르고 &ldquo;손으로&rdquo;로 기록됩니다. 연속 실패 수에는 시뮬레이터 실행을 넣지 않습니다.</p>
       <h2 className={styles.section}>최근 실행 20건</h2>
+      <p className={styles.muted}>시각을 누르면 그 실행의 단계를 흐름 화면에서 봅니다(IA AD_070201_PG 수집 실행 상세).</p>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead><tr><th scope="col">시각</th><th scope="col">출처</th><th scope="col">방식</th><th scope="col">결과</th><th scope="col">오류</th></tr></thead>
           <tbody>
             {runs.data.slice(0, 20).map((run) => (
               <tr key={run.id}>
-                <td>{kst(run.started_at)}</td>
+                <td><Link href={`/admin/flow?run=${run.id}`}>{kst(run.started_at)}</Link></td>
                 <td>{SOURCE[run.source_code] ?? run.source_code}</td>
                 <td>{TRIGGER[run.trigger] ?? run.trigger}</td>
                 <td><strong>{STATUS[run.status] ?? run.status}</strong></td>
