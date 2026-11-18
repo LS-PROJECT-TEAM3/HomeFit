@@ -3,17 +3,13 @@
 근거: Clean Code(R. C. Martin), Clean Architecture·Ports & Adapters, ESLint 기본값(max-lines 300, max-lines-per-function 50, max-params 3), Anthropic Claude Code 모범 사례. **근거 확인일: 2026-10-21**
 
 ## 스택
-추천 순서 (앞의 것으로 충분하면 뒤로 가지 않는다)
-1. 화면이 있는 앱: HTML/CSS/JavaScript, 빌드 도구 없음
-2. 화면이 10개를 넘거나 상태가 복잡해지면: React + TypeScript (Vite)
-3. 데이터 처리·엑셀 자동화·분석: Python (이 PC는 `py -3`. `python3`은 MS 스토어 가짜 실행 파일이다)
-4. 여러 사람이 같은 자료를 봐야 할 때만 서버 저장소(Supabase 등). 그 전에는 브라우저 저장 + CSV
-
-빌드 없는 JavaScript의 시험은 Node 내장 `node:test`로 하고, 명령은 `node --test "tests/*.test.js"` 형식으로 쓴다. 이 PC의 Node 24는 `node --test tests/`처럼 폴더만 넘기면 폴더를 파일 하나로 읽어 실패한다(2026-10-21 확인).
+이 저장소의 스택은 `CLAUDE.md` "스택"이 정한 대로다. 여기에는 그 선택을 지키는 기준만 둔다.
+- 언어·프레임워크: Next.js(App Router) + TypeScript(strict). 스타일은 CSS 변수. 저장소는 Supabase
+- 시험: Vitest. `npm test`, `npx tsc --noEmit`, `npm run lint`, `npm run build`
+- Python은 데이터 탐색용으로만 쓴다
 
 피할 것 (꼭 필요하면 이유를 들어 먼저 묻는다)
-- 유료이거나 계정·API 키가 필요한 외부 서비스
-- 첫 기능부터 무거운 프레임워크나 복잡한 빌드 설정 (Next.js, 모노레포 등)
+- 아직 정하지 않은 외부 서비스, 계정·API 키가 필요하거나 비용이 드는 것. 이미 쓰는 Supabase·Gemini·Claude·공공데이터포털은 예외
 - 정식판이 아닌 라이브러리 (베타, 실험 기능)
 - 같은 일을 하는 라이브러리를 둘 이상 들이기
 
@@ -31,13 +27,12 @@
 - 중첩은 3단계 이하. 조기 반환(guard clause)을 쓴다.
 
 ## 구조 (클린 아키텍처를 작은 규모로)
-- 의존성은 안쪽으로만: `ui`·`infrastructure` → `application` → `domain`.
-- `domain`은 순수 함수다. 화면(DOM), 네트워크, 저장소, 현재 시각을 직접 쓰지 않고 인자로 받는다.
-- 폴더가 필요해지면 `domain/`, `application/`, `infrastructure/`, `ui/` 네 가지만 쓴다. 파일 몇 개짜리 앱은 같은 분리를 파일 단위로 지킨다.
+- 의존성은 안쪽으로만: 화면(`app/`)·DB·API를 부르는 코드(`*.server.ts`) → 순수 함수.
+- 순수 함수는 화면, 네트워크, 저장소, 현재 시각을 직접 쓰지 않고 인자로 받는다.
+- 폴더 이름은 `CLAUDE.md` "폴더"의 안내서 이름(`watch/`, `incident/`, `knowledge/` 등)을 쓰고, 각 폴더 안에서 순수 함수 파일과 `*.server.ts` 파일로 나눈다.
 - 인터페이스(포트)는 구현이 둘 이상이거나 시험용 대역이 필요할 때만 만든다.
 
 ## 타입
-- 빌드 없는 JavaScript: 바깥에서 쓰는 domain 함수에 JSDoc 타입 주석(`/** @param {Date} today */`).
 - TypeScript: `strict`를 켜고 `any`는 쓰지 않는다. 꼭 필요하면 이유를 주석으로 남긴다.
 - Python: 함수에 타입 힌트.
 
