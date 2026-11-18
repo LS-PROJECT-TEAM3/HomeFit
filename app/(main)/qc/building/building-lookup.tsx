@@ -85,14 +85,14 @@ export function BuildingLookup({ initialSigungu }: { initialSigungu: string }) {
             {result.items.map((b, i) => (
               <section key={i} className={styles.card} aria-label={`${b.name} ${b.dong}`}>
                 <h2>{b.name}{b.dong ? ` · ${b.dong}` : ""}</h2>
-                <dl className={styles.list} style={{ listStyle: "none", paddingLeft: 0 }}>
-                  <div><dt style={{ display: "inline" }}>주용도: </dt><dd style={{ display: "inline", margin: 0 }}>{b.purpose}</dd></div>
-                  <div><dt style={{ display: "inline" }}>구조: </dt><dd style={{ display: "inline", margin: 0 }}>{b.structure}</dd></div>
-                  <div><dt style={{ display: "inline" }}>사용승인일: </dt><dd style={{ display: "inline", margin: 0 }}>{b.approvedOn ?? "정보 없음"}</dd></div>
-                  <div><dt style={{ display: "inline" }}>층수: </dt><dd style={{ display: "inline", margin: 0 }} className="tabular-nums">지상 {b.floorsAbove ?? "?"}층 · 지하 {b.floorsBelow ?? "?"}층</dd></div>
-                  <div><dt style={{ display: "inline" }}>세대수: </dt><dd style={{ display: "inline", margin: 0 }} className="tabular-nums">{b.households ?? "정보 없음"}</dd></div>
-                  <div><dt style={{ display: "inline" }}>연면적: </dt><dd style={{ display: "inline", margin: 0 }} className="tabular-nums">{area(b.totalArea)}</dd></div>
-                  <div><dt style={{ display: "inline" }}>내진설계: </dt><dd style={{ display: "inline", margin: 0 }}><strong>{b.quakeDesign}</strong></dd></div>
+                <dl className={`${styles.list} ${styles.plainList} ${styles.inlineFacts}`}>
+                  <div><dt>주용도: </dt><dd>{b.purpose}</dd></div>
+                  <div><dt>구조: </dt><dd>{b.structure}</dd></div>
+                  <div><dt>사용승인일: </dt><dd>{b.approvedOn ?? "정보 없음"}</dd></div>
+                  <div><dt>층수: </dt><dd className="tabular-nums">지상 {b.floorsAbove ?? "?"}층 · 지하 {b.floorsBelow ?? "?"}층</dd></div>
+                  <div><dt>세대수: </dt><dd className="tabular-nums">{b.households ?? "정보 없음"}</dd></div>
+                  <div><dt>연면적: </dt><dd className="tabular-nums">{area(b.totalArea)}</dd></div>
+                  <div><dt>내진설계: </dt><dd><strong>{b.quakeDesign}</strong></dd></div>
                 </dl>
                 <p className={styles.muted}>{b.roadAddress || b.address}</p>
               </section>

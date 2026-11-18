@@ -37,7 +37,7 @@ async function Usage() {
   );
 }
 
-// 기획안 Energy Analysis "예상 에너지 사용량" (spec 011 FR-003)
+// IA EN_110000_PG 예상 에너지 사용량 (spec 011 FR-003)
 export default function EnergyUsagePage() {
   return (
     <Suspense fallback={<Loading />}>

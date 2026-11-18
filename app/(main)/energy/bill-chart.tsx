@@ -18,7 +18,7 @@ export function BillChart({ rows, currentMonth }: { rows: readonly MonthlyBill[]
   const low = Math.min(...bills);
   const high = Math.max(...bills);
   return (
-    <figure style={{ margin: 0 }}>
+    <figure className={styles.figure}>
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} width="100%" role="img" style={{ maxWidth: 480, display: "block" }}
         aria-label={`월별 예상 전기요금 막대 그래프: 가장 적은 달 ${won(low)}, 가장 많은 달 ${won(high)}`}>
         {rows.map((row, i) => {

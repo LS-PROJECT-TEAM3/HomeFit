@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { LoadError } from "@/app/_components/states";
+import { Empty, LoadError } from "@/app/_components/states";
 import { RISK_RULES } from "@/incident/condensation";
 import { currentUserId } from "@/lib/supabase/server";
 import { Fold } from "@/app/_components/fold";
@@ -23,7 +23,7 @@ function kstText(iso: string): string {
 // Q4 (spec 003): 7일 넘은 측정값은 결로 판단에 쓰지 않는다. 색만이 아니라 글자로 알린다(디자인 기본선 5)
 function MeasurementList({ measurements, now }: { measurements: MyMeasurement[]; now: Date }) {
   if (measurements.length === 0) {
-    return <p>아직 측정값이 없습니다. 측정값이 있어야 결로 위험을 알려 드릴 수 있습니다.</p>;
+    return <Empty>아직 측정값이 없습니다. 측정값이 있어야 결로 위험을 알려 드릴 수 있습니다.</Empty>;
   }
   return (
     <ul className={styles.list}>

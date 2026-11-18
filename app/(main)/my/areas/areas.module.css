@@ -17,7 +17,7 @@
   padding: var(--space-1) var(--space-2);
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-control);
 }
 
 .text {
@@ -37,10 +37,10 @@
   background: var(--color-card);
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-control);
   font: inherit;
   cursor: pointer;
-  transition: border-color 200ms;
+  transition: border-color var(--transition-hover);
 }
 
 .delete:hover {
@@ -48,7 +48,7 @@
 }
 
 .delete:focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 

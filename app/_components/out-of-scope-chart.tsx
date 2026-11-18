@@ -7,7 +7,7 @@ export function OutOfScopeChart({ title, reason, status = "out" }: { title: stri
     <section className={styles.card} aria-labelledby="oos-title">
       <h2 id="oos-title">{title}</h2>
       <StatusLabel status={status} />
-      <div aria-hidden="true" style={{ height: 160, border: "1px dashed var(--color-border)", borderRadius: "var(--radius-card)", display: "grid", placeItems: "center", color: "var(--color-muted-text)" }}>
+      <div aria-hidden="true" className={styles.chartPlaceholder}>
         그래프 자리
       </div>
       <p className={styles.muted}>{reason}</p>

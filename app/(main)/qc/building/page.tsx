@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Loading } from "@/app/_components/states";
+import { LoadError, Loading } from "@/app/_components/states";
 import { currentUserId } from "@/lib/supabase/server";
 import { loadMyHome } from "../../my/home/load";
 import { BuildingLookup } from "./building-lookup";
@@ -14,8 +14,20 @@ async function Lookup() {
   await connection();
   const userId = await currentUserId();
   if (!userId) redirect("/login");
-  const home = await loadMyHome(userId).then((r) => r.home).catch(() => null);
-  return <BuildingLookup initialSigungu={home?.sigunguCode ?? ""} />;
+  let initialSigungu = "";
+  let loadFailed = false;
+  try {
+    initialSigungu = (await loadMyHome(userId)).home?.sigunguCode ?? "";
+  } catch {
+    loadFailed = true;
+  }
+  // 내 집 읽기 실패를 "내 집 없음"과 구분해 알린다(디자인 기본선 7). 조회는 직접 고르면 그대로 된다
+  return (
+    <>
+      {loadFailed ? <LoadError>내 집 시군구를 불러오지 못해 빈칸으로 두었습니다. 시군구를 직접 골라 조회해 주세요.</LoadError> : null}
+      <BuildingLookup initialSigungu={initialSigungu} />
+    </>
+  );
 }
 
 // IA CP_040303_TB 건축물 정보 (PRD v1.8 FR-34, spec 004 v0.4 FR-008): 건축HUB 건축물대장 표제부 조회

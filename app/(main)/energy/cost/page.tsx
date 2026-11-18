@@ -48,7 +48,7 @@ async function CostTable() {
   );
 }
 
-// 기획안 Energy Analysis "월별 예상 에너지 비용" (spec 011 FR-003)
+// IA EN_110100_TB 월별 예상 비용 (spec 011 FR-003)
 export default function EnergyCostPage() {
   return (
     <Suspense fallback={<Loading />}>

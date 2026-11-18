@@ -26,7 +26,7 @@ export function MoveInChecklist() {
   return (
     <>
       <p className={styles.muted} role="status">{done.size}/{ITEMS.length} 확인</p>
-      <ul className={styles.list} style={{ listStyle: "none", paddingLeft: 0 }}>
+      <ul className={`${styles.list} ${styles.plainList}`}>
         {ITEMS.map((item, index) => (
           <li key={item}>
             <label>

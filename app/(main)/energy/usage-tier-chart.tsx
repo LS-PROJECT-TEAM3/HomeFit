@@ -17,7 +17,7 @@ export function UsageTierChart({ kwh, month }: { kwh: number; month: number }) {
   const segments = [[0, first], [first, second], [second, scaleMax]] as const;
   const ranges = [`~${first}`, `${first + 1}~${second}`, `${second + 1}~`];
   return (
-    <figure style={{ margin: 0 }}>
+    <figure className={styles.figure}>
       <svg viewBox={`0 0 ${WIDTH} 84`} width="100%" role="img" style={{ maxWidth: 480, display: "block" }}
         aria-label={`한 달 ${kwh}kWh는 ${month}월 기준 누진 ${tier}구간(${ranges[tier - 1]}kWh)입니다`}>
         {segments.map(([from, to], i) => (

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { LoadError } from "@/app/_components/states";
+import { Suspense } from "react";
+import { Empty, LoadError, Loading } from "@/app/_components/states";
 import { buildFlow, sourceStarts, SOURCES } from "@/flow/graph";
 import { createClient } from "@/lib/supabase/server";
 import { maskSecrets } from "@/watch/mask";
@@ -41,8 +42,8 @@ function sourceLabel(code: string): string {
   return SOURCES.find((s) => s.code === code)?.label ?? code;
 }
 
-// IA AD_070400_TB 흐름 화면 (PRD FR-23, spec 005 FR-003): 시작 상자(출처마다) + 고른 실행의 단계 상자·화살표. 상자를 누르면 상세(AD_070401_MD)
-export default async function AdminFlowPage({ searchParams }: PageProps<"/admin/flow">) {
+// 기록 읽기는 Suspense 안에서 한다(Next.js 16 Cache Components: 밖에서 읽으면 화면 전체가 막힌다)
+async function FlowContent({ searchParams }: PageProps<"/admin/flow">) {
   await connection();
   const params = await searchParams;
   const wanted = typeof params.run === "string" ? params.run : null;
@@ -59,7 +60,6 @@ export default async function AdminFlowPage({ searchParams }: PageProps<"/admin/
   const starts = sourceStarts(runs);
   return (
     <>
-      <p className={styles.muted}>실행 기록(runs·run_steps)에서 그립니다. 성공은 초록 실선, 실패는 빨강, 승인 대기는 주황 점선, 안 켜짐·도달 못 함은 회색 점선이고 글자로도 적었습니다. 상자를 누르면 상세가 열립니다(키 값은 가림).</p>
       <section className={styles.section} aria-labelledby="flow-starts">
         <h2 id="flow-starts">시작 상자</h2>
         <ul className={flowStyles.starts}>
@@ -73,7 +73,7 @@ export default async function AdminFlowPage({ searchParams }: PageProps<"/admin/
       </section>
       <section className={styles.section} aria-labelledby="flow-run">
         <h2 id="flow-run">{selected ? `${sourceLabel(selected.source_code)} · ${kst(selected.started_at)} · ${TRIGGER[selected.trigger] ?? selected.trigger}` : "실행 기록"}</h2>
-        {selected ? <FlowChain {...buildFlow(rows, secrets())} /> : <p className={styles.muted}>아직 실행 기록이 없습니다. 시뮬레이터에서 가짜 묶음을 돌려 보세요.</p>}
+        {selected ? <FlowChain {...buildFlow(rows, secrets())} /> : <Empty>아직 실행 기록이 없습니다. 시뮬레이터에서 가짜 묶음을 돌려 보세요.</Empty>}
         {selected?.error_message ? <p role="note"><strong>오류:</strong> {maskSecrets(selected.error_message, secrets())}</p> : null}
       </section>
       <section className={styles.section} aria-labelledby="flow-pick">
@@ -88,6 +88,18 @@ export default async function AdminFlowPage({ searchParams }: PageProps<"/admin/
           ))}
         </ul>
       </section>
+    </>
+  );
+}
+
+// IA AD_070400_TB 흐름 화면 (PRD FR-23, spec 005 FR-003): 시작 상자(출처마다) + 고른 실행의 단계 상자·화살표. 상자를 누르면 상세(AD_070401_MD)
+export default function AdminFlowPage(props: PageProps<"/admin/flow">) {
+  return (
+    <>
+      <p className={styles.muted}>실행 기록(runs·run_steps)에서 그립니다. 성공은 초록 실선, 실패는 빨강, 승인 대기는 주황 점선, 실행 중은 파랑 점선, 안 켜짐·도달 못 함은 회색 점선이고 글자로도 적었습니다. 상자를 누르면 상세가 열립니다(키 값은 가림).</p>
+      <Suspense fallback={<Loading />}>
+        <FlowContent {...props} />
+      </Suspense>
     </>
   );
 }
