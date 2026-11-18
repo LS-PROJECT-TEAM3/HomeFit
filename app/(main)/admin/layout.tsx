@@ -27,7 +27,10 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>관리자</h1>
-      <SectionTabs label="관리자 메뉴" tabs={TABS.map(([href, label]) => ({ href, label }))} />
+      {/* 회원 상세(/admin/users/[id])처럼 주소에 값이 있는 화면은 탭이 주소를 읽을 때까지 기다려야 한다(Cache Components 빌드 오류) */}
+      <Suspense fallback={<div className={styles.tabsFallback} aria-hidden="true" />}>
+        <SectionTabs label="관리자 메뉴" tabs={TABS.map(([href, label]) => ({ href, label }))} />
+      </Suspense>
       <div>
         <Suspense fallback={<Loading />}>
           <Gate>{children}</Gate>

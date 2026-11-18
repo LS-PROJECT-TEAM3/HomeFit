@@ -199,3 +199,8 @@ a.card:hover {
 .primaryButton:hover {
   background: var(--color-primary-hover);
 }
+
+/* spec 005: 탭이 주소를 읽기 전 자리(높이만 잡아 화면이 덜 튄다) */
+.tabsFallback {
+  min-height: 48px;
+}

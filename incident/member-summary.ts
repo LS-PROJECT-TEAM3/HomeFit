@@ -1,4 +1,6 @@
 // spec 005 FR-005 (PRD FR-20, IA AD_070100_TB): 관리자 회원 목록 요약. 순수 함수, 읽기만
+import { toKstDate } from "@/watch/kst";
+
 // 이메일은 auth 쪽에 있고 화면 권한으로 읽지 않는다. 회원 ID 앞 8자만 보인다
 
 export type MemberSummary = {
@@ -23,7 +25,7 @@ export function summarizeMembers({ profiles, conditionUserIds, homeUserIds, inci
   return profiles.map((p) => {
     const mine = incidents.filter((i) => i.user_id === p.id);
     return {
-      id: p.id, shortId: p.id.slice(0, 8), role: p.role === "admin" ? "관리자" : "회원", joinedOn: p.created_at.slice(0, 10),
+      id: p.id, shortId: p.id.slice(0, 8), role: p.role === "admin" ? "관리자" : "회원", joinedOn: toKstDate(new Date(p.created_at)),
       hasCondition: conditions.has(p.id), hasHome: homes.has(p.id),
       incidents: mine.length, waiting: mine.filter((i) => WAITING.has(i.status)).length, isVirtual: virtualIds.has(p.id),
     };

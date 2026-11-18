@@ -1,21 +1,15 @@
-import { SkeletonNotice } from "@/app/_components/page-status";
+import { HistorySearch } from "./history-search";
 import styles from "@/app/_components/hub.module.css";
 
-export const metadata = { title: "주거 질의응답 | AI 도우미 | HomeFit AI" };
+export const metadata = { title: "기록 찾기 | AI 도우미 | HomeFit AI" };
 
-// PRD FR-18 기록 찾기(RAG) 자리. 임베딩 방법(ERD Q1)을 정한 뒤 만든다 (spec 004 뼈대)
+// IA KN_050000_PG 기록 찾기 (PRD FR-18, spec 005 FR-006): 승인·거절로 끝난 알림에서 찾고, 찾은 기록만 근거로 답한다
 export default function KnowledgeAskPage() {
   return (
     <section className={styles.card} aria-labelledby="ask-title">
-      <h2 id="ask-title">주거 질의응답</h2>
-      <SkeletonNotice>지난 알림·처리 기록과 공공데이터에서 찾아 답하고, 답마다 출처를 보여 줄 자리입니다(PRD FR-18). 임베딩 방법(ERD Q1)을 정한 뒤 만듭니다.</SkeletonNotice>
-      <form className={styles.form} aria-label="질문 (다음 단계)">
-        <div className={styles.field}>
-          <label htmlFor="ask">질문</label>
-          <input id="ask" className={styles.input} placeholder="예: 지난겨울 결로 알림에 무엇을 했지?" disabled />
-        </div>
-        <button type="button" className={styles.input} disabled>묻기 (다음 단계)</button>
-      </form>
+      <h2 id="ask-title">기록 찾기</h2>
+      <p className={styles.muted}>승인하거나 거절한 위험·기회 알림에서 찾습니다. 답은 찾은 기록만 근거로 하고, 기록마다 알림 링크를 붙입니다. 아직 처리 중인 알림과 공공데이터는 오른쪽 아래 챗봇에 물어보세요.</p>
+      <HistorySearch />
     </section>
   );
 }

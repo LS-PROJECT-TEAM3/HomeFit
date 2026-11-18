@@ -7,6 +7,7 @@ import { HOUSING_LABELS } from "@/incident/home-form";
 import { createClient } from "@/lib/supabase/server";
 import { parseVirtualUserIds } from "@/watch/simulation";
 import { SIDO_OPTIONS } from "@/watch/sido";
+import { toKstDate } from "@/watch/kst";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "회원 상세 | 관리자 | HomeFit AI" };
@@ -59,7 +60,7 @@ export default async function AdminUserDetailPage({ params }: PageProps<"/admin/
     <>
       <p><Link href="/admin/users">← 회원 목록</Link></p>
       <h2>회원 {id.slice(0, 8)}…{isVirtual ? " (가상 계정)" : ""}</h2>
-      <p className={styles.muted}>{data.profile.role === "admin" ? "관리자" : "회원"} · 가입 {data.profile.created_at.slice(0, 10)}. 읽기만 합니다.</p>
+      <p className={styles.muted}>{data.profile.role === "admin" ? "관리자" : "회원"} · 가입 {toKstDate(new Date(data.profile.created_at))}. 읽기만 합니다.</p>
       <div className={styles.grid}>
         <section className={styles.card} aria-labelledby="m-condition">
           <h2 id="m-condition">내 조건</h2>

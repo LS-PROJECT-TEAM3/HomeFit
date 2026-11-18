@@ -5,8 +5,9 @@ import { summarizeMembers } from "@/incident/member-summary";
 describe("summarizeMembers", () => {
   const profiles = [
     { id: "aaaaaaaa-1111", role: "admin", created_at: "2026-11-01T00:00:00Z" },
-    { id: "bbbbbbbb-2222", role: "member", created_at: "2026-11-02T00:00:00Z" },
+    { id: "bbbbbbbb-2222", role: "member", created_at: "2026-11-01T16:00:00Z" },
   ];
+  // 가입일은 한국 날짜: 11-01 16:00 UTC = 11-02 01:00 KST
   it("회원마다 조건·내 집·알림 수·승인 대기 수를 세고, 가상 계정을 표시한다", () => {
     const rows = summarizeMembers({
       profiles,

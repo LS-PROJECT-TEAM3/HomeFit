@@ -3,7 +3,7 @@ import styles from "@/app/_components/hub.module.css";
 
 // 기획안 9절 AI Assistant = IA KN_050000_PG 기록 찾기 (PRD FR-18, spec 004 v0.2)
 const TABS: Tab[] = [
-  { href: "/knowledge", label: "주거 질의응답", note: "뼈대" },
+  { href: "/knowledge", label: "기록 찾기" },
   { href: "/knowledge/history", label: "처리 기록" },
   { href: "/knowledge/sources", label: "공공데이터 출처" },
 ];
