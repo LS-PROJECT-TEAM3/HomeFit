@@ -1,0 +1,69 @@
+import { matchesCondition, type PolicyCondition } from "@/incident/match";
+import { changeDedupKey, complexKeyOf, mergeByAnnouncement, type ChangeKind, type FieldChange, type NoticeChange } from "@/incident/notice-change";
+import type { Notice } from "@/watch/notice";
+
+export type ConditionOwner = { userId: string; condition: PolicyCondition };
+
+/** 사건 상세에 보일 원문 값과 무엇이 바뀌었는지. AI 글이 이 값을 덮지 않는다 (FR-009, FR-010) */
+export type IncidentFacts = Notice & {
+  change?: { kind: ChangeKind; changes: FieldChange[]; relatedAnnouncementId: string | null };
+};
+
+export type PlannedIncident = {
+  userId: string;
+  dedupKey: string;
+  externalId: string;
+  facts: IncidentFacts;
+};
+
+/** 한 사람이 팔로우한 공고 ID와 그 공고들의 단지 키 (spec 001 v0.5 FR-020) */
+export type FollowSet = { announcements: { has(id: string): boolean }; complexKeys: { has(key: string): boolean } };
+
+type PlanInput = {
+  changes: readonly NoticeChange[];
+  /** 사용자 ID → 팔로우 (없으면 아무것도 팔로우하지 않음) */
+  follows: { get(userId: string): FollowSet | undefined };
+  owners: readonly ConditionOwner[];
+  /** 이미 있는 사건 "userId|dedupKey" */
+  existingKeys: ReadonlySet<string>;
+  today: string;
+  sourceCode: string;
+};
+
+/**
+ * FR-006, FR-016, FR-020 (spec 001 v0.5): 공고 변화 중 사용자가 팔로우했고 조건에 맞는 것만 사건으로 만든다.
+ * 같은 변화(단지 여럿 포함)는 사용자마다 하나, 이미 있는 사건은 건너뛴다.
+ */
+/** FR-020: 정정공고는 고치기 전 공고를, 완화 재공고는 같은 단지를 팔로우했으면 그 사람의 변화로 본다 */
+function isFollowed(change: NoticeChange, follow: FollowSet | undefined): boolean {
+  if (!follow) return false;
+  if (follow.announcements.has(change.notice.announcementId)) return true;
+  if (change.kind === "correction") return change.relatedAnnouncementId !== null && follow.announcements.has(change.relatedAnnouncementId);
+  const complexKey = complexKeyOf(change.notice);
+  return change.kind === "relaxed" && complexKey !== null && follow.complexKeys.has(complexKey);
+}
+
+export function planChangeIncidents({ changes, owners, existingKeys, today, sourceCode, follows }: PlanInput): PlannedIncident[] {
+  const seen = new Set(existingKeys);
+  const planned: PlannedIncident[] = [];
+  for (const { userId, condition } of owners) {
+    // 단지마다 시군구·임대료가 달라서, 이 사람에게 맞는 단지만 고른 뒤 공고·종류별로 하나로 합친다 (12단계 리뷰 2번)
+    // spec 001 v0.5: 팔로우한 공고의 변화만
+    const follow = follows.get(userId);
+    const mine = mergeByAnnouncement(changes.filter((change) => isFollowed(change, follow) && matchesCondition(change.notice, condition, today)));
+    for (const change of mine) {
+      const dedupKey = changeDedupKey(sourceCode, change);
+      const key = `${userId}|${dedupKey}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const { kind, changes: fields, relatedAnnouncementId } = change;
+      planned.push({
+        userId,
+        dedupKey,
+        externalId: change.notice.externalId,
+        facts: { ...change.notice, change: { kind, changes: fields, relatedAnnouncementId } },
+      });
+    }
+  }
+  return planned;
+}

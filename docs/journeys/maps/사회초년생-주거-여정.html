@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사회초년생 주거 여정 — 집을 알아볼 때부터 재계약까지</title>
+<style>
+:root { --bg:#fbfaf7; --surface:#ffffff; --text:#1d1d1b; --muted:#6b6a65; --line:#e3e0d8;
+  --accent:#2f5d50; --pos:#2e8b57; --neg:#c0392b; --neu:#9a978e; --mot:#fff4d6; --head:#eef2ef;
+  color-scheme: light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#181816; --surface:#22221f; --text:#ecebe6; --muted:#a3a198; --line:#3a3934;
+  --accent:#8cc5b2; --pos:#5fc28a; --neg:#ef7a6c; --neu:#8a887f; --mot:#3d3420; --head:#273029; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg:#181816; --surface:#22221f; --text:#ecebe6; --muted:#a3a198; --line:#3a3934;
+  --accent:#8cc5b2; --pos:#5fc28a; --neg:#ef7a6c; --neu:#8a887f; --mot:#3d3420; --head:#273029; color-scheme: dark; }
+*, *::before, *::after { box-sizing: inherit; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif; line-height:1.5; }
+main { max-width:100%; padding:28px 24px 40px; }
+.kind { color:var(--accent); font-weight:700; font-size:13px; letter-spacing:.04em; }
+h1 { margin:4px 0 10px; font-size:26px; }
+blockquote { margin:0 0 14px; padding:10px 14px; border-left:4px solid var(--accent); background:var(--surface); max-width:900px; }
+.metas { display:flex; flex-wrap:wrap; gap:8px 20px; margin-bottom:18px; font-size:14px; }
+.meta span { color:var(--muted); margin-right:6px; }
+.scroll { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.grid { display:grid; grid-template-columns:130px repeat(6, 190px); font-size:13px; }
+.grid > div { border-bottom:1px solid var(--line); border-right:1px solid var(--line); padding:9px 10px; }
+.corner, .stage { background:var(--head); position:sticky; top:0; }
+.stage b { display:block; font-size:14px; }
+.stage em { font-style:normal; font-size:11px; font-weight:700; color:var(--bg); background:var(--accent); padding:1px 6px; border-radius:4px; }
+.label { color:var(--muted); font-weight:600; background:var(--surface); position:sticky; left:0; z-index:1; }
+.cell.mot, .stage.mot { background:var(--mot); }
+.cell.pain { color:var(--neg); }
+.cell.opportunity { color:var(--accent); font-weight:600; }
+.cell.thought { font-style:italic; }
+.cell.screen_id { font-family:ui-monospace,Menlo,monospace; font-size:12px; }
+.curve { padding:0 !important; }
+svg .zero { stroke:var(--line); stroke-dasharray:4 4; }
+svg .line { fill:none; stroke:var(--accent); stroke-width:2.5; }
+svg .dot { stroke:var(--surface); stroke-width:2; }
+svg .pos { fill:var(--pos); } svg .neg { fill:var(--neg); } svg .neu { fill:var(--neu); }
+svg .lbl { fill:var(--text); font-size:12px; text-anchor:middle; }
+h2 { font-size:17px; margin:26px 0 8px; }
+ul { margin:0; padding-left:20px; max-width:900px; }
+li { margin:4px 0; }
+@media print { .scroll { overflow:visible; } body { background:#fff; } }
+</style></head>
+<body><main>
+<div class="kind">고객 여정 지도</div>
+<h1>사회초년생 주거 여정 — 집을 알아볼 때부터 재계약까지</h1>
+<blockquote>독립하고 혼자 사는 동안, 나에게 해당하는 주거 변화를 직접 찾아다니지 않고 대응할 시간이 있을 때 알고 싶다. 그래서 지원금·싼 집 기회를 놓치지 않고 곰팡이·재계약 손해를 막고 싶다.</blockquote>
+<div class="metas"><div class="meta"><span>페르소나</span>준비형(P01·P02·P04) + 자취형(P03·P01 자취 시절)</div><div class="meta"><span>시나리오</span>취업 뒤 다른 지역으로 독립해 1~2년 살고 재계약을 맞는다</div><div class="meta"><span>근거</span>감정 점수와 생각은 As-Is 인터뷰(P01~P04). To-Be 행동은 가설</div></div>
+<div class="scroll"><div class="grid">
+<div class="corner"></div><div class="stage"><b>1. 집 알아보기</b></div><div class="stage mot"><b>2. 지원 공고·정책 찾기</b><em>MOT</em></div><div class="stage"><b>3. 계약하기</b></div><div class="stage"><b>4. 살면서 집 관리</b></div><div class="stage"><b>5. 매달 비용 내기</b></div><div class="stage"><b>6. 재계약·이사</b></div>
+<div class="label">행동</div><div class="cell action">관심 지역을 등록하고 시세 변화 사건을 받는다</div><div class="cell action mot">조건을 한 번 넣으면 맞는 공고·정책이 사건으로 온다</div><div class="cell action">입주 전 점검으로 집 상태를 기록한다(2차)</div><div class="cell action">실내 온습도를 입력하고 습도·결로 사건을 받는다</div><div class="cell action">요금 변화는 알림 대상에서 뺀다</div><div class="cell action">내 집 시세 사건을 받고 재계약 판단 메모를 승인한다</div><div class="label">터치포인트</div><div class="cell touchpoint">관심 지역 탭, 사건</div><div class="cell touchpoint mot">첫 설정, 홈 카드, 사건 상세</div><div class="cell touchpoint">관심 주택 상세, 입주 전 점검</div><div class="cell touchpoint">내 집, 실내 온습도 입력, 사건</div><div class="cell touchpoint">없음</div><div class="cell touchpoint">내 집, 사건, 내 일정</div><div class="label">상호작용 주체</div><div class="cell actor">시스템 제안</div><div class="cell actor mot">시스템 제안</div><div class="cell actor">사용자</div><div class="cell actor">시스템 제안</div><div class="cell actor">사용자</div><div class="cell actor">시스템 제안</div><div class="label">생각·감정</div><div class="cell thought">&quot;관리비가 어느정도 나오는지 안써있는 곳이 많았고&quot; (P01)</div><div class="cell thought mot">&quot;무슨 말인지 잘 모르겠어서 자세히는 못 봤어&quot; (P04)</div><div class="cell thought">&quot;집주인 보증금 등기 다 불안했어&quot; (P01)</div><div class="cell thought">&quot;곰팡이 때문에 침실은 아예 사용도 못하고&quot; (P03)</div><div class="cell thought">&quot;별 차이 없었을거야 덥고 추운건 어쩔수 없으니까&quot; (P01)</div><div class="cell thought">&quot;시세를 몰라서 재계약 못한게 가장 손해가 아닐까&quot; (P01)</div><div class="label">감정 곡선</div><div class="curve" style="grid-column: span 6"><svg width="1140" height="150" viewBox="0 0 1140 150" role="img" aria-label="단계별 감정 곡선"><line x1="0" x2="1140" y1="75.0" y2="75.0" class="zero"/><path d="M95.0,101.5 L285.0,101.5 L475.0,128.0 L665.0,128.0 L855.0,75.0 L1045.0,128.0" class="line"/><circle cx="95.0" cy="101.5" r="7" class="dot neg"/><text x="95.0" y="88.5" class="lbl">😕 -1</text><circle cx="285.0" cy="101.5" r="7" class="dot neg"/><text x="285.0" y="88.5" class="lbl">😕 -1</text><circle cx="475.0" cy="128.0" r="7" class="dot neg"/><text x="475.0" y="115.0" class="lbl">😣 -2</text><circle cx="665.0" cy="128.0" r="7" class="dot neg"/><text x="665.0" y="115.0" class="lbl">😣 -2</text><circle cx="855.0" cy="75.0" r="7" class="dot neu"/><text x="855.0" y="62.0" class="lbl">😐 0</text><circle cx="1045.0" cy="128.0" r="7" class="dot neg"/><text x="1045.0" y="115.0" class="lbl">😣 -2</text></svg></div><div class="label">As-Is (지금 방법)</div><div class="cell as_is">직방·다방·네이버 부동산을 수시로 직접 검색</div><div class="cell as_is mot">LH 사이트에 종종 들어감, 알림 앱은 팔로우한 공고만</div><div class="cell as_is">부동산이 보여 주는 등기부등본을 읽어 보는 정도</div><div class="cell as_is">생긴 뒤에 닦거나 제습제를 대량으로 삼</div><div class="cell as_is">관리비 내역·고지서로 확인</div><div class="cell as_is">결정한 뒤에야 주변 시세를 찾아봄</div><div class="label">페인포인트</div><div class="cell pain">관리비·안전 정보가 없어 확인을 미룸</div><div class="cell pain mot">조건에 맞는 새 공고·정책을 바로 모름, 조건이 어려움</div><div class="cell pain">계약서·등기를 보는 법을 모름</div><div class="cell pain">곰팡이를 눈에 띌 때까지 모름(P04), 누수는 감지 불가</div><div class="cell pain"></div><div class="cell pain">판단할 때 비교 근거가 없음</div><div class="label">인사이트</div><div class="cell insight"></div><div class="cell insight mot">P01·P04 각 30만 원 정도의 지원금을 놓침</div><div class="cell insight"></div><div class="cell insight">큰 손해(누수·하자)는 날씨로 미리 알 수 없음</div><div class="cell insight"></div><div class="cell insight"></div><div class="label">기회·개선안</div><div class="cell opportunity">관심 지역 시세 사건, 실질 주거비 비교(2차)</div><div class="cell opportunity mot">신청 준비 계획(자격 확인 항목, 서류, 마감일)</div><div class="cell opportunity">입주 전 점검 체크리스트(2차). 계약 안전 판정은 하지 않음</div><div class="cell opportunity">대응 계획(환기·제습 일정), 하자 기록(2차)</div><div class="cell opportunity">사건으로 만들지 않음(4명 모두 미리 알아도 같았을 것)</div><div class="cell opportunity">재계약 판단 메모, 계약 만료 2달 전 일정(2차)</div><div class="label">지표</div><div class="cell metric">관심 지역 등록률</div><div class="cell metric mot">올라온 날부터 알게 된 날까지 걸린 날 수</div><div class="cell metric"></div><div class="cell metric">사건이 피해보다 먼저 생긴 날 수</div><div class="cell metric"></div><div class="cell metric">만료 전에 시세 사건을 받은 비율</div><div class="label">화면 ID</div><div class="cell screen_id">MY_030300_TB</div><div class="cell screen_id mot">IC_020100_PG</div><div class="cell screen_id">CP_040301_TB</div><div class="cell screen_id">MY_030201_MD</div><div class="cell screen_id"></div><div class="cell screen_id">SC_060000_PG</div>
+</div></div>
+<h2>핵심 발견</h2><ul><li>가장 아픈 구간: 살면서 집 관리(-2), 계약하기(-2), 재계약(-2). 이 중 바깥 변화로 미리 알 수 있는 것은 습도·결로와 시세다</li><li>공고·정책은 감정은 덜 아프지만(-1) 돈 손해가 확인된 곳이라 첫 기능(MOT)으로 둔다</li><li>계약 안전은 불안이 가장 크지만 바깥 변화가 아니라서 사건이 아닌 입주 전 점검(2차)으로만 다룬다</li><li>요금 변화는 미리 알아도 행동이 바뀌지 않아 알림 대상에서 뺐다</li></ul>
+</main></body></html>

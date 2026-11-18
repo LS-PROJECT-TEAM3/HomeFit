@@ -1,0 +1,106 @@
+/* spec 005 FR-003 흐름 화면. 색은 app/tokens.css 상태 색, 글자 라벨과 함께 (CLAUDE.md 디자인) */
+.starts,
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-half);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.box {
+  min-width: 120px;
+  padding: 12px;
+  background: var(--color-card);
+  border-radius: var(--radius-control);
+}
+
+.box summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.box summary::-webkit-details-marker {
+  display: none;
+}
+
+.box summary:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.name {
+  display: block;
+  font-weight: 700;
+}
+
+.state {
+  display: block;
+  font-size: var(--font-size-sm);
+}
+
+.count {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.succeeded { border: 2px solid var(--color-status-success); }
+.failed { border: 2px solid var(--color-status-failed); }
+.waiting { border: 2px dashed var(--color-status-waiting); }
+.skipped { border: 2px solid var(--color-border); }
+.not_reached,
+.off { border: 2px dotted var(--color-status-off); color: var(--color-muted-text); }
+
+.arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.details {
+  margin: var(--space-half) 0 0;
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.details dt {
+  font-weight: 700;
+}
+
+.details dd {
+  margin: 0 0 4px;
+}
+
+.runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-half);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
+}
+
+.current {
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .chain {
+    flex-direction: column;
+  }
+
+  .arrow {
+    flex-direction: row;
+    gap: 6px;
+  }
+}

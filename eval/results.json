@@ -1,0 +1,172 @@
+{
+  "generatedAt": "2026-11-17T16:43:29.802Z",
+  "summary": {
+    "total": 18,
+    "hit": 7,
+    "missed": 0,
+    "falseAlarm": 0,
+    "quietCorrect": 11
+  },
+  "byKind": {
+    "notice": {
+      "total": 10,
+      "hit": 4,
+      "missed": 0,
+      "falseAlarm": 0,
+      "quietCorrect": 6
+    },
+    "humidity": {
+      "total": 8,
+      "hit": 3,
+      "missed": 0,
+      "falseAlarm": 0,
+      "quietCorrect": 5
+    }
+  },
+  "results": [
+    {
+      "id": "N-01",
+      "kind": "notice",
+      "title": "팔로우한 공고의 마감일이 바뀜",
+      "basis": "사건 기준 (가) 접수 기간 바뀜",
+      "expected": true,
+      "predicted": true
+    },
+    {
+      "id": "N-02",
+      "kind": "notice",
+      "title": "팔로우한 공고의 월세가 바뀜(상한 안)",
+      "basis": "사건 기준 (가) 월 임대료 바뀜",
+      "expected": true,
+      "predicted": true
+    },
+    {
+      "id": "N-03",
+      "kind": "notice",
+      "title": "팔로우하지 않은 공고의 마감일이 바뀜",
+      "basis": "사건 아님: 팔로우하지 않은 공고의 변화",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "N-04",
+      "kind": "notice",
+      "title": "처음 보이는 맞는 공고",
+      "basis": "사건 아님: 처음 보이는 공고는 맞는 공고 목록",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "N-05",
+      "kind": "notice",
+      "title": "팔로우한 공고, 바뀐 것 없음",
+      "basis": "사건 아님: 바뀐 것 없음",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "N-06",
+      "kind": "notice",
+      "title": "팔로우한 공고의 정정공고",
+      "basis": "사건 기준 (나) 정정공고",
+      "expected": true,
+      "predicted": true
+    },
+    {
+      "id": "N-07",
+      "kind": "notice",
+      "title": "팔로우한 단지에 추가모집 공고",
+      "basis": "사건 기준 (나) 같은 단지 추가모집",
+      "expected": true,
+      "predicted": true
+    },
+    {
+      "id": "N-08",
+      "kind": "notice",
+      "title": "바뀐 월세가 내 상한을 넘음",
+      "basis": "사건 아님: 조건 밖",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "N-09",
+      "kind": "notice",
+      "title": "다른 시도 공고의 변화",
+      "basis": "사건 아님: 조건 밖(지역)",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "N-10",
+      "kind": "notice",
+      "title": "마감이 지난 공고의 변화",
+      "basis": "사건 아님: 마감 지난 공고",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "H-01",
+      "kind": "humidity",
+      "title": "홑유리, 실내 20°C·60%, 바깥 -5°C",
+      "basis": "사건 기준 (가) 표면 온도 ≤ 이슬점+1°C (spec 004 SC-002 예시)",
+      "expected": true,
+      "predicted": true
+    },
+    {
+      "id": "H-02",
+      "kind": "humidity",
+      "title": "이중유리, 실내 22°C·40%, 바깥 5°C",
+      "basis": "사건 아님: 기준에 못 미침",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "H-03",
+      "kind": "humidity",
+      "title": "실내 습도 75%, 예보 습한 날 48시간",
+      "basis": "사건 기준 (나) 실내 습도 기준 이상 + 습한 날 이어짐",
+      "expected": true,
+      "predicted": true
+    },
+    {
+      "id": "H-04",
+      "kind": "humidity",
+      "title": "실내 습도 75%, 예보 건조",
+      "basis": "사건 아님: 습한 날이 이어지지 않음",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "H-05",
+      "kind": "humidity",
+      "title": "측정값 없음",
+      "basis": "사건 아님: 측정값 없으면 판단하지 않음(spec 003 FR-010)",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "H-06",
+      "kind": "humidity",
+      "title": "측정값이 8일 전",
+      "basis": "사건 아님: 측정값 7일 지나면 판단하지 않음",
+      "expected": false,
+      "predicted": false
+    },
+    {
+      "id": "H-07",
+      "kind": "humidity",
+      "title": "창 종류 모름, 실내 20°C·60%, 바깥 -5°C",
+      "basis": "사건 기준 (가): 모름은 홑유리로 본다(spec 003 Q16)",
+      "expected": true,
+      "predicted": true
+    },
+    {
+      "id": "H-08",
+      "kind": "humidity",
+      "title": "예보를 못 받음",
+      "basis": "사건 아님: 예보 없으면 판단하지 않음",
+      "expected": false,
+      "predicted": false
+    }
+  ]
+}

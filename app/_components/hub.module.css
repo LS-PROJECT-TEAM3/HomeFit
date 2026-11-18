@@ -1,0 +1,206 @@
+/* spec 004 뼈대 화면 공통 모양. 색·간격은 app/tokens.css 변수만 쓴다 (디자인 기본선 1) */
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-1);
+}
+
+.title {
+  margin: 0 0 var(--space-half);
+  font-size: var(--font-size-xl);
+}
+
+.lead {
+  margin: 0 0 var(--space-2);
+  color: var(--color-muted-text);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-1);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-half);
+  padding: var(--space-2);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+a.card:hover {
+  border-color: var(--color-primary);
+}
+
+.card h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.section {
+  margin-top: var(--space-2);
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-muted-text);
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.2em;
+  line-height: 1.7;
+}
+
+/* 상태는 색만이 아니라 글자로 (디자인 기본선 5) */
+.badge {
+  align-self: flex-start;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.ready {
+  color: var(--color-status-success);
+}
+
+.skeleton {
+  color: var(--color-status-waiting);
+}
+
+.out {
+  color: var(--color-status-off);
+}
+
+.notice {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-1);
+  border: 1px dashed var(--color-status-waiting);
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: var(--space-half);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.input {
+  /* 휴대폰 폭에서 칸이 기본 너비로 버텨 가로로 넘치지 않게 (spec 004 화면 확인) */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font: inherit;
+  background: var(--color-card);
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-1);
+  align-items: end;
+}
+
+.result {
+  margin-top: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-card);
+  border: 2px solid currentColor;
+}
+
+/* spec 004 v0.2 화면별 하위 탭. 부모가 grid·flex여도 탭 줄이 화면을 넘지 않고 안에서 옆으로 밀린다 */
+.tabsNav {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tabs {
+  display: flex;
+  /* 좁으면 다음 줄로(가로 스크롤 막대 없이) */
+  flex-wrap: wrap;
+  gap: 0 4px;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  white-space: nowrap;
+  color: var(--color-muted-text);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 3px solid transparent;
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+/* 지금 탭: 색과 밑줄(모양)로 함께 표시 */
+.tab[aria-current="page"] {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.tabNote {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-muted-text);
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primaryButton:hover {
+  background: var(--color-primary-hover);
+}
+
+/* spec 005: 탭이 주소를 읽기 전 자리(높이만 잡아 화면이 덜 튄다) */
+.tabsFallback {
+  min-height: 48px;
+}
