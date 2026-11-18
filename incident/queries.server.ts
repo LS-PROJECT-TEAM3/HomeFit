@@ -3,6 +3,7 @@ import { periodStart, type IncidentFilter } from "@/incident/filter";
 import { createClient, requireUserId } from "@/lib/supabase/server";
 import type { IncidentFacts } from "@/incident/detect";
 import type { HumidityFacts } from "@/incident/humidity-detect";
+import type { RentFacts } from "@/incident/rent-detect";
 
 // 사건 화면이 읽는 자료. 로그인한 사용자 권한(RLS)으로 읽는다 (FR-014).
 // RLS는 관리자에게 모든 사건을 보여 주므로 목록·건수는 user_id로 내 것만 거른다 (FR-007, 리뷰 2026-11-17)
@@ -12,6 +13,8 @@ export type IncidentSummary = {
   id: string; status: string; facts: IncidentFacts; isUpdated: boolean; isSimulated: boolean; detectedAt: string;
   /** 습도·결로 사건이면 판단 근거(spec 003 FR-006). 공고 사건이면 null */
   humidity: HumidityFacts | null;
+  /** 시세 사건이면 비교표 근거(spec 008 FR-006) */
+  rent: RentFacts | null;
 };
 
 const PAGE_SIZE = 20;
@@ -24,6 +27,7 @@ function toSummary(row: SummaryRow): IncidentSummary {
     isUpdated: row.is_updated, isSimulated: row.is_simulated, detectedAt: row.detected_at,
     // 습도 사건 facts는 HumidityFacts로 저장했다 (incident/humidity-detect.ts)
     humidity: row.incident_type === "humidity_condensation" ? (row.facts as HumidityFacts) : null,
+    rent: row.incident_type === "rent_price_change" ? (row.facts as RentFacts) : null, // incident/rent-detect.ts
   };
 }
 

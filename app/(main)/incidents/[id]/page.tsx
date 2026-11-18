@@ -9,7 +9,10 @@ import { getIncidentDetail, type IncidentDetail } from "@/incident/queries.serve
 import { createClient, currentUserId } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import { DecisionPanel } from "./decision-panel";
+import { withObject } from "@/incident/korean";
 import { HumidityFactsView } from "./humidity-facts";
+import { RentFactsView } from "./rent-facts";
+import type { PlanName } from "./decision-panel";
 import styles from "./detail.module.css";
 
 export const metadata = { title: "알림 상세 | HomeFit AI" };
@@ -52,22 +55,29 @@ function WhatChanged({ detail }: { detail: IncidentDetail }) {
   );
 }
 
+// 알림 종류마다 계획 이름·근거 (spec 001 공고, spec 003 습도, spec 008 시세)
+function planText(detail: IncidentDetail): { name: PlanName; basis: string; risk: boolean } {
+  if (detail.rent) return { name: detail.rent.target === "home" ? "재계약 판단 메모" : "관심 지역 다시 보기", basis: "위 실거래 비교표", risk: true };
+  if (detail.humidity) return { name: "대응 계획", basis: "위 측정값·예보·추정값", risk: true };
+  return { name: "신청 준비 계획", basis: "위 공고 원문 값", risk: false };
+}
+
 function Plan({ detail }: { detail: IncidentDetail }) {
   const plan = detail.plan;
-  // spec 003 FR-007: 습도 사건은 대응 계획, 근거는 측정값·예보
-  const humidity = detail.humidity !== null;
+  const text = planText(detail);
+  const humidity = text.risk;
   return (
     <section className={styles.card} aria-labelledby="plan-title">
-      <h2 id="plan-title" className={styles.sectionTitle}>{humidity ? "대응 계획 (초안)" : "신청 준비 계획 (초안)"}</h2>
+      <h2 id="plan-title" className={styles.sectionTitle}>{text.name} (초안)</h2>
       {plan?.aiOk && plan.summary ? (
         <>
           <p>{plan.summary}</p>
           <p className={styles.source}>
-            {plan.isMock ? "시험용 요약(mock, 실제 AI가 쓴 글이 아님)" : "AI 요약"} · 근거: {humidity ? "위 측정값·예보·추정값" : "위 공고 원문 값"}{plan.citations[0] ? ` (${plan.citations[0].label})` : ""}
+            {plan.isMock ? "시험용 요약(mock, 실제 AI가 쓴 글이 아님)" : "AI 요약"} · 근거: {text.basis}{plan.citations[0] ? ` (${plan.citations[0].label})` : ""}
           </p>
         </>
       ) : (
-        <p className={styles.notice}>{humidity ? "AI 초안을 만들지 못해 기본 대응 계획을 보여 드립니다." : "요약을 만들지 못했습니다. 원문을 확인해 주세요."}</p>
+        <p className={styles.notice}>{humidity ? `AI 초안을 만들지 못해 기본 ${withObject(text.name)} 보여 드립니다.` : "요약을 만들지 못했습니다. 원문을 확인해 주세요."}</p>
       )}
       <ul className={styles.checklist}>
         {(plan?.checklist ?? []).map((item, i) => (
@@ -104,7 +114,7 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
         {detail.isSimulated ? <SimulatedBadge /> : null}
       </div>
       <h1 className={styles.title}>{detail.facts.title}</h1>
-      {detail.humidity ? (
+      {detail.rent ? <RentFactsView facts={detail.rent} /> : detail.humidity ? (
         <HumidityFactsView facts={detail.humidity} now={new Date()} />
       ) : (
         <>
@@ -114,7 +124,7 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
       )}
       <Plan detail={detail} />
       {/* FR-011: 관리자도 남의 사건은 승인·거절하지 못한다 */}
-      {detail.isMine && open ? <DecisionPanel incidentId={detail.id} planName={detail.humidity ? "대응 계획" : "신청 준비 계획"} /> : null}
+      {detail.isMine && open ? <DecisionPanel incidentId={detail.id} planName={planText(detail).name} /> : null}
       {detail.status === "approved" && detail.scheduleId ? (
         <p className={styles.success} role="status">
           내 일정에 넣었습니다. <Link href={`/schedule/${detail.scheduleId}`}>일정 보기</Link>

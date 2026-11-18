@@ -1,13 +1,18 @@
 "use client";
 
+import { withObject } from "@/incident/korean";
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import { approveIncident, rejectIncident, type DecisionState } from "./actions";
 import styles from "./detail.module.css";
 
-export type PlanName = "신청 준비 계획" | "대응 계획";
+// spec 008 FR-006: 시세 알림은 재계약 판단 메모(내 집)·관심 지역 다시 보기(관심 지역)
+export type PlanName = "신청 준비 계획" | "대응 계획" | "재계약 판단 메모" | "관심 지역 다시 보기";
 
-const REJECT_EXAMPLE: Record<PlanName, string> = { "신청 준비 계획": "예: 자격이 안 됨", "대응 계획": "예: 이미 환기·제습을 하고 있음" };
+const REJECT_EXAMPLE: Record<PlanName, string> = {
+  "신청 준비 계획": "예: 자격이 안 됨", "대응 계획": "예: 이미 환기·제습을 하고 있음",
+  "재계약 판단 메모": "예: 이미 이사하기로 정함", "관심 지역 다시 보기": "예: 이 지역은 더 안 봄",
+};
 
 // IA IC_020101_MD 대응안 승인, IC_020102_MD 대응안 거절 (FR-011, FR-012, spec 001)
 // spec 003 FR-012 수용 기준 2: 승인 창은 알림 종류에 맞는 계획 이름을 말한다
@@ -42,7 +47,7 @@ export function DecisionPanel({ incidentId, planName }: { incidentId: string; pl
       <button type="button" className={styles.reject} onClick={() => rejectDialog.current?.showModal()}>거절</button>
 
       <dialog ref={approveDialog} className={styles.dialog} aria-labelledby="approve-title">
-        <h2 id="approve-title">{planName}을 승인할까요?</h2>
+        <h2 id="approve-title">{withObject(planName)} 승인할까요?</h2>
         <p>승인하면 체크리스트와 마감일이 내 일정에 들어갑니다.</p>
         {state.error && which === "approve" ? <p className={styles.error} role="alert">{state.error}</p> : null}
         <div className={styles.dialogButtons}>

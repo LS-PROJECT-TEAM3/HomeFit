@@ -1,3 +1,4 @@
+import type { RentFacts } from "@/incident/rent-detect";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -25,6 +26,18 @@ function formatTime(iso: string | null): string {
 }
 
 // FR-006 (spec 003): 습도·결로 사건 한 줄. 추정값은 "추정"이라고 밝힌다
+// spec 008 FR-006: 시세 알림 한 줄(가장 크게 바뀐 값과 거래 수)
+function RentLine({ facts }: { facts: RentFacts }) {
+  return (
+    <>
+      <span className={styles.change}>
+        {facts.diffs.map((d) => `${d.field === "monthlyRent" ? "월세" : "보증금"} ${d.percent > 0 ? "+" : ""}${d.percent}%`).join(" · ")}
+      </span>
+      <span className={styles.meta}>주변 전월세 시세 · 실거래 {facts.count}건({facts.months[0]}~{facts.months[1]})</span>
+    </>
+  );
+}
+
 function HumidityLine({ facts, today }: { facts: HumidityFacts; today: string }) {
   return (
     <>
@@ -74,7 +87,7 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
                   {incident.isSimulated ? <SimulatedBadge /> : null}
                 </span>
                 <span className={styles.itemTitle}>{incident.facts.title}</span>
-                {incident.humidity ? (
+                {incident.rent ? <RentLine facts={incident.rent} /> : incident.humidity ? (
                   <HumidityLine facts={incident.humidity} today={today} />
                 ) : (
                   <>
