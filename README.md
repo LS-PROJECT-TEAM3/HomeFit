@@ -83,11 +83,11 @@
 - 조각 표와 브랜치·PR 순서: [docs/plan.md](docs/plan.md)
 
 ### 팀원
-병합된 PR #1~#9 기준(2026-11-18)입니다. 열린 PR은 #10(선우, 커넥터·서브에이전트 문서)과 #11(예림, 조각 B)입니다. PR과 리뷰가 새로 생기면 이 표를 고칩니다.
+병합된 PR #1~#10 기준(2026-11-18)입니다. 열린 PR은 #11(예림, 조각 B)과 이 표를 고치는 PR들입니다. PR과 리뷰가 새로 생기면 이 표를 고칩니다.
 
 | 이름 | GitHub | 맡은 조각 | 대표 PR | 리뷰 |
 |---|---|---|---|---|
-| 예림 | dbdpfla98 | B, E, 기획 문서와 기능 001~008 | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1) 팀 하네스·문제정의, [#2](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/2) IA, [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4) 기능 001~008, [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8) 집 비교 실질 주거비(조각 E) | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 승인 |
+| 예림 | dbdpfla98 | B, E, 기획 문서와 기능 001~008 | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1) 팀 하네스·문제정의, [#2](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/2) IA, [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4) 기능 001~008, [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8) 집 비교 실질 주거비(조각 E) | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9), [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10) 승인 |
 | 현경 | gaangstar | A, D | 아직 (조각 A·D PR 예정) | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1), [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4), [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8) 승인 |
-| 선우 | sunwood0803 | C1 | [#3](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/3) 하네스 규칙을 팀 스택에 맞춤, [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 제출 문서(data-sources·debug-note·qa) | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 승인 |
+| 선우 | sunwood0803 | C1 | [#3](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/3) 하네스 규칙을 팀 스택에 맞춤, [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 제출 문서(data-sources·debug-note·qa), [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10) 커넥터·서브에이전트 문서 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 승인 |
 | 서윤 | lilyoon333 | C2 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6) README·.env.example 보강, [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7) 시연 순서, [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 시연 순서 정정 | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 승인과 코멘트 |
