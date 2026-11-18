@@ -1,6 +1,7 @@
 import { describeChange } from "@/incident/change-text";
 import type { IncidentFacts } from "@/incident/detect";
 import type { HumidityFacts } from "@/incident/humidity-detect";
+import type { RentFacts } from "@/incident/rent-detect";
 
 // FR-018, FR-019 (spec 001 v0.3): 슬랙 알림의 판단. 순수 함수 (보내기는 notify.server.ts)
 
@@ -31,11 +32,26 @@ export function readLookupResult(body: unknown): { ok: true; slackUserId: string
 }
 
 /** 공고 변화(주거 기회) 또는 습도·결로(위험, spec 003 FR-009) */
-export type NotifyIncident = { incidentId: string; facts: IncidentFacts | HumidityFacts };
+export type NotifyIncident = { incidentId: string; facts: IncidentFacts | HumidityFacts | RentFacts };
 export type OutgoingMessage = { incidentIds: string[]; text: string };
 
-function isHumidity(facts: IncidentFacts | HumidityFacts): facts is HumidityFacts {
+function isHumidity(facts: NotifyIncident["facts"]): facts is HumidityFacts {
   return (facts as HumidityFacts).kind === "humidity";
+}
+
+function isRent(facts: NotifyIncident["facts"]): facts is RentFacts {
+  return (facts as RentFacts).kind === "rent";
+}
+
+/** spec 008 FR-007: 중간값·거래 수·링크만. 지역(시군구)과 AI 요약은 넣지 않는다 */
+function rentText(incidentId: string, facts: RentFacts, baseUrl: string): string {
+  const won = (value: number) => `${Math.round(value / 10_000).toLocaleString("ko-KR")}만 원`;
+  return [
+    `[HomeFit] 위험: ${facts.title}`,
+    ...facts.diffs.map((d) => `${d.field === "monthlyRent" ? "월세" : "보증금"} ${won(d.base)} → 주변 중간값 ${won(d.median)} (${d.percent > 0 ? "+" : ""}${d.percent}%)`),
+    `${facts.months[0]}~${facts.months[1]} 실거래 ${facts.count}건 기준`,
+    `${baseUrl}/incidents/${incidentId}`,
+  ].join("\n");
 }
 
 /** spec 003 FR-009: 측정값·추정 숫자와 할 날·링크만. 집 위치(시군구)와 AI 요약은 넣지 않는다 */
@@ -51,6 +67,7 @@ function humidityText(incidentId: string, facts: HumidityFacts, baseUrl: string)
 /** 이름·조건·AI 요약은 넣지 않는다. facts의 공고 원문 값과 변화만 쓴다 (FR-019) */
 function incidentText({ incidentId, facts }: NotifyIncident, baseUrl: string): string {
   if (isHumidity(facts)) return humidityText(incidentId, facts, baseUrl);
+  if (isRent(facts)) return rentText(incidentId, facts, baseUrl);
   const change = describeChange(facts.change);
   return [
     `[HomeFit] 주거 기회: ${facts.title}`,
