@@ -459,7 +459,8 @@ erDiagram
 DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과를 한 줄로 적는다(P3-16).
 - 2026-11-17 (마이그레이션 0001~0005): `source_items`(칸 20개, v1.1 칸 complex_key·status_name·before_external_id·previous_values 포함), `notification_settings`(6개, 0006에서 slack_email·slack_user_id), `notifications`(9개)가 이 문서 표와 이름이 같다(information_schema 조회). 첫 기능 밖 표(homes 등)는 아직 만들지 않았다.
 - 2026-11-17 (마이그레이션 0010·0011, spec 003): `homes`(칸 12개)·`indoor_measurements`(7개)를 이 문서 표 그대로 만들었다. `sources`에 `kma_forecast`, `llm_calls.purpose`에 `response_plan`을 더했다.
-- 2026-11-18 (마이그레이션 0001~0017·0020, ERD v1.9, 선우가 Supabase 대시보드를 읽기만 함): 실제 DB의 표 20개와 표별 칸 수가 이 문서·마이그레이션과 모두 같다. 행 단위 권한(RLS)은 20개 표 모두 켜져 있고 정책은 35개, 적용된 마이그레이션은 18개로 저장소 파일과 같다. 칸 이름은 마이그레이션과 이 문서끼리 맞췄고(20개 표 일치) 실제 DB에서는 칸 수만 봤다. 이 문서에만 있는 표 5개(`knowledge_chunks`, `audit_logs`, `wiki_chunks`, `chat_logs`, `eval_results`)는 아직 만들지 않았다. 자세한 결과는 [connectors.md](connectors.md) 6절.
+- 2026-11-18 오후 (마이그레이션 0001~0017·0020, ERD v1.9, 선우가 Supabase 대시보드를 읽기만 함): 실제 DB의 표 20개와 표별 칸 수가 이 문서·마이그레이션과 모두 같다. 행 단위 권한(RLS)은 20개 표 모두 켜져 있고 정책은 35개, 적용된 마이그레이션은 18개로 저장소 파일과 같다. 칸 이름은 마이그레이션과 이 문서끼리 맞췄고(20개 표 일치) 실제 DB에서는 칸 수만 봤다. 이 문서에만 있는 표 5개(`knowledge_chunks`, `audit_logs`, `wiki_chunks`, `chat_logs`, `eval_results`)는 아직 만들지 않았다. 자세한 결과는 [connectors.md](connectors.md) 6절.
+- 2026-11-18 저녁 (예림 확인): 위 대조 뒤에 `audit_logs`를 0019로 만들었다(PR #11). `chat_logs`는 DB에는 있으나 저장소 마이그레이션 파일과 DB 마이그레이션 기록에 없다(칸 6개, RLS 켜짐, 정책 2개). 만든 사람이 마이그레이션 파일로 남겨야 한다. DB 마이그레이션 기록은 19개(0001~0017, 0019, 0020).
 
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
