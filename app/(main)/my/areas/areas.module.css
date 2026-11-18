@@ -1,0 +1,60 @@
+/* spec 008 FR-001 관심 지역 목록. 색·간격은 app/tokens.css 토큰만 */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+}
+
+.text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  color: var(--color-muted-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.delete {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  background: var(--color-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 200ms;
+}
+
+.delete:hover {
+  border-color: var(--color-danger);
+}
+
+.delete:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* 시군구 여러 곳 고르기. 휴대폰 폭에서는 두 줄, 넓으면 세 줄 */
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-half) var(--space-1);
+}
