@@ -1,10 +1,10 @@
-// spec 010 FR-010·FR-011: 위키 쪽을 절 단위 조각으로 자르고, 질문 낱말이 많이 겹치는 조각을 고른다. 순수 함수
-// 임베딩은 쓰지 않는다(spec 010 제외 범위, Q3). 수업 교안 P2-S08a처럼 낱말 겹침으로 찾는다
+// spec 012 FR-010·FR-011: 위키 쪽을 절 단위 조각으로 자르고, 질문 낱말이 많이 겹치는 조각을 고른다. 순수 함수
+// 임베딩은 쓰지 않는다(spec 012 제외 범위, Q3). 수업 교안 P2-S08a처럼 낱말 겹침으로 찾는다
 
 export type WikiChunk = { id: string; page: string; heading: string; text: string };
 export type WikiPageText = { page: string; markdown: string };
 
-// 목차·작업 기록·연결지도·위키 규칙 파일은 근거 조각으로 쓰지 않는다(plan 010 파일별 역할)
+// 목차·작업 기록·연결지도·위키 규칙 파일은 근거 조각으로 쓰지 않는다(plan 012 파일별 역할)
 const SKIPPED_PAGES = new Set(["index", "log", "연결지도", "CLAUDE"]);
 const SUMMARY_HEADING = "요약";
 

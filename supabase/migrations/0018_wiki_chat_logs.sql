@@ -1,5 +1,5 @@
--- spec 010 FR-013·FR-014 (PRD FR-26, 평가항목 P3-21), ERD chat_logs. DB 번호 0018은 조각 A 몫(docs/plan.md 2절)
--- wiki_chunks는 만들지 않는다: 배포 묶음의 위키 파일을 바로 읽는다(spec 010 Q3)
+-- spec 012 FR-013·FR-014 (PRD FR-26, 평가항목 P3-21), ERD chat_logs. DB 번호 0018은 조각 A 몫(docs/plan.md 2절)
+-- wiki_chunks는 만들지 않는다: 배포 묶음의 위키 파일을 바로 읽는다(spec 012 Q3)
 
 -- 1) 위키 챗봇 질문 기록. 하루 질문 수는 created_at으로 센다(ERD 저장하지 않고 계산하는 값)
 create table public.chat_logs (

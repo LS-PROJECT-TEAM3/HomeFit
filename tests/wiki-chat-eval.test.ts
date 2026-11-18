@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import { WIKI_MAX_CHUNKS } from "@/chat/wiki-answer";
 import { chunkWiki, pickChunks } from "@/chat/wiki-pages";
 
-// spec 010 FR-015, SC-008: 정답표(docs/wiki-chat.md 1절, 사용자 확정 2026-11-18) 5문항으로 실제 wiki/ 찾기를 확인한다.
-// 정답표와 이 목록은 결과를 보고 고치지 않는다. 틀리면 찾기(chat/wiki-pages.ts)를 고친다(plan 010 6단계 랄프 루프)
+// spec 012 FR-015, SC-008: 정답표(docs/wiki-chat.md 1절, 사용자 확정 2026-11-18) 5문항으로 실제 wiki/ 찾기를 확인한다.
+// 정답표와 이 목록은 결과를 보고 고치지 않는다. 틀리면 찾기(chat/wiki-pages.ts)를 고친다(plan 012 6단계 랄프 루프)
 const ANSWER_KEY = [
   { id: "Q1", kind: "있음", question: "관리자도 사건을 대신 승인할 수 있어?", pages: ["규칙-사람 승인"] },
   { id: "Q2", kind: "있음", question: "결로 사건은 실내 습도가 몇 % 이상일 때 생겨?", pages: ["규칙-사건 기준", "기능-003 습도·결로 사건"] },

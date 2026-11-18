@@ -5,7 +5,7 @@ import { WIKI_DAILY_LIMIT, WIKI_QUESTION_MAX, checkQuestion, readWikiReply, type
 import styles from "@/app/_components/hub.module.css";
 import own from "./wiki-chat.module.css";
 
-// spec 010 FR-010·011·014·016: 위키에 묻고, 답·출처(펼쳐서 절 내용)·남은 질문 수를 보인다
+// spec 012 FR-010·011·014·016: 위키에 묻고, 답·출처(펼쳐서 절 내용)·남은 질문 수를 보인다
 export function WikiChatForm() {
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);

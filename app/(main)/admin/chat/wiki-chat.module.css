@@ -1,4 +1,4 @@
-/* spec 010 5단계 위키 챗봇. 색·간격은 app/tokens.css 변수만 (디자인 기본선 1), 375px에서 넘치지 않게 (SC-012) */
+/* spec 012 5단계 위키 챗봇. 색·간격은 app/tokens.css 변수만 (디자인 기본선 1), 375px에서 넘치지 않게 (SC-012) */
 .form {
   display: grid;
   gap: var(--space-1);

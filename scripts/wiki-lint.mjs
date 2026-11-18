@@ -1,4 +1,4 @@
-// spec 010 FR-007: 프로젝트 위키 점검. 고치지 않고 표로만 보고한다(평가항목 P3-20).
+// spec 012 FR-007: 프로젝트 위키 점검. 고치지 않고 표로만 보고한다(평가항목 P3-20).
 // 수업 교안 P2-S10a 참고본 tools/lint.mjs를 우리 원본 위치(docs/, interviews/)에 맞게 옮겼다.
 //
 // 실행 (저장소 맨 위에서):
@@ -12,9 +12,9 @@ import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const SOURCE_DIRS = ['docs', 'interviews']
-// 저장소 맨 위에 있는 원본(spec 010 Q2, 사용자 결정 2026-11-18)
+// 저장소 맨 위에 있는 원본(spec 012 Q2, 사용자 결정 2026-11-18)
 const SOURCE_ROOT_FILES = ['GLOSSARY.md']
-// 위키 챗봇 정답표는 원본에서 뺀다. 질문 글자가 위키에 들어가면 "위키에 없는 질문"이 위키에 생긴다(사용자 결정 2026-11-18, spec 010 Q2)
+// 위키 챗봇 정답표는 원본에서 뺀다. 질문 글자가 위키에 들어가면 "위키에 없는 질문"이 위키에 생긴다(사용자 결정 2026-11-18, spec 012 Q2)
 const EXCLUDED_SOURCES = new Set(['docs/wiki-chat.md'])
 const HASH_FILE = 'wiki/raw-hashes.json'
 const SPECIAL = new Set(['index', 'log', '연결지도'])
