@@ -12,13 +12,15 @@ import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const SOURCE_DIRS = ['docs', 'interviews']
+// 저장소 맨 위에 있는 원본(spec 009 Q2, 사용자 결정 2026-11-18)
+const SOURCE_ROOT_FILES = ['GLOSSARY.md']
 const HASH_FILE = 'wiki/raw-hashes.json'
 const SPECIAL = new Set(['index', 'log', '연결지도'])
 // 위키 규칙 파일은 쪽이 아니다
 const NOT_PAGES = new Set(['CLAUDE'])
 const REQUIRED = ['## 내용', '## 충돌', '## 확인 필요', '## 연결']
 const LINK = /\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]/g
-const CITE = /근거:\s*((?:docs|interviews)\/[^\s·,)]+)/g
+const CITE = /근거:\s*((?:docs\/|interviews\/|GLOSSARY\.md)[^\s·,)]*)/g
 const FENCE = /```[\s\S]*?```/g
 const INLINE_CODE = /`[^`\n]*`/g
 
@@ -42,7 +44,10 @@ export function mdFilesDeep(root, folder) {
     .sort()
 }
 
-export const sourceFiles = (root) => SOURCE_DIRS.flatMap((d) => mdFilesDeep(root, d))
+export const sourceFiles = (root) => [
+  ...SOURCE_DIRS.flatMap((d) => mdFilesDeep(root, d)),
+  ...SOURCE_ROOT_FILES.filter((f) => existsSync(join(root, f))),
+]
 
 export function wikiPages(root) {
   const dir = join(root, 'wiki')

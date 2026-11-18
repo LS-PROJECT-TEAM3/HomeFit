@@ -103,6 +103,14 @@ describe("wiki-lint", () => {
     ]);
   });
 
+  it("맨 위 GLOSSARY.md도 원본이고 근거 경로로 쓸 수 있다", () => {
+    healthyWiki();
+    put("GLOSSARY.md", "# 용어\n\n**사건**: 바깥 변화 한 건\n");
+    page("팀-용어집", { sources: ["GLOSSARY.md"], body: "- 사건은 바깥 변화 한 건. (근거: GLOSSARY.md · 사건)" });
+    put("wiki/index.md", "# 목차\n\n- [[규칙-위키 챗봇]]\n- [[팀-용어집]]\n- [[연결지도]]\n- [[log]]\n");
+    expect(lint(root).map((p: { kind: string; page: string }) => `${p.kind} ${p.page}`)).toEqual(["새 원본 GLOSSARY.md"]);
+  });
+
   it("지문에만 있고 파일이 없으면 원본 사라짐", () => {
     healthyWiki();
     rmSync(join(root, "docs/PRD.md"));
