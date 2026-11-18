@@ -113,7 +113,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 - [x] `wiki/CLAUDE.md`: 참고본 CLAUDE.md를 우리 원본 위치·갈래·근거 모양 `(근거: docs/PRD.md · FR-26)`으로 옮기고 Q8(반영은 조각 A 담당) 한 줄
 - [x] `wiki/index.md`, `wiki/log.md`, `wiki/연결지도.md` 뼈대(연결지도는 열 머리만)
 - [x] `.claude/skills/wiki-ingest|wiki-query|wiki-lint/SKILL.md`: 참고본을 옮기고 명령을 `node scripts/wiki-*.mjs`로
-- [ ] 새 대화에서 스킬 목록 확인
+- [x] 새 대화에서 스킬 목록 확인
 
 ### 2단계 작업
 - [x] `tests/wiki-lint.test.ts` 먼저: 임시 폴더에 작은 위키·원본을 만들어 사례별 표 줄과 종료 코드 확인(아래 4절 함수 시험)
@@ -129,17 +129,17 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 - [x] 점검 0건 확인 → 사용자 승인 → `node scripts/wiki-lint.mjs --record`
 
 ### 4단계 작업
-- [ ] `tests/wiki-pages.test.ts`, `tests/wiki-answer.test.ts` 먼저
-- [ ] `chat/wiki-pages.ts`, `chat/wiki-answer.ts`
-- [ ] `0018_wiki_chat_logs.sql`, `lib/llm/types.ts` purpose, `database.types.ts`
-- [ ] `chat/wiki-chat.server.ts`, `app/api/wiki-chat/route.ts`
-- [ ] `next.config.ts`에 `outputFileTracingIncludes`로 `wiki/*.md` 포함
-- [ ] `docs/ERD.md`: wiki_chunks "미룸", Q1에서 위키 챗봇 분리(knowledge_chunks는 그대로)
-- [ ] (사용자 승인 뒤) 팀 Supabase에 0018 적용
+- [x] `tests/wiki-pages.test.ts`, `tests/wiki-answer.test.ts` 먼저
+- [x] `chat/wiki-pages.ts`, `chat/wiki-answer.ts`
+- [x] `0018_wiki_chat_logs.sql`, `lib/llm/types.ts` purpose, `database.types.ts`
+- [x] `chat/wiki-chat.server.ts`, `app/api/wiki-chat/route.ts`
+- [x] `next.config.ts`에 `outputFileTracingIncludes`로 `wiki/*.md` 포함
+- [x] `docs/ERD.md`: wiki_chunks "미룸", Q1에서 위키 챗봇 분리(knowledge_chunks는 그대로)
+- [x] (사용자 승인 뒤) 팀 Supabase에 0018 적용
 
 ### 5단계 작업
-- [ ] `wiki-chat-form.tsx`: 입력(1~300자), 보내는 중, 답, 출처 목록(`<details>`로 절 내용 펼침), "모의 답" 표시, 남은 질문 수, 한도 초과·오류 문구
-- [ ] `page.tsx`: 뼈대 안내 지우고 폼 연결
+- [x] `wiki-chat-form.tsx`: 입력(1~300자), 보내는 중, 답, 출처 목록(`<details>`로 절 내용 펼침), "모의 답" 표시, 남은 질문 수, 한도 초과·오류 문구
+- [x] `page.tsx`: 뼈대 안내 지우고 폼 연결
 - [ ] 브라우저로 관리자·일반 사용자 각각 확인, 375px 스크린샷
 
 ### 6단계 작업
