@@ -2,7 +2,8 @@ import type { Notice } from "@/watch/notice";
 
 // 온통청년 정책 응답 한 건(필요한 칸만). Intent Q6: 2026-11-18 실제 응답(주거 424건)으로 확인
 export type YouthPolicyItem = {
-  plcyNo?: string; plcyNm?: string; mclsfNm?: string; plcyExplnCn?: string; plcySprtCn?: string; operInstCdNm?: string;
+  plcyNo?: string; plcyNm?: string; mclsfNm?: string; plcyKywdNm?: string;
+  plcyAplyMthdCn?: string; srngMthdCn?: string; sbmsnDcmntCn?: string; addAplyQlfcCndCn?: string; ptcpPrpTrgtCn?: string; bizPrdEtcCn?: string; plcyExplnCn?: string; plcySprtCn?: string; operInstCdNm?: string;
   aplyPrdSeCd?: string; aplyYmd?: string; aplyUrlAddr?: string; refUrlAddr1?: string;
   sprtTrgtMinAge?: string | number; sprtTrgtMaxAge?: string | number; zipCd?: string; frstRegDt?: string;
 };
@@ -16,6 +17,11 @@ export type Policy = Notice & {
   /** 법정동 시군구 코드 목록. 비면 전국 (spec 006 E4) */
   regionCodes: string[];
   agency: string | null; support: string | null; description: string | null; periodKind: PeriodKind;
+  /** 정책 키워드(plcyKywdNm, 쉼표). 종류 거르기에 쓴다 (사용자 요청 2026-11-18). 그 전에 저장된 행에는 없을 수 있다 */
+  keywords?: string[];
+  /** spec 006 v0.3 FR-007 정책 상세 칸(원문 그대로). 그 전에 저장된 행에는 없을 수 있다 */
+  applyMethod?: string | null; screening?: string | null; documents?: string | null;
+  extraQualification?: string | null; excluded?: string | null; periodNote?: string | null;
 };
 
 export type PolicyParseResult =
@@ -73,6 +79,9 @@ export function normalizeYouthPolicy(item: YouthPolicyItem): Policy | null {
     complexName: null, statusName: null, beforeAnnouncementId: null,
     minAge: age(item.sprtTrgtMinAge), maxAge: age(item.sprtTrgtMaxAge),
     agency: text(item.operInstCdNm), support: text(item.plcySprtCn), description: text(item.plcyExplnCn), periodKind: kind,
+    keywords: (item.plcyKywdNm ?? "").split(",").map((k) => k.trim()).filter(Boolean),
+    applyMethod: text(item.plcyAplyMthdCn), screening: text(item.srngMthdCn), documents: text(item.sbmsnDcmntCn),
+    extraQualification: text(item.addAplyQlfcCndCn), excluded: text(item.ptcpPrpTrgtCn), periodNote: text(item.bizPrdEtcCn),
   };
 }
 

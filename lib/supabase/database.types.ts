@@ -72,6 +72,12 @@ type IncidentActionRow = {
   id: string; incident_id: string; actor_id: string; action: string; reason: string | null; created_at: string;
 };
 
+// ERD interest_areas (마이그레이션 0017, spec 008)
+type InterestAreaRow = {
+  id: string; user_id: string; sigungu_code: string; housing_type: string; target_area_m2: number; contract_type: string;
+  last_median_value: number | null; last_median_deposit: number | null; created_by: string; created_at: string;
+};
+
 // 0016 (spec 007): 출처는 알림(incident_id·response_plan_id) 또는 공고(source_code·announcement_id)
 type ScheduleItemRow = {
   id: string; user_id: string; response_plan_id: string | null; incident_id: string | null; source_code: string | null; announcement_id: string | null; title: string;
@@ -113,6 +119,7 @@ export type Database = {
         PolicyConditionRow,
         Optional<PolicyConditionRow, "sigungu_code" | "supply_types" | "max_monthly_rent" | "age" | "target_groups" | "updated_at">
       >;
+      interest_areas: Table<InterestAreaRow, Optional<InterestAreaRow, "id" | "last_median_value" | "last_median_deposit" | "created_at">>;
       homes: Table<HomeRow, Optional<HomeRow, "id" | "contract_type" | "deposit" | "monthly_rent" | "maintenance_fee" | "contract_end_date" | "updated_at">>;
       indoor_measurements: Table<IndoorMeasurementRow, Optional<IndoorMeasurementRow, "id" | "created_at">>;
       sources: Table<SourceRow, Optional<SourceRow, "enabled">>;

@@ -61,3 +61,22 @@ describe("parseYouthPolicyResponse", () => {
     expect(parseYouthPolicyResponse("<html>")).toEqual({ ok: false, error: "온통청년 응답 형식이 다릅니다" });
   });
 });
+
+// spec 006 v0.3 FR-007: 정책 상세에 보일 원문 칸
+describe("normalizeYouthPolicy 상세 칸", () => {
+  it("신청 방법·심사·서류·추가 자격·참여 제한·사업 기간 메모를 담고, 비면 null", () => {
+    const policy = normalizeYouthPolicy({ ...item, plcyAplyMthdCn: "온라인 신청", srngMthdCn: " ", sbmsnDcmntCn: "신청서, 임대차계약서", addAplyQlfcCndCn: "무주택자", ptcpPrpTrgtCn: "", bizPrdEtcCn: "연중" });
+    expect(policy).toMatchObject({ applyMethod: "온라인 신청", screening: null, documents: "신청서, 임대차계약서", extraQualification: "무주택자", excluded: null, periodNote: "연중" });
+  });
+});
+
+describe("buildPolicyPrompt", () => {
+  it("정책 원문 값만 넣는다(사용자 정보 없음), 빈 칸은 '원문 확인'", async () => {
+    const { buildPolicyPrompt } = await import("@/incident/policy-summary");
+    const prompt = buildPolicyPrompt(normalizeYouthPolicy({ ...item, sbmsnDcmntCn: "" })!);
+    expect(prompt).toContain("정책 이름: 청년 월세 지원");
+    expect(prompt).toContain("지원 내용: 월 20만 원, 12개월");
+    expect(prompt).toContain("제출 서류: 원문 확인");
+    expect(prompt).not.toContain("41390");
+  });
+});

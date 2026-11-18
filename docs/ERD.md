@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-18 (v1.7, 사용자 결정 2026-11-18: schedule_items 공고 출처)
+- 최종 갱신: 2026-11-18 (v1.8, 사용자 결정 2026-11-18: interest_areas 보증금 지난번 값)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -98,7 +98,8 @@ erDiagram
 | housing_type | text (homes와 같은 값) | ✔ | | [GLOSSARY 관심 지역] |
 | target_area_m2 | numeric | ✔ | 기준 면적. ±20%로 비교 | [문제정의 사건 기준 표] |
 | contract_type | text: `monthly` / `jeonse` | ✔ | | [GLOSSARY 관심 지역] |
-| last_median_value | integer (원) | | 지난번 본 중간값. 시세(관심 지역) 사건 비교 기준 (저장 값) | [문제정의 사건 기준 표 (나)] |
+| last_median_value | integer (원) | | 지난번 본 **월세** 중간값(월세 계약만). 시세(관심 지역) 사건 비교 기준 (저장 값, v1.8에 뜻을 좁힘) | [문제정의 사건 기준 표 (나)] |
+| last_median_deposit | bigint (원) | | 지난번 본 **보증금** 중간값 (v1.8) | [spec 008 Q2] 사용자 결정 2026-11-18 "월세·보증금 둘 다" |
 | created_by | uuid | ✔ | | [평가항목 P3-10] |
 | created_at | timestamptz | ✔ | | [평가항목 P3-10] |
 
@@ -438,6 +439,8 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-18 | v1.8 | notice_summaries에 정책 요약도 저장(source_code `youth_policy`, announcement_id = 정책 ID). 칸 변경 없음 (spec 006 v0.3 FR-007) |
+| 2026-11-18 | v1.8 | interest_areas 만듦(마이그레이션 0017). last_median_value를 월세 중간값으로 좁히고 last_median_deposit 추가(사용자 결정 "월세·보증금 둘 다", spec 008). sources `rtms_trade` |
 | 2026-11-18 | v1.7 | schedule_items: incident_id·response_plan_id를 비울 수 있게, source_code·announcement_id 추가(공고에서 온 일정, 마이그레이션 0016). 사용자 결정 2026-11-18 "표 고치기", spec 007 |
 | 2026-11-18 | v1.6 | llm_calls.purpose에 `chat_answer`(챗봇 답변, 마이그레이션 0014) |
 | 2026-11-18 | v1.6 | policy_conditions.target_groups(대상) 추가. 사용자 결정 2026-11-18 |

@@ -10,6 +10,10 @@
       "schedule": "10 0 * * *"
     },
     {
+      "path": "/api/cron/rent",
+      "schedule": "0 1 2 * *"
+    },
+    {
       "path": "/api/cron/weather",
       "schedule": "30 20 * * *"
     },

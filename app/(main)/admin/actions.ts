@@ -5,6 +5,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { collectMyhome } from "@/watch/collect.server";
 import { collectWeather } from "@/watch/collect-weather.server";
 import { collectYouthPolicies } from "@/watch/collect-youth.server";
+import { collectRent } from "@/watch/collect-rent.server";
+import { buildRentFixture, isRentFixtureName, RENT_LIVE } from "@/watch/rent-fixtures";
+import { rtmsApiFetcher } from "@/watch/rtms.server";
 import { youthPolicyApiFetcher } from "@/watch/youth-policy.server";
 import { kmaApiFetcher } from "@/watch/kma.server";
 import { myhomeApiFetcher } from "@/watch/myhome.server";
@@ -16,7 +19,7 @@ export type RunResult =
   | { ok: true; runId: string; status: "succeeded" | "failed"; summary: string }
   | { ok: false; message: string };
 
-type Source = "myhome" | "weather";
+type Source = "myhome" | "weather" | "rent";
 /** 지금 한 번 실행만 되는 출처. 정책 가짜 묶음은 아직 없다(spec 006 Q2) */
 type RunNowSource = Source | "youth";
 
@@ -46,6 +49,19 @@ function youthKey(): string {
   return key;
 }
 
+// spec 008 FR-007: 시세는 대상 수·거래 수로 요약
+function describeRent(s: { status: string; targets: number; trades: number; newIncidents: number; error?: string }): string {
+  const read = `대상 ${s.targets}곳, 실거래 ${s.trades}건 읽음, 새 알림 ${s.newIncidents}건`;
+  return s.status === "failed" ? `${s.error ?? "이유 없음"} (${read})` : read;
+}
+
+async function runRentNow(): Promise<RunResult> {
+  const key = serviceKey();
+  const s = await collectRent({ db: createAdminClient(), makeFetcher: () => rtmsApiFetcher(key), trigger: "manual", now: new Date() });
+  revalidatePath("/admin/watch");
+  return { ok: true, runId: s.runId, status: s.status, summary: describeRent(s) };
+}
+
 // spec 006 FR-004: 정책은 사건을 만들지 않아 요약 문구가 다르다
 async function runYouthNow(): Promise<RunResult> {
   const s = await collectYouthPolicies({ db: createAdminClient(), fetchPage: youthPolicyApiFetcher(youthKey()), trigger: "manual" });
@@ -60,6 +76,7 @@ export async function runNow(source: RunNowSource): Promise<RunResult> {
   if (denied) return denied;
   try {
     if (source === "youth") return await runYouthNow();
+    if (source === "rent") return await runRentNow();
     const db = createAdminClient();
     const now = new Date();
     const result = source === "myhome"
@@ -87,6 +104,17 @@ export async function runSimulation(input: { source: Source; fixture: string }):
       const name = input.fixture;
       const s = await collectWeather({ db, fetchForecast: async () => buildWeatherFixture(name, now), trigger: "simulation", now });
       return { ok: true, runId: s.runId, status: s.status, summary: describe(s, `가짜 예보 시군구 ${s.sigungu}곳`) };
+    }
+    // spec 008 FR-007: 실제 실거래가 API를 가상 계정 대상에만(실제 계정에 알림이 생기지 않게 실제 연결을 시연)
+    if (input.source === "rent" && input.fixture === RENT_LIVE) {
+      const key = serviceKey();
+      const s = await collectRent({ db, makeFetcher: () => rtmsApiFetcher(key), trigger: "simulation", now });
+      return { ok: true, runId: s.runId, status: s.status, summary: describeRent(s) };
+    }
+    if (input.source === "rent" && isRentFixtureName(input.fixture)) {
+      const name = input.fixture;
+      const s = await collectRent({ db, makeFetcher: (targets, firstMonth) => buildRentFixture(name, targets, firstMonth), trigger: "simulation", now });
+      return { ok: true, runId: s.runId, status: s.status, summary: describeRent(s) };
     }
     return { ok: false, message: "정해진 가짜 묶음만 돌릴 수 있습니다." };
   } catch (cause) {

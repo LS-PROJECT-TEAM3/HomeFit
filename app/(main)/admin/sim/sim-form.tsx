@@ -6,7 +6,7 @@ import { RunButton } from "../run-button";
 import styles from "@/app/_components/hub.module.css";
 
 type Option = { name: string; help: string };
-type Props = { title: string; source: "myhome" | "weather"; options: Option[]; run: (input: { source: "myhome" | "weather"; fixture: string }) => Promise<RunResult> };
+type Props = { title: string; source: "myhome" | "weather" | "rent"; options: Option[]; run: (input: { source: "myhome" | "weather" | "rent"; fixture: string }) => Promise<RunResult> };
 
 // spec 005 FR-002: 묶음 하나를 골라 돌린다
 export function SimForm({ title, source, options, run }: Props) {

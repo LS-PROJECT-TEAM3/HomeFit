@@ -1,5 +1,6 @@
 import { FIXTURE_NAMES } from "@/watch/sim-fixtures";
 import { WEATHER_FIXTURE_NAMES } from "@/watch/weather-fixtures";
+import { RENT_FIXTURES, RENT_LIVE, RENT_LIVE_HELP } from "@/watch/rent-fixtures";
 import { runSimulation } from "../actions";
 import { SimForm } from "./sim-form";
 import styles from "@/app/_components/hub.module.css";
@@ -27,10 +28,8 @@ export default function AdminSimPage() {
       <div className={styles.grid}>
         <SimForm title="마이홈 가짜 공고" source="myhome" options={FIXTURE_NAMES.map((name) => ({ name, help: NOTICE_HELP[name] ?? "" }))} run={runSimulation} />
         <SimForm title="기상청 가짜 예보" source="weather" options={WEATHER_FIXTURE_NAMES.map((name) => ({ name, help: WEATHER_HELP[name] ?? "" }))} run={runSimulation} />
-        <section className={styles.card} aria-labelledby="sim-trade">
-          <h2 id="sim-trade">실거래가(시세) 가짜 거래</h2>
-          <p className={styles.muted}>시세 수집 기능이 아직 없어 묶음도 없습니다.</p>
-        </section>
+        {/* spec 008 FR-007: 가상 계정의 집·관심 지역에 맞춘 가짜 거래 */}
+        <SimForm title="실거래가(시세) 가짜 거래" source="rent" options={[...Object.entries(RENT_FIXTURES).map(([name, help]) => ({ name, help })), { name: RENT_LIVE, help: RENT_LIVE_HELP }]} run={runSimulation} />
       </div>
     </>
   );
