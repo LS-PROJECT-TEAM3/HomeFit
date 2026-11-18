@@ -25,3 +25,12 @@ export async function listMyPolicies(today: string, kind?: PolicyKind): Promise<
   const policies = data.map((row) => row.raw as unknown as Policy); // raw는 Policy로 저장했다 (watch/collect-youth.server.ts)
   return { hasCondition: true, items: listMatchedPolicies({ policies, condition: filter, today, kind }) };
 }
+
+/** spec 006 v0.3 FR-007: 정책 한 건(원문 값). 없으면 null */
+export async function getPolicy(externalId: string): Promise<Policy | null> {
+  await requireUserId();
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("source_items").select("raw").eq("source_code", "youth_policy").eq("external_id", externalId).maybeSingle();
+  if (error) throw new Error("정책을 불러오지 못했습니다.");
+  return data ? (data.raw as unknown as Policy) : null;
+}

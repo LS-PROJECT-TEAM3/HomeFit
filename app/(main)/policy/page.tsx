@@ -81,7 +81,8 @@ async function PolicyList({ searchParams }: { searchParams: PageProps<"/policy">
       <ul className={styles.list}>
         {result.items.map(({ policy, sameName }) => (
           <li key={policy.externalId} className={`${hub.card} ${styles.item}`}>
-            <h3>{policy.title}</h3>
+            {/* spec 006 v0.3 FR-007: 눌러서 설명·요약 보기 */}
+            <h3><Link href={`/policy/${encodeURIComponent(policy.externalId)}`} className={styles.titleLink}>{policy.title}</Link></h3>
             <p className={styles.meta}>{[policy.agency, ...policyKinds(policy).map((k) => POLICY_KIND_LABELS[k]), nationwide(policy) ? "전국 대상" : null].filter(Boolean).join(" · ")}</p>
             {sameName > 1 ? <p className={styles.meta}>같은 이름 정책 {sameName}건 중 내 지역에 가장 맞는 것 하나만 보입니다(지역마다 따로 올라옴)</p> : null}
             <p className={styles.meta}>{period(policy, today)} · {ages(policy)}</p>
