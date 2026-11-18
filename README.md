@@ -22,6 +22,7 @@
 ## 시험
 - `npm test` (Vitest, 순수 함수 시험)
 - `npx tsc --noEmit` (타입 검사), `npm run lint`, `npm run build`
+- 저장소를 새로 받은 폴더에서는 `npm run build`를 먼저 돌려야 `npx tsc --noEmit`이 통과합니다. `PageProps`·`LayoutProps` 타입을 Next가 빌드할 때 만들기 때문입니다
 - 시험은 실제 AI API를 부르지 않습니다(mock). 공급자를 바꾸려면 `.env.local`의 `AI_PROVIDER`만 바꿉니다. AI 호출 수·시간·토큰·실패는 DB `llm_calls`에 남습니다(관리자만 읽음). 구조는 `lib/llm/`, 설명은 [spec 002](docs/specs/002-LLM-공급자/spec.md)
 
 ## 지금 되는 기능 (기능 001 공고·정책 사건 v0.5, 기능 002 LLM 공급자)
