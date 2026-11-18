@@ -30,3 +30,39 @@
   margin: 0 0 var(--space-2);
   font-variant-numeric: tabular-nums;
 }
+
+/* 사용자 요청(2026-11-18) 종류 거르기. 고른 것은 글자 굵기와 밑줄로도 보인다(색만으로 구분하지 않음) */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-half);
+  margin: 0 0 var(--space-2);
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-card);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color 200ms;
+}
+
+.filter:hover {
+  border-color: var(--color-primary);
+}
+
+.filter[aria-current="page"] {
+  border-color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.filter:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
