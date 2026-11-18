@@ -13,6 +13,8 @@
 |---|---|---|---|---|---|---|
 | A | **Supabase 커넥터** (Supabase MCP) | DB 표·권한 규칙 만들기와 확인 | 마이그레이션 적용(`apply_migration`, 20번), DB 확인 질의(`execute_sql`), 가상 계정에 관리자 권한을 주는 SQL 한 줄 실행 | `supabase/migrations/` 0001~0017 (적용 20번과 파일 17개의 차이는 확인 필요). 캡처 없음 | 아니오, 개발 때만. 앱은 Supabase를 자체 키로 부름 | 예림 |
 | B | **Vercel 커넥터** (Vercel MCP) | 배포 상태와 운영 환경변수 확인 | 배포 목록·상세 조회(`list_deployments`, `get_deployment`), 프로젝트 환경변수 확인(`filter_project_envs`) | qa 006 C-609(운영 빌드 실패 조치), qa 008 C-807(운영 `SIMULATION_USER_IDS` 빠짐)과 같은 종류의 확인. 어느 확인에 썼는지는 확인 필요 | 아니오, 개발 때만 | 예림 |
+| C | GitHub | PR 만들기·리뷰·병합 | 예림님이 "커넥터"로 답함(2026-11-18). GitHub 커넥터인지 명령줄 `gh`인지는 확인 필요 | [PR #1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1), [#2](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/2), [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4), [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8) | 아니오, 개발 때만 | 예림 |
+| D | 브라우저 | 화면 확인 | 개발·운영 화면을 열어 QA 증거를 확인(각 qa의 "화면" 방법 항목) | 기능별 `qa.md` | 아니오, 개발 때만 | 예림 |
 | 1 | GitHub (명령줄 `gh`를 Claude가 실행) | 협업 확인 | 팀 저장소의 브랜치·커밋·PR·병합 상태 읽기, 브랜치 올리기, PR 만들기, 리뷰 요청, PR #6 승인 리뷰 | [PR #3](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/3)(병합됨), [PR #5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5), [PR #6 리뷰](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6) | 아니오, 개발 때만 | 선우 |
 | 1-2 | GitHub (명령줄 `gh`를 Claude가 실행) | 조각 C2 PR 올리기, PR #5 리뷰 | 저장소 받기, `lilyoon` 브랜치 작업, 커밋 2개(`cb63ebb`, `5deded8`) 올리기, PR #6·#7 열기, PR #5 승인 리뷰와 보충 코멘트 | [PR #6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6)(병합됨), [PR #7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [PR #5 리뷰](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) | 아니오, 개발 때만 | 서윤 (서윤님 PC 기록) |
 | 2 | Claude 앱 내장 브라우저 | 앱 화면 확인, 자료 읽기 | 개발 서버에 로그인한 뒤 화면 17곳 열기, 입력 검사·공고 팔로우와 관심 없음·일정 체크·기록 찾기·챗봇 질문 시험, 팀 노션 제안서 읽기 | 이 저장소에는 결과 기록이 없음(대화 기록뿐). 시험 결과는 아래 3절에 줄인 것을 둠 | 아니오, 개발 때만 | 선우 |
@@ -54,12 +56,12 @@
 | 선우 (`sunwood0803`) | 위 1번, 2번. Notion 커넥터는 실패(2절) |
 | 현경 (`gaangstar`) | PC의 Claude 세션 기록 12개에 GitHub·Supabase·Vercel·슬랙·Notion·Drive·Sheets·Calendar를 Claude가 부른 기록 없음. 확인된 것은 내장 브라우저(위 3번)뿐 |
 | 서윤 (`lilyoon333`) | 위 1-2번. Supabase·Vercel·슬랙·Notion·Drive 등은 이 PC에 기록 없음(기억 안 남) |
-| 예림 (`dbdpfla98`) | 위 A, B. 커넥터가 **아닌** 것도 함께 답함: 시험 계정 만들기는 명령줄(작은 Node 스크립트가 `.env.local`의 서버 키로 Supabase 관리자 API 호출, 비밀번호는 `.env.local`에만), 배포는 명령줄(`npm run deploy`, Vercel CLI), 슬랙 DM은 앱 코드(`incident/notify.server.ts`)가 보내고 도착은 슬랙에서 직접 확인 |
+| 예림 (`dbdpfla98`) | 위 A, B, C, D. 커넥터가 **아닌** 것도 함께 답함: 시험 계정 만들기는 명령줄(작은 Node 스크립트가 `.env.local`의 서버 키로 Supabase 관리자 API 호출, 비밀번호는 `.env.local`에만), 배포는 명령줄(`npm run deploy`, Vercel CLI), 슬랙 DM은 앱 코드(`incident/notify.server.ts`)가 보내고 도착은 슬랙에서 직접 확인 |
 
 ## 5. 아직 비어 있는 것 (확인 필요)
 - A·B의 **결과 링크나 캡처**. 안내서는 "결과 링크나 캡처"를 남기라고 한다. 지금은 저장소의 마이그레이션 파일과 qa 기록이 간접 근거다. 예림님이 커넥터 호출 화면이나 결과를 한 장씩 남기면 좋다.
 - `apply_migration` 20번과 마이그레이션 파일 17개의 차이(다시 적용했거나 파일로 남기지 않은 것이 있는지).
-- ERD와 실제 DB 대조(P3-16)는 6절에 결과가 있다. `docs/ERD.md`의 "실제 DB 대조" 절에 한 줄로 옮기는 일이 남았다(ERD v1.9가 main에 합쳐진 뒤).
+- ERD와 실제 DB 대조(P3-16)는 6절에 결과가 있고, `docs/ERD.md`의 "실제 DB 대조" 절에도 한 줄로 옮겼다.
 - GitHub는 명령줄 `gh`로만 썼고 GitHub 커넥터는 두 PC에서 연결에 실패했다(2절).
 
 ## 6. ERD와 실제 DB 대조 결과 (2026-11-18, 선우, 읽기만)
@@ -74,6 +76,6 @@
 | 적용된 마이그레이션 | 18개(0001~0017, 0020). 저장소 파일 18개와 같음 |
 | ERD에만 있는 표 | `knowledge_chunks`, `audit_logs`, `wiki_chunks`, `chat_logs`, `eval_results` 5개. 아직 만들지 않은 표(조각 A·B 예정) |
 
-- 실제 DB는 `Yelim` 브랜치와 같고 **main보다 앞서 있다.** `0020_interest_homes_and_costs`가 DB에는 적용됐는데 main에는 아직 없다(main의 ERD는 v1.8, 마이그레이션은 0017까지).
+- 대조할 때(2026-11-18 오후)는 실제 DB가 main보다 앞서 있었다(`0020_interest_homes_and_costs`가 DB에만 적용). 그 뒤 PR #8이 합쳐져 main의 ERD(v1.9)와 마이그레이션(0020)이 DB와 같아졌다.
 - 권한 규칙 화면에서 `profiles`, `notification_settings`, `schedule_items` 세 표에 "API DISABLED" 표시가 붙어 있다. 의도한 설정인지 `확인 필요`.
 - 확인하지 못한 것: 실제 DB의 칸 이름·자료형·제약, 정책의 조건식 내용, DB 함수와 트리거.

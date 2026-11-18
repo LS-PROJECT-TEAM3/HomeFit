@@ -30,10 +30,21 @@
 | 근거 | `docs/specs/001-공고정책-사건/plan.md` 222줄, `qa.md` 실패와 조치 #14~#17 |
 | 기록이 서로 다른 곳 | qa 001 변경 기록은 "2번은 결정 필요, 3·4번 제안"이고, 같은 qa의 실패와 조치는 2번(#16)·4번(#17)을 고친 것으로 적었다. plan 001은 "1·2·4·5 고침"이라 최종은 후자로 보이나 확인 필요 |
 
-### 1.3 쓰지 않은 것
+### 1.3 조사·문서 읽기·코드 리뷰 도우미 (예림, 모두 12번)
+예림님 답(2026-11-18 슬랙)을 옮긴 것이다. 호출 기록은 예림님 PC에 있다.
+
+| 칸 | 내용 |
+|---|---|
+| 이름과 역할 | Claude에 기본으로 있는 서브에이전트. 직접 만든 설정은 없다(`.claude/agents/` 없음) |
+| 맡긴 일 | 공공 API 조사, Vercel·Gemini 문서 읽기, 한전 요금표 읽기, 코드 리뷰 2번(그중 하나가 1.2). 모두 합쳐 12번 |
+| 받은 결과 | `확인 필요` (건별 결과는 기록을 받지 못함). 저장소에는 조사 결과가 반영된 흔적이 있다: `docs/문제정의.md` 확인 필요 6·7번(API 문서 확인), `docs/specs/002-LLM-공급자/plan.md`(Gemini 문서 조사와 출처 링크) |
+| 사람이 확인한 것 | `확인 필요` |
+| 잘 안 된 점과 고친 것 | `확인 필요` |
+| 근거 | 예림님 답. 코드 리뷰는 qa 001 실패와 조치 #14~#17 |
+
+### 1.4 쓰지 않은 것
 - **현경님(`gaangstar`) PC**: Claude 세션 기록에 서브에이전트 호출이 없고, `.claude/agents/`도 없다. "쓰지 않음".
 - **서윤님(`lilyoon333`) PC**: 작업 기록에서 서브에이전트를 맡긴 기록을 찾지 못함(기억 안 남).
-- **예림님 PC**: 위 1.2 한 건을 답함. 그 밖에 더 쓴 것이 있는지, 큰 일에 쓰지 않았다면 그 이유는 `확인 필요`.
 
 ## 2. 스킬 (P3-24)
 저장소 `.claude/skills/`에 스킬 10개가 들어 있다. **harness-* 7개**(erd, ia, intent, journeys, prd, qa, spec-plan)와 **그 밖 3개**(domain-modeling, grill-with-docs, grilling)다.
@@ -42,23 +53,23 @@
 
 | 스킬 | 쓴 흔적(산출물) | 누가·어떤 입력으로 |
 |---|---|---|
-| grill-with-docs, grilling, domain-modeling | `docs/문제정의.md`, `GLOSSARY.md`, `docs/adr/` 3개, 인터뷰 종합 | 확인 필요 |
-| harness-ia | `docs/IA.md`, `docs/IA.xlsx`, `docs/IA-screens.json`. IA.md 맨 위에 스킬 스크립트 `build_ia_workbook.py`로 엑셀을 다시 만드는 명령이 적혀 있음 | 확인 필요 |
-| harness-journeys | `docs/journeys/` (여정 지도, 핵심 여정 4개, 명세, 예외 경로) | 확인 필요 |
-| harness-prd | `docs/PRD.md` | 확인 필요 |
-| harness-erd | `docs/ERD.md` | 확인 필요 |
-| harness-intent | `docs/Intent.md` | 확인 필요 |
-| harness-spec-plan | `docs/specs/NNN-기능/spec.md`, `plan.md` 8묶음 | 확인 필요 |
-| harness-qa | `docs/specs/NNN-기능/qa.md` 8묶음. plan 001의 단계표에 "`harness-qa` B·C"가 적혀 있음 | 확인 필요 |
+| grill-with-docs, grilling, domain-modeling | `docs/문제정의.md`, `GLOSSARY.md`, `docs/adr/` 3개, 인터뷰 종합 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| harness-ia | `docs/IA.md`, `docs/IA.xlsx`, `docs/IA-screens.json`. IA.md 맨 위에 스킬 스크립트 `build_ia_workbook.py`로 엑셀을 다시 만드는 명령이 적혀 있음 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| harness-journeys | `docs/journeys/` (여정 지도, 핵심 여정 4개, 명세, 예외 경로) | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| harness-prd | `docs/PRD.md` | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| harness-erd | `docs/ERD.md` | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| harness-intent | `docs/Intent.md` | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| harness-spec-plan | `docs/specs/NNN-기능/spec.md`, `plan.md` 8묶음 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| harness-qa | `docs/specs/NNN-기능/qa.md` 8묶음. plan 001의 단계표에 "`harness-qa` B·C"가 적혀 있음 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
 
 ### 2.1 저장소 밖 스킬
-- **ponytail-review** (코드 검토 스킬): qa 001에 7곳, qa 003에 1곳 언급. 이 스킬은 저장소 `.claude/skills/`에 **없다**(전역 스킬). 어떤 입력으로 어떤 결과를 얻었는지는 qa 표에 남아 있다(qa 001 실패와 조치 #1, #11~#13의 "ponytail-review 지적"). 누가 불렀는지는 확인 필요.
-- `humanize-korean`, `ui-ux-pro-max`, `web-design-guidelines`, `code-review`, `simplify` 등 `.claude/rules/`가 부르는 다른 스킬도 저장소에 없다. 실제로 썼는지는 기록에서 찾지 못했다.
+- **ponytail-review** (코드 검토 스킬): qa 001에 7곳, qa 003에 1곳 언급. 이 스킬은 저장소 `.claude/skills/`에 **없다**(전역 스킬). 어떤 입력으로 어떤 결과를 얻었는지는 qa 표에 남아 있다(qa 001 실패와 조치 #1, #11~#13의 "ponytail-review 지적"). 예림님이 단계 끝 리뷰로 7번 썼다고 답했다(2026-11-18).
+- 예림님은 그 밖에 `ui-ux-pro-max`, `react-best-practices`, `composition-patterns`, `claude-api`를 썼다고 답했다(2026-11-18). 모두 저장소 `.claude/skills/`에 없는 스킬이라 다른 팀원 PC에서는 불리지 않는다. 어떤 입력으로 어떤 결과를 얻었는지는 확인 필요. `.claude/rules/`가 부르는 `humanize-korean`, `web-design-guidelines`, `code-review`, `simplify`는 썼다는 답이 없다.
 - 현경님(`gaangstar`) PC 기록에는 Skill 도구로 스킬을 부른 기록이 없다.
 - 서윤님(`lilyoon333`) PC에서는 harness-* 스킬을 직접 부른 기록을 확인하지 못했다(기억 안 남). `ponytail-review`는 서윤님 PC에 개인 플러그인으로 있고 프로젝트 2 작업 기록에는 있으나, HomeFit에서 직접 썼는지는 기억 안 남.
 
 ## 3. 아직 비어 있는 것 (확인 필요)
-1. 예림님이 1.2 말고 서브에이전트를 더 썼는지, 스킬은 누가 어떤 입력으로 불렀는지. 현경님·서윤님은 답함(2026-11-18)
+1. 예림님 서브에이전트 12번의 건별 결과와, 스킬별 입력·결과. 현경님·서윤님은 답함(2026-11-18)
 2. 1.2에서 리뷰 결과를 **사람이 어떻게 확인했는지**(누가 읽고 무엇을 받아들이거나 버렸는지)와, 지적 처리 기록이 서로 다른 곳
-3. 위 2절 표의 "누가·어떤 입력으로"
-4. 안내서가 권하는 "만드는 도우미와 검토하는 도우미 분리"를 앞으로 어떻게 할지. 지금 확인된 분리는 1.1(인터뷰 검증)과 1.2(코드 리뷰) 두 곳이다.
+3. 위 2절 표의 스킬별 입력(무엇을 주고 불렀는지)
+4. 안내서가 권하는 "만드는 도우미와 검토하는 도우미 분리"를 앞으로 어떻게 할지. 지금 확인된 분리는 1.1(인터뷰 검증)과 코드 리뷰 2번(1.2 포함)이다.
