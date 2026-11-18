@@ -7,8 +7,7 @@ const TABS: Tab[] = [
   { href: "/my/home", label: "내 집" },
   { href: "/my/conditions", label: "공고·정책 조건" },
   { href: "/my/areas", label: "관심 지역" }, // spec 008 FR-001 (IA MY_030300_TB)
-  { href: "/my/notifications", label: "슬랙 알림" },
-  { href: "/my/account", label: "계정" },
+  { href: "/my/account", label: "계정·알림" }, // 사용자 요청(2026-11-18): 슬랙 알림 탭을 합침
 ];
 
 export default function MyLayout({ children }: LayoutProps<"/my">) {
