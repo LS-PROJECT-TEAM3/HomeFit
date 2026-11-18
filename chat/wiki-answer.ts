@@ -72,3 +72,20 @@ export function kstDayStart(now: Date): Date {
   const kst = now.getTime() + KST_OFFSET_MS;
   return new Date(kst - (kst % DAY_MS) - KST_OFFSET_MS);
 }
+
+/** 답에 [W1]처럼 적힌 번호(id)로 출처를 맞춰 볼 수 있게 id를 함께 보낸다 (FR-010·016) */
+export type WikiSource = { id: string; page: string; heading: string; text: string };
+export type WikiChatView =
+  | { ok: true; answer: string; sources: WikiSource[]; isMock: boolean; remaining: number }
+  | { ok: false; message: string };
+
+const WIKI_FALLBACK_ERROR = "답을 만들지 못했습니다. 잠시 뒤 다시 물어 주세요.";
+
+/** 화면용: /api/wiki-chat 응답을 보여 줄 값으로. 서버 오류 문구는 그대로, 모양이 틀리면 기본 문구 */
+export function readWikiReply(ok: boolean, body: unknown): WikiChatView {
+  const b = (body ?? {}) as { answer?: unknown; sources?: unknown; isMock?: unknown; remaining?: unknown; error?: unknown };
+  if (ok && typeof b.answer === "string" && Array.isArray(b.sources) && typeof b.remaining === "number") {
+    return { ok: true, answer: b.answer, sources: b.sources as WikiSource[], isMock: b.isMock === true, remaining: b.remaining };
+  }
+  return { ok: false, message: typeof b.error === "string" ? b.error : WIKI_FALLBACK_ERROR };
+}

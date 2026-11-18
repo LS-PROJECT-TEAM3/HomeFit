@@ -2,7 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   WIKI_JSON_SCHEMA, WIKI_MAX_CHUNKS, WIKI_NOT_FOUND, WIKI_SYSTEM_PROMPT, WIKI_DAILY_LIMIT,
-  buildMockAnswer, buildWikiPrompt, canAskToday, kstDayStart, parseWikiAnswer, type WikiAnswer,
+  buildMockAnswer, buildWikiPrompt, canAskToday, kstDayStart, parseWikiAnswer, type WikiAnswer, type WikiSource,
 } from "@/chat/wiki-answer";
 import { chunkWiki, pickChunks, type WikiChunk, type WikiPageText } from "@/chat/wiki-pages";
 import { callLlm, newCallContext } from "@/lib/llm/call.server";
@@ -12,7 +12,6 @@ import { createClient } from "@/lib/supabase/server";
 // spec 009 FR-010·011·013·014: 위키 파일을 읽어 찾고, AI로 답하고, chat_logs에 남긴다.
 // 위키 파일은 배포 묶음에 들어간 것을 바로 읽는다(spec 009 Q3, next.config.ts outputFileTracingIncludes)
 
-export type WikiSource = { page: string; heading: string; text: string };
 export type WikiChatReply =
   | { kind: "answer"; answer: string; sources: WikiSource[]; isMock: boolean; remaining: number }
   | { kind: "limit" };
@@ -51,7 +50,7 @@ export async function answerWikiQuestion(userId: string, question: string, now: 
   if (!canAskToday(asked)) return { kind: "limit" };
   const picked = pickChunks(question, chunkWiki(await readWikiPages()), WIKI_MAX_CHUNKS);
   const { answer, sourceIds, isMock } = await answerFromChunks(question, picked);
-  const sources = picked.filter((c) => sourceIds.includes(c.id)).map(({ page, heading, text }) => ({ page, heading, text }));
+  const sources = picked.filter((c) => sourceIds.includes(c.id)).map(({ id, page, heading, text }) => ({ id, page, heading, text }));
   const { error } = await (await createClient()).from("chat_logs").insert({
     user_id: userId, question, answer, cited_pages: sources.map(({ page, heading }) => ({ page, heading })),
   });

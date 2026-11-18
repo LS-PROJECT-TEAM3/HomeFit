@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  WIKI_ANSWER_MAX, WIKI_DAILY_LIMIT, WIKI_NOT_FOUND, buildMockAnswer, buildWikiPrompt, canAskToday, checkQuestion, kstDayStart, parseWikiAnswer,
+  WIKI_ANSWER_MAX, WIKI_DAILY_LIMIT, WIKI_NOT_FOUND, buildMockAnswer, buildWikiPrompt, canAskToday, checkQuestion, kstDayStart, parseWikiAnswer, readWikiReply,
 } from "@/chat/wiki-answer";
 import type { WikiChunk } from "@/chat/wiki-pages";
 
@@ -73,5 +73,24 @@ describe("하루 질문 한도", () => {
     expect(kstDayStart(new Date("2026-11-18T15:30:00Z")).toISOString()).toBe("2026-11-18T15:00:00.000Z");
     // 2026-11-18T14:59Z = 한국 18일 23:59 → 18일 00:00 KST = 17일 15:00Z
     expect(kstDayStart(new Date("2026-11-18T14:59:00Z")).toISOString()).toBe("2026-11-17T15:00:00.000Z");
+  });
+});
+
+describe("readWikiReply (화면용 응답 읽기)", () => {
+  const source = { id: "W1", page: "규칙-사람 승인", heading: "내용", text: "승인 전에는 실행하지 않는다." };
+
+  it("성공 응답은 답·출처·mock 표시·남은 질문 수로 읽는다", () => {
+    expect(readWikiReply(true, { kind: "answer", answer: "답 [W1]", sources: [source], isMock: true, remaining: 19 }))
+      .toEqual({ ok: true, answer: "답 [W1]", sources: [source], isMock: true, remaining: 19 });
+  });
+
+  it("거절 응답은 서버 문구를 그대로 보인다(한도 초과 등)", () => {
+    expect(readWikiReply(false, { error: "오늘 질문 한도를 다 썼습니다. 내일 다시 물어 주세요." }))
+      .toEqual({ ok: false, message: "오늘 질문 한도를 다 썼습니다. 내일 다시 물어 주세요." });
+  });
+
+  it("모양이 틀리거나 본문이 없으면 기본 오류 문구", () => {
+    expect(readWikiReply(true, { answer: 3 })).toEqual({ ok: false, message: "답을 만들지 못했습니다. 잠시 뒤 다시 물어 주세요." });
+    expect(readWikiReply(false, null).ok).toBe(false);
   });
 });
