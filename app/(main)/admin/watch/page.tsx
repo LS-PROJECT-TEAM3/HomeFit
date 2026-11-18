@@ -1,9 +1,14 @@
 import { connection } from "next/server";
 import { LoadError } from "@/app/_components/states";
 import { createClient } from "@/lib/supabase/server";
+import { consecutiveFailures } from "@/watch/run-health";
+import { runNow } from "../actions";
+import { RunButton } from "../run-button";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "수집 현황 | 관리자 | HomeFit AI" };
+// 지금 한 번 실행은 수집 입구와 같은 상한 안에서 끝나야 한다
+export const maxDuration = 300;
 
 const SOURCE: Record<string, string> = { myhome_notice: "마이홈 공고", kma_forecast: "기상청 예보" };
 const STATUS: Record<string, string> = { succeeded: "성공", failed: "수집 오류", running: "도는 중" };
@@ -18,19 +23,36 @@ export default async function AdminWatchPage() {
   await connection();
   const supabase = await createClient();
   const [runs, calls] = await Promise.all([
-    supabase.from("runs").select("id, source_code, trigger, status, error_message, started_at").order("started_at", { ascending: false }).limit(20),
+    supabase.from("runs").select("id, source_code, trigger, status, error_message, started_at").order("started_at", { ascending: false }).limit(50),
     supabase.from("llm_calls").select("created_at, purpose, provider, ok, error_kind, latency_ms").eq("ok", false).order("created_at", { ascending: false }).limit(10),
   ]);
   if (runs.error || calls.error) return <LoadError>수집 기록을 불러오지 못했습니다.</LoadError>;
   return (
     <>
-      <h2>최근 실행 20건</h2>
-      <p className={styles.muted}>&ldquo;지금 한 번 실행&rdquo; 버튼과 연속 실패 수는 다음 단계입니다(PRD FR-21).</p>
+      <h2>출처별 상태</h2>
+      <div className={styles.grid}>
+        {(["myhome", "weather"] as const).map((source) => {
+          const code = source === "myhome" ? "myhome_notice" : "kma_forecast";
+          const failures = consecutiveFailures(runs.data, code);
+          return (
+            <section key={source} className={styles.card} aria-label={SOURCE[code]}>
+              <h3>{SOURCE[code]}</h3>
+              <p>
+                연속 실패: <strong className="tabular-nums">{failures}회</strong>
+                {failures > 0 ? " — 확인이 필요합니다" : ""}
+              </p>
+              <RunButton label="지금 한 번 실행" run={runNow.bind(null, source)} />
+            </section>
+          );
+        })}
+      </div>
+      <p className={styles.muted}>지금 한 번 실행은 실제 API를 부르고 &ldquo;손으로&rdquo;로 기록됩니다. 연속 실패 수에는 시뮬레이터 실행을 넣지 않습니다.</p>
+      <h2 className={styles.section}>최근 실행 20건</h2>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead><tr><th scope="col">시각</th><th scope="col">출처</th><th scope="col">방식</th><th scope="col">결과</th><th scope="col">오류</th></tr></thead>
           <tbody>
-            {runs.data.map((run) => (
+            {runs.data.slice(0, 20).map((run) => (
               <tr key={run.id}>
                 <td>{kst(run.started_at)}</td>
                 <td>{SOURCE[run.source_code] ?? run.source_code}</td>
