@@ -1,0 +1,32 @@
+/* spec 006 FR-003 청년 주거지원 정책 목록. 색·간격은 app/tokens.css 토큰만 */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  color: var(--color-muted-text);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.support {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.count {
+  margin: 0 0 var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
