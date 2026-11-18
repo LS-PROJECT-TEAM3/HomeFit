@@ -313,7 +313,7 @@
       "path": [
         "홈",
         "내 정보",
-        "계정"
+        "계정·알림"
       ],
       "type": "탭",
       "login": "필요",
@@ -322,7 +322,7 @@
       "status": "신규",
       "url": "/my/account",
       "menu_entry": true,
-      "note": "로그아웃, 탈퇴"
+      "note": "로그아웃, 탈퇴 v1.7: 슬랙 알림 칸을 합침(사용자 요청 2026-11-18)"
     },
     {
       "menu_code": "MY",
@@ -342,7 +342,7 @@
       "priority": "MVP",
       "status": "신규",
       "url": "/my/notifications",
-      "note": "팀 슬랙 이메일(기본값 로그인 이메일), 알림 켜기·끄기, 시험 메시지 보내기. 켜는 것이 알림 승인"
+      "note": "팀 슬랙 이메일(기본값 로그인 이메일), 알림 켜기·끄기, 시험 메시지 보내기. 켜는 것이 알림 승인 v1.7: 계정·알림 탭 안의 칸으로 합침, 옛 주소는 /my/account#slack으로"
     },
     {
       "menu_code": "CP",
@@ -358,7 +358,7 @@
       "type": "페이지",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/compare",
       "menu_entry": true,
@@ -379,7 +379,7 @@
       "type": "페이지",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/compare/new",
       "menu_entry": true,
@@ -400,7 +400,7 @@
       "type": "페이지",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/compare/cost",
       "menu_entry": true,
@@ -421,7 +421,7 @@
       "type": "페이지",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/compare/[id]"
     },
