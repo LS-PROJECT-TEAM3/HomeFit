@@ -108,6 +108,9 @@ type NoticeFollowRow = {
 
 type NoticeSummaryRow = { source_code: string; announcement_id: string; summary: string; model: string; created_at: string };
 
+// 0018: 위키 챗봇 질문 기록 (ERD chat_logs, spec 009)
+type ChatLogRow = { id: string; user_id: string; question: string; answer: string; cited_pages: Json; created_at: string };
+
 // 기본값이 있는 칸은 넣을 때 빼도 된다
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -167,6 +170,7 @@ export type Database = {
       >;
       notice_follows: Table<NoticeFollowRow, Optional<NoticeFollowRow, "reason" | "decided_at">>;
       notice_summaries: Table<NoticeSummaryRow, Optional<NoticeSummaryRow, "created_at">>;
+      chat_logs: Table<ChatLogRow, Optional<ChatLogRow, "id" | "cited_pages" | "created_at">>;
       llm_calls: Table<
         LlmCallRow,
         Optional<LlmCallRow, "id" | "run_id" | "model" | "error_kind" | "input_tokens" | "output_tokens" | "created_at">
