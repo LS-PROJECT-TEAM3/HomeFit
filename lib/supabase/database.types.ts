@@ -21,6 +21,16 @@ type HomeRow = {
   id: string; user_id: string; sigungu_code: string; housing_type: string; exclusive_area_m2: number;
   contract_type: string | null; deposit: number | null; monthly_rent: number | null; maintenance_fee: number | null; contract_end_date: string | null;
   window_type: string; created_by: string; updated_at: string;
+  // 0020 (spec 009): 실질 주거비 칸(모두 선택)
+  energy_cost: number | null; electricity_kwh: number | null; transit_fare: number | null; trips_per_day: number | null; commute_days: number | null;
+};
+
+// ERD interest_homes (마이그레이션 0020, spec 009)
+type InterestHomeRow = {
+  id: string; user_id: string; name: string; sigungu_code: string; housing_type: string; exclusive_area_m2: number | null;
+  deposit: number | null; monthly_rent: number; maintenance_fee: number | null;
+  energy_cost: number | null; electricity_kwh: number | null; transit_fare: number | null; trips_per_day: number | null; commute_days: number | null;
+  created_by: string; created_at: string; updated_at: string;
 };
 
 type IndoorMeasurementRow = {
@@ -122,8 +132,9 @@ export type Database = {
         PolicyConditionRow,
         Optional<PolicyConditionRow, "sigungu_code" | "supply_types" | "max_monthly_rent" | "age" | "target_groups" | "updated_at">
       >;
+      interest_homes: Table<InterestHomeRow, Optional<InterestHomeRow, "id" | "exclusive_area_m2" | "deposit" | "maintenance_fee" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days" | "created_at" | "updated_at">>;
       interest_areas: Table<InterestAreaRow, Optional<InterestAreaRow, "id" | "last_median_value" | "last_median_deposit" | "created_at">>;
-      homes: Table<HomeRow, Optional<HomeRow, "id" | "contract_type" | "deposit" | "monthly_rent" | "maintenance_fee" | "contract_end_date" | "updated_at">>;
+      homes: Table<HomeRow, Optional<HomeRow, "id" | "contract_type" | "deposit" | "monthly_rent" | "maintenance_fee" | "contract_end_date" | "updated_at" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days">>;
       indoor_measurements: Table<IndoorMeasurementRow, Optional<IndoorMeasurementRow, "id" | "created_at">>;
       sources: Table<SourceRow, Optional<SourceRow, "enabled">>;
       runs: Table<RunRow, Optional<RunRow, "id" | "triggered_by" | "status" | "error_message" | "started_at" | "finished_at">>;

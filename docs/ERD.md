@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-18 (v1.9, spec 010: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`)
+- 최종 갱신: 2026-11-18 (v1.10, spec 010: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -33,6 +33,7 @@ erDiagram
     PROFILES ||--o{ AUDIT_LOGS : "관리자 수정"
     PROFILES ||--o{ CHAT_LOGS : "위키 챗봇"
     RUNS ||--o| EVAL_RESULTS : "채점"
+    PROFILES ||--o{ INTEREST_HOMES : "관심 주택 (v1.9)"
 ```
 
 ## 엔터티
@@ -75,6 +76,11 @@ erDiagram
 | contract_end_date | date | | 계약 만료일 | [PRD FR-03] |
 | window_type | text: `single` / `double` / `unknown` | ✔ | 창 종류(홑유리 / 이중유리 / 모름) | [PRD FR-03] [CUJ-02 1단계] |
 | created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
+| energy_cost | integer (원) | | 한 달 에너지비 직접 입력 (v1.9) | [PRD FR-28 v1.10] |
+| electricity_kwh | integer | | 한 달 전기 사용량. 넣으면 한전 주택용 저압 요금표로 계산(직접 입력이 있으면 그것을 씀) (v1.9) | [PRD FR-28 v1.10] |
+| transit_fare | integer (원) | | 출퇴근 편도 요금 (v1.9) | [PRD FR-28 v1.10] |
+| trips_per_day | integer | | 하루 탈 횟수. 비우면 2 (v1.9) | [PRD FR-28 v1.10] |
+| commute_days | integer | | 한 달 출근 일수. 비우면 22 (v1.9) | [PRD FR-28 v1.10] |
 | updated_at | timestamptz | ✔ | | [평가항목 P3-10] |
 
 #### indoor_measurements — 측정값(실내 온습도)
@@ -87,6 +93,24 @@ erDiagram
 | measured_at | timestamptz | ✔ | 측정 시각. 몇 시간 지난 값까지 쓸지는 Q4 | [PRD FR-04] [GLOSSARY 측정값] |
 | created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
 | created_at | timestamptz | ✔ | 입력 시각 | [평가항목 P3-10] |
+
+#### interest_homes — 관심 주택 (v1.9)
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| id | uuid (PK) | ✔ | 회원당 여러 개 | [PRD FR-28] |
+| user_id | uuid (FK profiles) | ✔ | | [PRD FR-28] |
+| name | text | ✔ | 내가 알아볼 이름(40자 안). 상세 주소는 받지 않는다 | [IA CP_040100_PG] [PRD 8절 개인정보] |
+| sigungu_code | text | ✔ | 시군구 코드 | [IA CP_040100_PG] |
+| housing_type | text (homes와 같은 값) | ✔ | 주택 유형 | [GLOSSARY 관심 주택] |
+| exclusive_area_m2 | numeric | | 전용면적 | [IA CP_040100_PG] |
+| deposit | bigint (원) | | 보증금 | [IA CP_040100_PG] |
+| monthly_rent | integer (원) | ✔ | 월세(전세면 0) | [PRD FR-28] |
+| maintenance_fee | integer (원) | | 관리비 | [PRD FR-28] |
+| energy_cost, electricity_kwh, transit_fare, trips_per_day, commute_days | | | homes와 같은 뜻 | [PRD FR-28 v1.10] |
+| created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
+| created_at, updated_at | timestamptz | ✔ | | [평가항목 P3-10] |
+
+실질 주거비 = 월세 + 관리비 + 에너지비 + 교통비 (계산 값, 저장하지 않음). 에너지비 = energy_cost, 없으면 electricity_kwh로 계산, 둘 다 없으면 "미입력". 교통비 = transit_fare × trips_per_day × commute_days. [GLOSSARY 실질 주거비]
 
 #### interest_areas — 관심 지역
 | 필드 | 타입 | 필수 | 설명 | 출처 |
@@ -270,7 +294,7 @@ erDiagram
 | created_at | timestamptz | ✔ | 시각 | [PRD FR-20] |
 
 #### wiki_chunks — 위키 쪽 조각
-> **미룸 (v1.9, spec 010 Q3, 사용자 결정 2026-11-18)**: 위키 챗봇은 배포 묶음 안의 `wiki/` 파일을 바로 읽어 낱말로 찾는다. 이 표는 만들지 않았고, 임베딩이 필요해지면 다시 정한다.
+> **미룸 (v1.10, spec 010 Q3, 사용자 결정 2026-11-18)**: 위키 챗봇은 배포 묶음 안의 `wiki/` 파일을 바로 읽어 낱말로 찾는다. 이 표는 만들지 않았고, 임베딩이 필요해지면 다시 정한다.
 
 | 필드 | 타입 | 필수 | 설명 | 출처 |
 |---|---|---|---|---|
@@ -378,7 +402,7 @@ erDiagram
 | AD_070400_TB, AD_070401_MD | 흐름 화면, 상자 상세 | runs, run_steps | | FR-23 |
 | AD_070500_TB | 시뮬레이터 | | runs(`simulation`), observations·incidents(`is_simulated`) | FR-24 |
 | AD_070600_TB | 채점 결과 | eval_results | eval_results | FR-25 |
-| AD_070700_TB | 위키 챗봇 | 저장소 `wiki/` 파일(v1.9), chat_logs | chat_logs | FR-26 |
+| AD_070700_TB | 위키 챗봇 | 저장소 `wiki/` 파일(v1.10), chat_logs | chat_logs | FR-26 |
 
 ## 저장하지 않고 계산하는 값
 | 값 | 계산 위치 | 출처 |
@@ -424,7 +448,7 @@ erDiagram
 ## 확인 필요
 | # | 질문 | 막고 있는 필드 | 출처 |
 |---|---|---|---|
-| Q1 | 기록 찾기의 임베딩(글을 숫자 목록으로 바꾸는 것)을 무엇으로 만드나? Claude API는 임베딩을 만들지 않아 별도 방법이 필요하다(외부 서비스면 먼저 묻는다). 위키 챗봇은 임베딩을 쓰지 않는다(v1.9, spec 010 Q3) | knowledge_chunks.embedding | [PRD FR-18] |
+| Q1 | 기록 찾기의 임베딩(글을 숫자 목록으로 바꾸는 것)을 무엇으로 만드나? Claude API는 임베딩을 만들지 않아 별도 방법이 필요하다(외부 서비스면 먼저 묻는다). 위키 챗봇은 임베딩을 쓰지 않는다(v1.10, spec 010 Q3) | knowledge_chunks.embedding | [PRD FR-18] |
 | Q2 | 습도 기준값(곰팡이 위험)과 창 종류별 표면 온도 계산 값 | (코드 설정) | [문제정의 확인 필요 4·8] |
 | Q3 | 시세 비교에 필요한 최소 거래 건수 | (코드 설정) | [문제정의 확인 필요 9] |
 | Q4 | 몇 시간 지난 측정값까지 습도 사건에 쓸까 | indoor_measurements.measured_at 사용 규칙 | [CUJ-02 MOT] |
@@ -436,11 +460,14 @@ erDiagram
 DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과를 한 줄로 적는다(P3-16).
 - 2026-11-17 (마이그레이션 0001~0005): `source_items`(칸 20개, v1.1 칸 complex_key·status_name·before_external_id·previous_values 포함), `notification_settings`(6개, 0006에서 slack_email·slack_user_id), `notifications`(9개)가 이 문서 표와 이름이 같다(information_schema 조회). 첫 기능 밖 표(homes 등)는 아직 만들지 않았다.
 - 2026-11-17 (마이그레이션 0010·0011, spec 003): `homes`(칸 12개)·`indoor_measurements`(7개)를 이 문서 표 그대로 만들었다. `sources`에 `kma_forecast`, `llm_calls.purpose`에 `response_plan`을 더했다.
+- 2026-11-18 오후 (마이그레이션 0001~0017·0020, ERD v1.9, 선우가 Supabase 대시보드를 읽기만 함): 실제 DB의 표 20개와 표별 칸 수가 이 문서·마이그레이션과 모두 같다. 행 단위 권한(RLS)은 20개 표 모두 켜져 있고 정책은 35개, 적용된 마이그레이션은 18개로 저장소 파일과 같다. 칸 이름은 마이그레이션과 이 문서끼리 맞췄고(20개 표 일치) 실제 DB에서는 칸 수만 봤다. 이 문서에만 있는 표 5개(`knowledge_chunks`, `audit_logs`, `wiki_chunks`, `chat_logs`, `eval_results`)는 아직 만들지 않았다. 자세한 결과는 [connectors.md](connectors.md) 6절.
+- 2026-11-18 저녁 (예림 확인): 위 대조 뒤에 `audit_logs`를 0019로 만들었다(PR #11). `chat_logs`는 DB에는 있으나 저장소 마이그레이션 파일과 DB 마이그레이션 기록에 없다(칸 6개, RLS 켜짐, 정책 2개). 만든 사람이 마이그레이션 파일로 남겨야 한다. DB 마이그레이션 기록은 19개(0001~0017, 0019, 0020).
 
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
-| 2026-11-18 | v1.9 | spec 010(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-18 | v1.10 | spec 010(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-18 | v1.9 (승인 2026-11-18, 마이그레이션 0020) | interest_homes 표 추가, homes에 energy_cost·electricity_kwh·transit_fare·trips_per_day·commute_days. 실질 주거비 알파(PRD v1.10 FR-28, spec 009) |
 | 2026-11-18 | v1.8 | notice_summaries에 정책 요약도 저장(source_code `youth_policy`, announcement_id = 정책 ID). 칸 변경 없음 (spec 006 v0.3 FR-007) |
 | 2026-11-18 | v1.8 | interest_areas 만듦(마이그레이션 0017). last_median_value를 월세 중간값으로 좁히고 last_median_deposit 추가(사용자 결정 "월세·보증금 둘 다", spec 008). sources `rtms_trade` |
 | 2026-11-18 | v1.7 | schedule_items: incident_id·response_plan_id를 비울 수 있게, source_code·announcement_id 추가(공고에서 온 일정, 마이그레이션 0016). 사용자 결정 2026-11-18 "표 고치기", spec 007 |
