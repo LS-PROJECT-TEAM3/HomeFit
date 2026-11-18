@@ -104,7 +104,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 |---|---|---|---|---|---|
 | 1 | 위키 뼈대와 규칙, 스킬 3개 | FR-001, 003, 005, 008 | `wiki/CLAUDE.md`, `index.md`, `log.md`, `연결지도.md` 뼈대, 스킬 3개 | 새 대화에서 `/wiki-ingest`·`/wiki-query`·`/wiki-lint`가 목록에 보이고, 각 SKILL.md 60줄 이내·`wiki/CLAUDE.md` 50줄 이내 | 없음 |
 | 2 | 점검·찾기 스크립트(시험 먼저) | FR-007, FR-002 | `scripts/wiki-lint.mjs`, `wiki-search.mjs`, `tests/wiki-lint.test.ts` | 시험 통과. 지금 저장소에서 점검하면 "새 원본·정리 안 된 원본"이 원본 수만큼 나오고 종료 코드 1 | 없음 |
-| 3 | 원본 넣기(묶음마다 계획 → 승인) | FR-001~006, 008 | 주제 쪽 10개 이상, 연결지도 채움, log 줄들 | 점검 문제 0건(종료 코드 0) 뒤 `--record`. 원본 바뀐 줄 0줄(`git diff docs interviews` 비어 있음). 계약 만료 충돌이 충돌 절에 있음 | 묶음마다 사용자 승인 |
+| 3 | 원본 넣기(묶음마다 계획 → 승인) | FR-001~006, 008 | 주제 쪽 10개 이상, 연결지도 채움, log 줄들 | 점검 문제 0건(종료 코드 0) 뒤 `--record`. 원본 바뀐 줄 0줄(`git diff docs interviews` 비어 있음). 건축물 정보 충돌(IA vs PRD FR-34)이 충돌 절에 있음 | 묶음마다 사용자 승인 |
 | 4 | 챗봇 서버와 DB(시험 먼저) | FR-009~014 | `chat/` 3개, API, 0018, types, ERD 수정, next.config | 순수 함수 시험 통과, `tsc`·`lint`·`build` 통과. mock으로 API에 물으면 답·출처가 오고 chat_logs에 1행 | 0018을 팀 Supabase에 적용해도 되나(먼저 묻기) |
 | 5 | 관리자 화면 | FR-009~011, 014, 016 | `/admin/chat` 화면 | 브라우저에서 관리자로 묻고 답·출처·펼침이 보임, 일반 사용자 차단, 375px 가로 넘침 없음(스크린샷) | 없음 |
 | 6 | 정답표·랄프 루프·결과 기록 | FR-015, FR-012 | `docs/wiki-chat.md`, `tests/wiki-chat-eval.test.ts` | 찾기 시험 5/5 통과(mock), 실제 Gemini로 5문항 결과와 숨은 지시 시험 결과가 문서에 있음 | 정답표 5문항은 사용자(팀)가 먼저 씀 |
@@ -122,11 +122,11 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 - [x] 저장소에서 점검을 한 번 돌려 결과 표 확인(문제 수 기록)
 
 ### 3단계 작업 (묶음마다 wiki-ingest 계획 표 → 승인 → 쓰기 → 점검)
-- [ ] 묶음 1: 문제정의, 인터뷰 종합·기록, GLOSSARY, ADR 0001~0003 (인터뷰는 P01처럼 번호만, 사람/AI 표시)
-- [ ] 묶음 2: PRD, IA, ERD, Intent, journeys
-- [ ] 묶음 3: specs 001~009 (spec·plan·qa)
-- [ ] 묶음 4: 안내서 문서(plan.md 조각 표, 평가항목) + 연결지도 채우기(PR 칸은 `git log`의 PR 합치기 커밋·출처 ID, spec Q7)
-- [ ] 점검 0건 확인 → 사용자 승인 → `node scripts/wiki-lint.mjs --record`
+- [x] 묶음 1: 문제정의, 인터뷰 종합·기록, GLOSSARY, ADR 0001~0003 (인터뷰는 P01처럼 번호만, 사람/AI 표시)
+- [x] 묶음 2: PRD, IA, ERD, Intent, journeys
+- [x] 묶음 3: specs 001~009 (spec·plan·qa)
+- [x] 묶음 4: 안내서 문서(plan.md 조각 표, 평가항목) + 연결지도 채우기(PR 칸은 `git log`의 PR 합치기 커밋·출처 ID, spec Q7)
+- [x] 점검 0건 확인 → 사용자 승인 → `node scripts/wiki-lint.mjs --record`
 
 ### 4단계 작업
 - [ ] `tests/wiki-pages.test.ts`, `tests/wiki-answer.test.ts` 먼저
@@ -159,7 +159,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | FR-001 | 점검(필수 절) + QA | wiki-lint "필수 절 빠짐" / C-901 |
 | FR-002 | git diff + 점검(원본 바뀜) | wiki-lint "원본 바뀜" / C-902 |
 | FR-003 | QA(계획 표가 먼저 나오고 파일이 안 바뀜) | H-901 |
-| FR-004 | QA(계약 만료 충돌) | C-903 |
+| FR-004 | QA(건축물 정보 충돌) | C-903 |
 | FR-005 | 점검(목차 누락) + QA(log 덧붙이기) | wiki-lint "목차 누락" / C-904 |
 | FR-006 | QA(Must 요구 행 수, PR 없음 표시) | C-905 |
 | FR-007 | 함수 시험 | wiki-lint 전체 사례 |
@@ -269,4 +269,5 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 |---|---|---|
 | 2026-11-18 | v0.1 | 초안. 6단계 |
 | 2026-11-18 | v0.1 | 승인 |
+| 2026-11-18 | v0.1 | 3단계 끝. 넣기 4묶음, --record, 점검 0건. 묶음 1에서 원본에 GLOSSARY.md를 더함(spec Q2) |
 | 2026-11-18 | v0.1 | 2단계 끝. 구현 중 더함: 원본 지문은 줄바꿈(CRLF)을 LF로 맞춰 계산(git autocrlf로 컴퓨터마다 달라지는 것 막기), 인라인 코드 속 링크 무시, wiki/CLAUDE.md는 쪽으로 보지 않음, 필수 절에 `## 내용` 포함 |
