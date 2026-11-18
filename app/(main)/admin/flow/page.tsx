@@ -19,7 +19,7 @@ function kst(iso: string): string {
 
 // 상자 상세에서 가릴 키 값(서버에서만 읽는다, PRD FR-27)
 function secrets(): string[] {
-  return [process.env.DATA_GO_KR_SERVICE_KEY, process.env.SUPABASE_SECRET_KEY, process.env.GEMINI_API_KEY, process.env.ANTHROPIC_API_KEY, process.env.SLACK_BOT_TOKEN, process.env.CRON_SECRET]
+  return [process.env.DATA_GO_KR_SERVICE_KEY, process.env.SUPABASE_SECRET_KEY, process.env.GEMINI_API_KEY, process.env.ANTHROPIC_API_KEY, process.env.SLACK_BOT_TOKEN, process.env.CRON_SECRET, process.env.YOUTH_POLICY_API_KEY]
     .filter((v): v is string => typeof v === "string");
 }
 

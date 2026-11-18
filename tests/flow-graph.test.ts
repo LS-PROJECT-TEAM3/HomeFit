@@ -43,3 +43,27 @@ describe("sourceStarts", () => {
     ]);
   });
 });
+
+// PR #13 리뷰·캡처: 상세 항목이 영어·JSON 그대로 보이던 것, 도는 중인 실행이 "건너뜀"으로 보이던 것
+describe("상세 항목 한국어 (PR #13)", () => {
+  const detailOf = (detail: unknown) => buildFlow([{ step_name: "detect", status: "succeeded", items_in: 1, items_out: 1, detail }], []).boxes[2].details;
+  it("묶인 값(changes)은 JSON이 아니라 이름 붙은 글자로", () => {
+    expect(detailOf({ changes: { changed: 3, correction: 0, relaxed: 1 } })).toEqual([{ label: "바뀐 공고 종류", value: "바뀜 3 · 정정공고 0 · 완화·재공고 1" }]);
+  });
+  it("수집기가 쓰는 이름은 모두 한국어 라벨이 있다", () => {
+    const keys = ["skipped", "duplicates", "new", "changed", "reason", "months", "ok", "enough", "too_few", "planned", "area_updates"];
+    for (const key of keys) expect(detailOf({ [key]: 1 })[0].label).not.toBe(key);
+  });
+  it("목록은 쉼표로, 목록 안의 묶음은 이름 붙은 글자로", () => {
+    expect(detailOf({ months: ["202610", "202609"] })[0].value).toBe("202610, 202609");
+    expect(detailOf({ failed_sigungu: [] })[0].value).toBe("없음");
+    expect(detailOf({ failed: [{ key: "11680:apartment", reason: "시간 초과" }] })[0].value).toBe("대상 11680:apartment · 이유 시간 초과");
+  });
+});
+
+describe("도는 중인 실행 (PR #13)", () => {
+  it("시작 상자는 건너뜀이 아니라 실행 중", () => {
+    const [myhome] = sourceStarts([{ source_code: "myhome_notice", status: "running" }]);
+    expect(myhome).toMatchObject({ state: "running", stateLabel: "실행 중" });
+  });
+});
