@@ -43,6 +43,8 @@
 ## 6. 확인 필요 사항
 ### 결정
 - Q1 (2026-11-18 예림님): (A) 한국전력 시군구별 가구 평균 전력사용량. 면적은 반영하지 않음
+- Q2 (2026-11-19, 추천안으로 진행 — 예림님 "질문은 전부 추천대로"): IA v1.8에 새 메뉴 EN_110000_PG·EN_110100_TB·EN_110200_TB로 올림
+- Q4 (추천안 (B) 하루 캐시, 2026-11-19 같은 지시로 확정)
 - Q3 (2026-11-18 예림님): 전력데이터개방포털 가입·키 발급 끝. 키 이름 `KEPCO_API_KEY`(값은 `.env.local`·Vercel에만)
 - API 가이드 확인(2026-11-18, 포털 OPEN API > 가구평균 전력사용량): GET `https://bigdata.kepco.co.kr/openapi/v1/powerUsage/houseAve.do`, 요청 year(YYYY)·month(MM)·metroCd(시도 2자리)·cityCd(시군구 3자리, 선택)·apiKey·returnType=json, 응답 `data[]`의 year·month·metro·city·houseCnt·powerUsage(표에는 powerUseage)·bill
 
@@ -58,5 +60,3 @@
 ### 질문
 | # | 질문 | 막고 있는 것 | 추천 |
 |---|---|---|---|
-| Q4 | 시군구 평균값을 어디에 둘까? (A) 새 표에 달마다 저장(ERD 변경, 마이그레이션) (B) 화면을 열 때 API를 불러 하루 동안 기억(캐시) | plan 2단계 | **(B)**: ERD를 바꾸지 않고 한 달에 한 번 바뀌는 값이라 충분하다. 수집 오류 기록이 필요하면 (A) |
-| Q2 | 에너지 분석 화면을 IA에 올릴까? (spec 004 Q1: 지금 IA에 없음) | FR-003 화면 ID | IA에 새 메뉴로 올림 |

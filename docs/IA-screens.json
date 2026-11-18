@@ -885,6 +885,226 @@
       "status": "신규",
       "url": "/policy/[id]",
       "note": "정책 원문 값(설명·지원 내용·신청 방법·서류·대상), AI 요약(처음 열 때 한 번), 원문 링크. 자격은 판정하지 않음 (사용자 요청 2026-11-18, spec 006 v0.3)"
+    },
+    {
+      "menu_code": "QC",
+      "no": [
+        10,
+        0,
+        0
+      ],
+      "path": [
+        "홈",
+        "집 점검"
+      ],
+      "type": "페이지",
+      "login": "필요",
+      "dev": "개발",
+      "priority": "MVP",
+      "status": "신규",
+      "url": "/qc",
+      "note": "결로 위험 시뮬레이터(집 점검 첫 탭), spec 004 FR-003",
+      "menu_entry": true
+    },
+    {
+      "menu_code": "QC",
+      "no": [
+        10,
+        1,
+        0
+      ],
+      "path": [
+        "홈",
+        "집 점검",
+        "입주 전 품질 점검"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "개발",
+      "priority": "2차",
+      "status": "신규",
+      "url": "/qc/checklist",
+      "note": "뼈대, 저장 안 함 (spec 004 FR-004)"
+    },
+    {
+      "menu_code": "QC",
+      "no": [
+        10,
+        2,
+        0
+      ],
+      "path": [
+        "홈",
+        "집 점검",
+        "주거환경·하자 기록"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "개발",
+      "priority": "2차",
+      "status": "신규",
+      "url": "/qc/records",
+      "note": "실내 측정 추이, 하자 기록은 MY_030202_PG"
+    },
+    {
+      "menu_code": "QC",
+      "no": [
+        10,
+        3,
+        0
+      ],
+      "path": [
+        "홈",
+        "집 점검",
+        "건축물 기본 정보"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "외부연동",
+      "priority": "MVP",
+      "status": "신규",
+      "url": "/qc/building",
+      "note": "건축HUB 표제부 조회 (PRD v1.8 FR-34)"
+    },
+    {
+      "menu_code": "EN",
+      "no": [
+        11,
+        0,
+        0
+      ],
+      "path": [
+        "홈",
+        "에너지 분석"
+      ],
+      "type": "페이지",
+      "login": "필요",
+      "dev": "외부연동",
+      "priority": "MVP",
+      "status": "신규",
+      "url": "/energy",
+      "note": "예상 에너지 사용량, 한전 시군구 평균 추정 (spec 011)",
+      "menu_entry": true
+    },
+    {
+      "menu_code": "EN",
+      "no": [
+        11,
+        1,
+        0
+      ],
+      "path": [
+        "홈",
+        "에너지 분석",
+        "월별 예상 비용"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "개발",
+      "priority": "MVP",
+      "status": "신규",
+      "url": "/energy/cost",
+      "note": "12개월 예상 전기요금 (spec 011)"
+    },
+    {
+      "menu_code": "EN",
+      "no": [
+        11,
+        2,
+        0
+      ],
+      "path": [
+        "홈",
+        "에너지 분석",
+        "냉난방비 시뮬레이션"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "개발",
+      "priority": "보류",
+      "status": "신규",
+      "url": "/energy/heating",
+      "note": "범위 밖 (spec 009·011)"
+    },
+    {
+      "menu_code": "CP",
+      "no": [
+        4,
+        4,
+        0
+      ],
+      "path": [
+        "홈",
+        "집 비교",
+        "추천 결과"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "개발",
+      "priority": "보류",
+      "status": "신규",
+      "url": "/compare/recommend",
+      "note": "범위 밖 안내만(PRD 9절)"
+    },
+    {
+      "menu_code": "KN",
+      "no": [
+        5,
+        1,
+        0
+      ],
+      "path": [
+        "홈",
+        "기록 찾기",
+        "처리 기록"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "개발",
+      "priority": "MVP",
+      "status": "신규",
+      "url": "/knowledge/history",
+      "note": "끝난 알림, 내 것만"
+    },
+    {
+      "menu_code": "KN",
+      "no": [
+        5,
+        2,
+        0
+      ],
+      "path": [
+        "홈",
+        "기록 찾기",
+        "공공데이터 출처"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "콘텐츠",
+      "priority": "MVP",
+      "status": "신규",
+      "url": "/knowledge/sources",
+      "note": "앱이 쓰는 출처"
+    },
+    {
+      "menu_code": "PL",
+      "no": [
+        9,
+        2,
+        0
+      ],
+      "path": [
+        "홈",
+        "청년 주거지원 정책",
+        "직장 및 생활권 분석"
+      ],
+      "type": "탭",
+      "login": "필요",
+      "dev": "외부연동",
+      "priority": "보류",
+      "status": "신규",
+      "url": "/policy/commute",
+      "note": "범위 밖 안내만(PRD FR-33 보류)"
     }
   ]
 }
