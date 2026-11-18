@@ -70,6 +70,8 @@ export async function myhomeCollectionStatus(): Promise<CollectionStatus> {
 
 export type IncidentDetail = IncidentSummary & {
   isMine: boolean;
+  /** 비슷한 지난 알림을 같은 종류에서 고르려고 (spec 010 FR-002) */
+  incidentType: string;
   firstViewedAt: string | null;
   plan: { id: string; summary: string | null; checklist: ChecklistItem[]; citations: { label: string; url: string }[]; aiOk: boolean; isMock: boolean } | null;
   actions: { action: string; reason: string | null; createdAt: string }[];
@@ -97,6 +99,7 @@ export async function getIncidentDetail(id: string, userId: string): Promise<Inc
   return {
     ...toSummary(data),
     isMine: data.user_id === userId,
+    incidentType: data.incident_type,
     firstViewedAt: data.first_viewed_at,
     plan: plan
       ? {

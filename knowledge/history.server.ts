@@ -11,7 +11,8 @@ const MAX_CLOSED = 50;
 export type HistoryHit = { title: string; text: string; href?: string };
 export type HistoryAnswer = { hits: HistoryHit[]; answer: string | null; aiFailed: boolean };
 
-async function loadClosedRows(userId: string): Promise<ClosedIncidentRow[]> {
+/** 내 끝난 알림(최근 50건). 비슷한 지난 알림(spec 010 FR-002)도 쓴다 */
+export async function loadClosedRows(userId: string): Promise<ClosedIncidentRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("incidents")
