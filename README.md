@@ -70,16 +70,16 @@
 | qa.md | [docs/specs/001-공고정책-사건/qa.md](docs/specs/001-공고정책-사건/qa.md) |
 | 평가 항목 점검표 | [docs/프로젝트3-평가항목.md](docs/프로젝트3-평가항목.md) |
 | 조각 표(분배·작업 순서) | [docs/plan.md](docs/plan.md) |
-| 데이터 출처 | `docs/data-sources.md` (조각 C1 작업 중, main에 합쳐지면 링크 연결) |
+| 데이터 출처 | [docs/data-sources.md](docs/data-sources.md) |
 | 커넥터, 서브에이전트 | `docs/connectors.md`, `docs/agents.md` (조각 C1 작업 중) |
-| 디버그 기록, 전체 QA 모음 | `docs/debug-note.md`, `docs/qa.md` (조각 C1 작업 중) |
+| 디버그 기록, 전체 QA 모음 | [docs/debug-note.md](docs/debug-note.md), [docs/qa.md](docs/qa.md) |
 | 시연 순서 | [docs/demo-order.md](docs/demo-order.md) (초안, 팀 확인 전) |
 | 발표 슬라이드 | `slides/index.html` (조각 C2 작업 중) |
 
 ## 팀과 작업 방식
 - 팀 하네스(규칙·스킬): [CLAUDE.md](CLAUDE.md), [.claude/rules/](.claude/rules/), [.claude/skills/](.claude/skills/)
 - 서비스 주소: https://homefit-lac.vercel.app (Vercel 무료 플랜, 로그인해야 화면이 보임). 발표 주소: (slides 배포 뒤 채움)
-- QA: 기능별 확인 결과는 위 "기능 목록" 표의 qa 링크, 전체 모음은 `docs/qa.md`(조각 C1 작업 중)
+- QA: 기능별 확인 결과는 위 "기능 목록" 표의 qa 링크, 전체 모음은 [docs/qa.md](docs/qa.md)
 - 조각 표와 브랜치·PR 순서: [docs/plan.md](docs/plan.md)
 
 ### 팀원
