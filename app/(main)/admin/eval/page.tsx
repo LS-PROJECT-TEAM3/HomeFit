@@ -4,7 +4,7 @@ import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "채점 결과 | 관리자 | HomeFit AI" };
 
-const KIND: Record<string, string> = { notice: "공고 변화", humidity: "습도·결로 위험" };
+const KIND: Record<string, string> = { notice: "공고 변화", humidity: "습도·결로 위험", rent: "시세 변화" };
 
 function TallyRow({ label, t }: { label: string; t: Tally }) {
   return (
@@ -33,7 +33,7 @@ export default function AdminEvalPage() {
             <TallyRow label="합계" t={report.summary} />
             <TallyRow label={KIND.notice} t={report.byKind.notice} />
             <TallyRow label={KIND.humidity} t={report.byKind.humidity} />
-            <tr><th scope="row">실거래가 시세</th><td colSpan={5} className={styles.muted}>시세 수집 기능이 없어 묶음이 아직 없습니다.</td></tr>
+            <TallyRow label={KIND.rent} t={report.byKind.rent} />
           </tbody>
         </table>
       </div>

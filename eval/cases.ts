@@ -4,6 +4,7 @@ import type { PolicyCondition } from "@/incident/match";
 import type { TrackedValues } from "@/incident/notice-change";
 import type { HourlyForecast, Measurement, WindowType } from "@/incident/condensation";
 import type { Notice } from "@/watch/notice";
+import { RENT_CASES, type RentCase } from "./rent-cases";
 
 export const EVAL_TODAY = "2026-11-18";
 export const EVAL_NOW = "2026-11-18T09:00:00+09:00";
@@ -34,7 +35,8 @@ export type HumidityCase = {
   forecast: HourlyForecast[];
 };
 
-export type EvalCase = NoticeCase | HumidityCase;
+export type EvalCase = NoticeCase | HumidityCase | RentCase;
+export type { RentCase };
 
 const CONDITION: PolicyCondition = { sidoCode: "41", sigunguCode: "41390", supplyTypes: ["ALL"], maxMonthlyRent: 500000, age: 27, targetGroups: ["youth"] };
 
@@ -96,4 +98,5 @@ export const EVAL_CASES: EvalCase[] = [
     measurement: { temperatureC: 20, humidityPct: 60, measuredAt: RECENT }, windowType: "unknown", forecast: forecast(-5, 50) },
   { kind: "humidity", id: "H-08", title: "예보를 못 받음", basis: "사건 아님: 예보 없으면 판단하지 않음", expected: false,
     measurement: { temperatureC: 20, humidityPct: 60, measuredAt: RECENT }, windowType: "single", forecast: [] },
+  ...RENT_CASES,
 ];
