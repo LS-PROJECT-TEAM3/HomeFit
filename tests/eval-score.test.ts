@@ -14,9 +14,9 @@ describe("tally", () => {
 });
 
 describe("scoreCases", () => {
-  it("정답 묶음에 공고 변화와 결로 위험이 둘 다 있고, 울려야 하는 것과 아닌 것이 모두 있다", () => {
+  it("정답 묶음에 공고 변화·결로 위험·시세 변화가 모두 있고, 울려야 하는 것과 아닌 것이 모두 있다", () => {
     const kinds = new Set(EVAL_CASES.map((c) => c.kind));
-    expect(kinds).toEqual(new Set(["notice", "humidity"]));
+    expect(kinds).toEqual(new Set(["notice", "humidity", "rent"]));
     expect(EVAL_CASES.some((c) => c.expected)).toBe(true);
     expect(EVAL_CASES.some((c) => !c.expected)).toBe(true);
     expect(new Set(EVAL_CASES.map((c) => c.id)).size).toBe(EVAL_CASES.length);
@@ -29,6 +29,18 @@ describe("scoreCases", () => {
   });
   it("종류별 합계도 낸다", () => {
     const report = scoreCases(EVAL_CASES);
-    expect(report.byKind.notice.total + report.byKind.humidity.total).toBe(EVAL_CASES.length);
+    expect(report.byKind.notice.total + report.byKind.humidity.total + report.byKind.rent.total).toBe(EVAL_CASES.length);
+  });
+  // spec 010 FR-001, SC-001: 시세 묶음은 경계 상황 E1~E7을 모두 담고, 울려야 하는 것과 아닌 것이 모두 있다
+  it("시세 묶음이 spec 010 E1~E7을 모두 담는다", () => {
+    const rent = EVAL_CASES.filter((c) => c.kind === "rent");
+    const covered = new Set(rent.flatMap((c) => c.basis.match(/E\d/g) ?? []));
+    expect([...covered].sort()).toEqual(["E1", "E2", "E3", "E4", "E5", "E6", "E7"]);
+    expect(rent.some((c) => c.expected) && rent.some((c) => !c.expected)).toBe(true);
+  });
+  it("기존 공고·습도 18건은 그대로다", () => {
+    const report = scoreCases(EVAL_CASES);
+    expect(report.byKind.notice.total + report.byKind.humidity.total).toBe(18);
+    expect(report.byKind.notice.hit + report.byKind.humidity.hit).toBe(7);
   });
 });

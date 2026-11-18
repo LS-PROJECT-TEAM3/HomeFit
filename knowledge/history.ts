@@ -7,7 +7,7 @@ export type ClosedIncidentRow = {
 };
 
 const RESULT_TEXT: Record<string, string> = { approved: "승인함", rejected: "거절함" };
-const TYPE_TEXT: Record<string, string> = { housing_support: "주거 기회(공고 변화)", humidity_condensation: "위험(습도·결로)" };
+const TYPE_TEXT: Record<string, string> = { housing_support: "주거 기회(공고 변화)", humidity_condensation: "위험(습도·결로)", rent_price_change: "시세 변화" };
 const MAX_RESULTS = 8;
 
 export const HISTORY_NOT_FOUND = "기록에서 찾지 못했습니다.";

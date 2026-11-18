@@ -12,6 +12,7 @@ import { DecisionPanel } from "./decision-panel";
 import { withObject } from "@/incident/korean";
 import { HumidityFactsView } from "./humidity-facts";
 import { RentFactsView } from "./rent-facts";
+import { SimilarIncidents } from "./similar";
 import type { PlanName } from "./decision-panel";
 import styles from "./detail.module.css";
 
@@ -136,6 +137,12 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
           처리 이력: {action.action === "approve" ? "승인" : `거절 (사유: ${action.reason ?? ""})`} · {new Date(action.createdAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}
         </p>
       ))}
+      {/* spec 010 FR-002: 내 알림에서만. 남의 알림을 보는 관리자에게는 보이지 않는다 */}
+      {detail.isMine ? (
+        <Suspense fallback={<Loading />}>
+          <SimilarIncidents current={{ id: detail.id, incidentType: detail.incidentType, title: detail.facts.title }} userId={userId} />
+        </Suspense>
+      ) : null}
     </>
   );
 }
