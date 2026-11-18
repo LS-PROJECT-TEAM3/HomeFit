@@ -1,5 +1,5 @@
 {
-  "docs/ERD.md": "80992c2c9e0ce0b1eb084564d324d0b81a8020c5a3e3e8f554a62ccaeecc5147",
+  "docs/ERD.md": "1f6f4b14e7e6f9d66d3a8a3f0596ee2ac87a0b8b480cc594a32aa8f462b22b83",
   "docs/IA.md": "d732b84d5240ce1d850ad1f1c569ef75902760877788b0b30397dbb6154ca686",
   "docs/Intent.md": "e9d42aa737520e5ac13da7ea58a55ab0a1ec357a924d8f09489a51f8a924f12a",
   "docs/PRD.md": "861ff65aabd8665d9670ba01e9bc51e7539ac55667da0621f948b0d3e6231db0",
@@ -40,7 +40,7 @@
   "docs/specs/008-시세-변화-사건/qa.md": "57daae8b7ed73d6610de3236527b34a9dae0dd47f71dd4998bae989b6b4eb542",
   "docs/specs/008-시세-변화-사건/spec.md": "0349b5916d927248a7baef3b11ea99708a4362962ad86ae257a091d736e9b03b",
   "docs/specs/009-위키-챗봇/plan.md": "73c8e416cf209546537cf67fc2ff2300417063a9b73f8701eb2c215b3fac0e3f",
-  "docs/specs/009-위키-챗봇/qa.md": "db7b3a56120daeef2935d4425ab1b3bb63ded854d1d55635a311dd87c580272d",
+  "docs/specs/009-위키-챗봇/qa.md": "f981d04f511ef25f08841284eebf6a5ccb9a10f37f3d470571f9222f33f0fadf",
   "docs/specs/009-위키-챗봇/spec.md": "2338c30e0be3457b9fa62e5ec583ffb8eb74215c6599d070cd3896d4c3659e1e",
   "docs/문제정의.md": "ba548f07f50ad203befebac67a00a7ce8ce52655203afb4755631599433a61f5",
   "docs/프로젝트3-평가항목.md": "efd794ee02449490683e748ec31e02dddc5873bac23955a5d1fd13b2d01ace39",
