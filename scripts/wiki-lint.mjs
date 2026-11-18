@@ -14,6 +14,8 @@ import { fileURLToPath } from 'node:url'
 const SOURCE_DIRS = ['docs', 'interviews']
 // 저장소 맨 위에 있는 원본(spec 009 Q2, 사용자 결정 2026-11-18)
 const SOURCE_ROOT_FILES = ['GLOSSARY.md']
+// 위키 챗봇 정답표는 원본에서 뺀다. 질문 글자가 위키에 들어가면 "위키에 없는 질문"이 위키에 생긴다(사용자 결정 2026-11-18, spec 009 Q2)
+const EXCLUDED_SOURCES = new Set(['docs/wiki-chat.md'])
 const HASH_FILE = 'wiki/raw-hashes.json'
 const SPECIAL = new Set(['index', 'log', '연결지도'])
 // 위키 규칙 파일은 쪽이 아니다
@@ -47,7 +49,7 @@ export function mdFilesDeep(root, folder) {
 export const sourceFiles = (root) => [
   ...SOURCE_DIRS.flatMap((d) => mdFilesDeep(root, d)),
   ...SOURCE_ROOT_FILES.filter((f) => existsSync(join(root, f))),
-]
+].filter((f) => !EXCLUDED_SOURCES.has(f))
 
 export function wikiPages(root) {
   const dir = join(root, 'wiki')

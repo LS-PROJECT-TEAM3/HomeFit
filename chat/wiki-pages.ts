@@ -31,22 +31,26 @@ export function chunkWiki(pages: readonly WikiPageText[]): WikiChunk[] {
   return pages.filter((p) => !SKIPPED_PAGES.has(p.page)).flatMap((p) => splitWikiPage(p.page, p.markdown));
 }
 
-/** 질문 낱말. 두 글자 이상만, 세 글자 이상이면 끝의 조사 한 글자를 뗀 꼴도 함께(예: "규칙은" → "규칙") */
-function questionWords(question: string): string[] {
-  const words = question.toLowerCase().split(/[^0-9a-z가-힣]+/).filter((word) => word.length >= 2);
-  return [...new Set(words.flatMap((word) => (word.length >= 3 ? [word, word.slice(0, -1)] : [word])))];
+/** 질문 낱말. 두 글자 이상만. 낱말마다 찾을 꼴 목록: 세 글자 이상이면 끝의 조사 한 글자를 뗀 꼴도(예: "규칙은" → "규칙") */
+function questionWords(question: string): string[][] {
+  const words = [...new Set(question.toLowerCase().split(/[^0-9a-z가-힣]+/).filter((word) => word.length >= 2))];
+  return words.map((word) => (word.length >= 3 ? [word, word.slice(0, -1)] : [word]));
 }
 
-/** 질문 낱말이 많이 겹치는 조각부터 limit개. 하나도 안 겹치면 빈 목록. 고른 조각에는 W1, W2… 번호를 다시 붙인다 */
+/**
+ * 질문 낱말을 많이 덮는 조각부터 limit개. 고른 조각에는 W1, W2… 번호를 다시 붙인다.
+ * 질문 낱말이 2개 이상 겹치는 조각만 쓴다(질문 낱말이 하나면 그 하나). 낱말 하나만 우연히 겹친 조각으로 답을 지어내지 않게(FR-011)
+ */
 export function pickChunks(question: string, chunks: readonly WikiChunk[], limit: number): WikiChunk[] {
   const words = questionWords(question);
   if (words.length === 0) return [];
+  const minScore = Math.min(2, words.length);
   return chunks
     .map((chunk, order) => {
       const haystack = `${chunk.page} ${chunk.heading} ${chunk.text}`.toLowerCase();
-      return { chunk, order, score: words.filter((word) => haystack.includes(word)).length };
+      return { chunk, order, score: words.filter((forms) => forms.some((form) => haystack.includes(form))).length };
     })
-    .filter((item) => item.score > 0)
+    .filter((item) => item.score >= minScore)
     .sort((a, b) => b.score - a.score || a.order - b.order)
     .slice(0, limit)
     .map((item, i) => ({ ...item.chunk, id: `W${i + 1}` }));

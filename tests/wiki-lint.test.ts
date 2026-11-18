@@ -111,6 +111,12 @@ describe("wiki-lint", () => {
     expect(lint(root).map((p: { kind: string; page: string }) => `${p.kind} ${p.page}`)).toEqual(["새 원본 GLOSSARY.md"]);
   });
 
+  it("위키 챗봇 정답표 docs/wiki-chat.md는 원본이 아니다(질문 글자가 위키에 들어가지 않게)", () => {
+    healthyWiki();
+    put("docs/wiki-chat.md", "# 정답표\n\n| Q4 | 없음 | 대표님 점심 메뉴는? |\n");
+    expect(lint(root)).toEqual([]);
+  });
+
   it("지문에만 있고 파일이 없으면 원본 사라짐", () => {
     healthyWiki();
     rmSync(join(root, "docs/PRD.md"));
