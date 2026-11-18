@@ -21,7 +21,7 @@ export function EditDialog({ table, targetId, memberId, title, values }: Props) 
       <dialog ref={dialog} className={dialogStyles.dialog} aria-labelledby={id("title")}>
         <h2 id={id("title")}>{title} 고치기</h2>
         {state.saved ? <p className={formStyles.notice} role="status">고쳤습니다. 회원 상세의 수정 기록에 남았습니다.</p> : null}
-        <form key={JSON.stringify(state.values ?? null)} action={action} className={formStyles.form} noValidate>
+        <form key={`${state.savedAt ?? ""}|${JSON.stringify(state.values ?? null)}`} action={action} className={formStyles.form} noValidate>
           <input type="hidden" name="table" value={table} />
           <input type="hidden" name="targetId" value={targetId} />
           <input type="hidden" name="memberId" value={memberId} />

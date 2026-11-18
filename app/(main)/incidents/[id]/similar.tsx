@@ -29,7 +29,7 @@ export async function SimilarIncidents({ current, userId }: { current: Current; 
           ))}
         </ul>
       )}
-      <p className={styles.source}>내가 승인·거절로 끝낸 같은 종류의 알림 중 제목이 많이 겹치는 순입니다.</p>
+      <p className={styles.source}>내가 승인·거절로 끝낸 같은 종류의 알림 중 제목 낱말이 겹치는 것만, 많이 겹치는 순으로 보입니다.</p>
     </section>
   );
 }

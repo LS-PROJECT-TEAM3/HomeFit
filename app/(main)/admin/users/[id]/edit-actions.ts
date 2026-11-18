@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "../../guard";
 
 /** values: 오류가 났을 때 입력한 글자를 그대로 다시 보이려고 (폼이 다시 그려지면 처음 값으로 돌아가므로) */
-export type EditState = { saved?: boolean; error?: string; errors?: Record<string, string>; values?: Record<string, string> };
+/** savedAt: 저장할 때마다 바뀌어 폼을 새로 그린다(이전 사유가 남지 않게, PR #11 리뷰) */
+export type EditState = { saved?: boolean; savedAt?: number; error?: string; errors?: Record<string, string>; values?: Record<string, string> };
 
 const DB_ERRORS: Record<string, string> = {
   not_admin: "관리자만 고칠 수 있습니다.",
@@ -49,5 +50,5 @@ export async function saveMemberEdit(_prev: EditState, formData: FormData): Prom
   });
   if (error) return { error: DB_ERRORS[error.message] ?? "저장하지 못했습니다. 잠시 뒤 다시 해 주세요.", values: form };
   revalidatePath(`/admin/users/${memberId}`);
-  return { saved: true };
+  return { saved: true, savedAt: Date.now() };
 }

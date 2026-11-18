@@ -18,12 +18,14 @@ function kstDate(iso: string | null): string | null {
   return iso ? new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }) : null;
 }
 
-/** 같은 종류의 끝난 알림 중 자기 자신을 빼고, 제목 낱말이 많이 겹치는 순(같으면 최근에 끝낸 순) 최대 3건 */
+/** 같은 종류의 끝난 알림 중 자기 자신을 빼고, 제목 낱말이 하나 이상 겹치는 것만 많이 겹치는 순(같으면 최근에 끝낸 순) 최대 3건.
+ *  겹침 0건은 "비슷하다"고 보일 근거가 없어 뺀다(PR #11 리뷰) */
 export function findSimilarIncidents({ current, closed }: { current: Current; closed: readonly ClosedIncidentRow[] }): SimilarIncident[] {
   const words = questionWords(current.title);
   return closed
     .filter((row) => row.id !== current.id && row.incidentType === current.incidentType && (row.status === "approved" || row.status === "rejected"))
     .map((row) => ({ row, score: words.filter((word) => row.title.includes(word)).length }))
+    .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score || (b.row.closedAt ?? "").localeCompare(a.row.closedAt ?? ""))
     .slice(0, SIMILAR_LIMIT)
     .map(({ row }) => ({ id: row.id, title: row.title, result: resultText(row), closedOn: kstDate(row.closedAt), href: `/incidents/${row.id}` }));

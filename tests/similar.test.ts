@@ -21,7 +21,7 @@ describe("findSimilarIncidents", () => {
     expect(findSimilarIncidents({ current: CURRENT, closed: [] })).toEqual([]);
   });
   it("승인·거절로 끝난 것만 고른다", () => {
-    const closed = [row({ id: "a", status: "pending" }), row({ id: "b", status: "rejected", reason: "이사 계획 없음" })];
+    const closed = [row({ id: "a", status: "pending", title: "오피스텔 월세 시세" }), row({ id: "b", status: "rejected", reason: "이사 계획 없음", title: "오피스텔 월세 시세" })];
     expect(findSimilarIncidents({ current: CURRENT, closed }).map((s) => s.id)).toEqual(["b"]);
   });
   it("낱말이 많이 겹치는 순, 같으면 최근에 끝낸 순으로 최대 3건", () => {
@@ -34,6 +34,10 @@ describe("findSimilarIncidents", () => {
     const ids = findSimilarIncidents({ current: CURRENT, closed }).map((s) => s.id);
     expect(ids).toHaveLength(SIMILAR_LIMIT);
     expect(ids).toEqual(["new-same", "old-same", "mid"]);
+  });
+  it("PR #11 리뷰: 제목 낱말이 하나도 겹치지 않으면 같은 종류여도 보이지 않는다", () => {
+    const closed = [row({ id: "x", title: "관심 지역 전세 보증금 하락" }), row({ id: "y", title: "알림" })];
+    expect(findSimilarIncidents({ current: CURRENT, closed })).toEqual([]);
   });
   it("줄마다 처리 결과·사유·처리한 날(한국 날짜)·링크를 준다", () => {
     const [hit] = findSimilarIncidents({ current: CURRENT, closed: [row({ id: "b", status: "rejected", reason: "이사 계획 없음", title: "월세 시세", closedAt: "2026-11-17T16:00:00Z" })] });
