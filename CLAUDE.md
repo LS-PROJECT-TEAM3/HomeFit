@@ -48,7 +48,8 @@
 - 배포: Vercel(서비스와 `slides/index.html` 두 주소). 안내서상 필수지만 실제 배포는 팀이 "배포해줘"라고 할 때 비용·공개 범위를 보여 주고 한다
 
 ## 폴더
-- 바깥은 안내서 이름을 쓴다: `app/`(웹앱, Next.js 라우트), `watch/`(수집), `incident/`(사건·알림·승인), `knowledge/`(기록·찾기), `sim/`, `eval/`, `flow/`(flow.json, 흐름 화면), `chat/`(위키 챗봇), `wiki/`, `interviews/`, `slides/`
+- 바깥은 안내서 이름을 쓴다: `app/`(웹앱, Next.js 라우트), `watch/`(수집), `incident/`(사건·알림·승인), `knowledge/`(기록·찾기), `eval/`, `flow/`(흐름 화면이 읽는 실행 기록 해석 `graph.ts`), `interviews/`
+- 아직 없는 폴더(만들 때 이 이름을 쓴다): `sim/`(지금 시뮬레이션은 `watch/simulation.ts`·`watch/sim-fixtures.ts`), `chat/`(위키 챗봇), `wiki/`, `slides/`. 안내서는 이름을 바꿔도 된다고 하니 실제 위치는 README에서 연결한다
 - 각 폴더 안에서 계산·판단(순수 함수)과 DB·API를 부르는 코드를 다른 파일로 나눈다. 순수 함수는 DB·네트워크·현재 시각을 직접 쓰지 않는다
 
 ## 문서 이름
@@ -83,19 +84,15 @@
 - [rules/git-security.md §배포] 직접 요청 없는 배포 금지 → 그대로 지키되, 서비스와 발표 슬라이드 배포가 제출 필수임을 일정에 넣는다
 
 ## 현재 코드
-- `app/(auth)/`: 로그인·가입·로그아웃 화면과 서버 액션
-- `app/(main)/`: 로그인 뒤 화면. 홈 대시보드, `incidents/`(사건 목록·상세·승인·거절), `schedule/`(내 일정·체크리스트), `my/`(조건·계정), `onboarding/`(첫 설정)
-- `app/_components/`: 상태 배지, 빈 화면·불러오는 중·오류 표시
-- `app/api/cron/myhome/`: 정기 수집 입구 (`vercel.json` 매일 00:00 UTC)
-- `app/tokens.css`: 디자인 토큰 한곳
-- `watch/`: 마이홈 공고 수집. 순수 함수(`myhome.ts`, `notice.ts`, `sido.ts`, `mask.ts`, `kst.ts`), 가짜 응답(`sim-fixtures.ts`), DB·API(`*.server.ts`)
-- `incident/`: 조건 맞추기·중복·체크리스트·AI 초안 검사(순수 함수), 사건·계획·일정 읽고 쓰기(`*.server.ts`)
-- `lib/supabase/`: 서버·관리자 클라이언트, DB 타입
-- `app/(main)/notices/`: 맞는 공고(사건 아님) / `app/(main)/my/notifications/`: 슬랙 알림 설정 / `app/api/sigungu/`: 시군구 목록
-- `incident/notice-change.ts`·`detect.ts`: 공고 변화 → 사건(순수 함수), `matched.ts`: 맞는 공고, `change-text.ts`: 전 → 후 문구, `notify.ts`·`notify.server.ts`: 슬랙 DM
-- `watch/region.ts`·`region.server.ts`: 법정동 시군구 목록(30일 캐시)
-- `lib/llm/`: AI 공급자 구조(gemini·claude·mock, 다시 시도·상한·호출 기록), spec 002
-- `scripts/deploy.mjs`: `npm run deploy` = 운영 배포 후 수집 한 번
-- `supabase/migrations/`: DB 표·권한 규칙·DB 함수 (0001~0008. 0005 공고 변화·알림, 0006 슬랙 이메일, 0007 AI 호출 기록, 0008 슬랙 사람 ID는 서버만)
-- `proxy.ts`: 로그인 세션 새로 고침, 로그인 안 했으면 로그인 화면으로
-- `tests/`: Vitest 시험 (순수 함수)
+2026-11-18 기준. 기능이 끝날 때마다 `harness-intent` 절차 B에서 함께 고친다.
+- `app/(auth)/`: 로그인·가입·로그아웃
+- `app/(main)/`: 로그인 뒤 화면. 홈, `notices/`(맞는 공고), `incidents/`(사건 목록·상세·승인·거절), `schedule/`(내 일정), `onboarding/`(첫 설정), `my/`(내 집·공고 조건·슬랙 알림·계정), `policy/`(청년 주거지원 정책), `knowledge/`(기록 찾기·처리 기록·출처), `qc/`·`compare/`·`energy/`(일부는 화면 뼈대, spec 004), `admin/`(개요·회원·수집·사건·흐름 화면·시뮬레이터·채점·위키 챗봇 자리)
+- `app/api/`: `cron/`(myhome, youth-policy, rent, weather. 일정은 `vercel.json`), `chat`(챗봇), `building`, `sigungu`, `umd`
+- `watch/`: 수집(마이홈, 온통청년, 기상청, 실거래가, 건축HUB, 법정동 시군구). 순수 함수와 `*.server.ts`, 가짜 응답(`sim-fixtures.ts`, `fixtures/`), 시뮬레이션(`simulation.ts`)
+- `incident/`: 공고·습도결로·시세 사건 판단과 문구(순수 함수), 사건·계획·일정·슬랙 알림 읽고 쓰기(`*.server.ts`)
+- `knowledge/`: 처리 기록 찾기, 챗봇 답변
+- `flow/graph.ts`: 흐름 화면용 실행 기록 해석. 화면은 `app/(main)/admin/flow/`
+- `eval/`: 감지 채점(정답 붙은 가짜 묶음)과 결과
+- `lib/llm/`: AI 공급자 구조(gemini·claude·mock, 다시 시도·상한·호출 기록), spec 002. `lib/supabase/`: 서버·관리자 클라이언트, DB 타입
+- `supabase/migrations/`: DB 표·권한 규칙·DB 함수 (0001~0017)
+- `proxy.ts`: 로그인 세션 새로 고침. `scripts/deploy.mjs`: `npm run deploy`. `tests/`: Vitest 시험
