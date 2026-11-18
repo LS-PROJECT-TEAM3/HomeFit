@@ -63,10 +63,11 @@ export function buildFlow(steps: readonly StepRow[], secrets: readonly string[])
 export const SOURCES = [
   { code: "myhome_notice", label: "마이홈 공고" },
   { code: "kma_forecast", label: "기상청 예보" },
+  { code: "youth_policy", label: "온통청년 정책" }, // spec 006 FR-004
   { code: "rtms_trade", label: "실거래가" },
 ] as const;
 
-/** 시작 상자 3종. runs는 최근 것이 앞에 */
+/** 시작 상자(출처마다 하나). runs는 최근 것이 앞에 */
 export function sourceStarts(runs: readonly { source_code: string; status: string }[]) {
   return SOURCES.map(({ code, label }) => {
     const latest = runs.find((r) => r.source_code === code);

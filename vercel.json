@@ -6,6 +6,10 @@
       "schedule": "0 0 * * *"
     },
     {
+      "path": "/api/cron/youth-policy",
+      "schedule": "10 0 * * *"
+    },
+    {
       "path": "/api/cron/weather",
       "schedule": "30 20 * * *"
     },

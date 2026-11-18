@@ -41,7 +41,7 @@ function sourceLabel(code: string): string {
   return SOURCES.find((s) => s.code === code)?.label ?? code;
 }
 
-// IA AD_070400_TB 흐름 화면 (PRD FR-23, spec 005 FR-003): 시작 상자 3종 + 고른 실행의 단계 상자·화살표. 상자를 누르면 상세(AD_070401_MD)
+// IA AD_070400_TB 흐름 화면 (PRD FR-23, spec 005 FR-003): 시작 상자(출처마다) + 고른 실행의 단계 상자·화살표. 상자를 누르면 상세(AD_070401_MD)
 export default async function AdminFlowPage({ searchParams }: PageProps<"/admin/flow">) {
   await connection();
   const params = await searchParams;

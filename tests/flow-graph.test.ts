@@ -36,10 +36,10 @@ describe("buildFlow", () => {
 });
 
 describe("sourceStarts", () => {
-  it("시작 상자 3종, 기록이 없는 출처는 '아직 안 켜짐'(E4)", () => {
+  it("시작 상자 출처마다 하나, 기록이 없는 출처는 '아직 안 켜짐'(E4)", () => {
     const starts = sourceStarts([{ source_code: "myhome_notice", status: "succeeded" }, { source_code: "myhome_notice", status: "failed" }]);
     expect(starts.map((s) => [s.code, s.state, s.stateLabel])).toEqual([
-      ["myhome_notice", "succeeded", "성공"], ["kma_forecast", "off", "아직 안 켜짐"], ["rtms_trade", "off", "아직 안 켜짐"],
+      ["myhome_notice", "succeeded", "성공"], ["kma_forecast", "off", "아직 안 켜짐"], ["youth_policy", "off", "아직 안 켜짐"], ["rtms_trade", "off", "아직 안 켜짐"],
     ]);
   });
 });

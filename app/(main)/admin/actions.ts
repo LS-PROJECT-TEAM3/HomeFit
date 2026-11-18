@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { collectMyhome } from "@/watch/collect.server";
 import { collectWeather } from "@/watch/collect-weather.server";
+import { collectYouthPolicies } from "@/watch/collect-youth.server";
+import { youthPolicyApiFetcher } from "@/watch/youth-policy.server";
 import { kmaApiFetcher } from "@/watch/kma.server";
 import { myhomeApiFetcher } from "@/watch/myhome.server";
 import { fixtureFetcher, isFixtureName } from "@/watch/sim-fixtures";
@@ -15,6 +17,8 @@ export type RunResult =
   | { ok: false; message: string };
 
 type Source = "myhome" | "weather";
+/** 지금 한 번 실행만 되는 출처. 정책 가짜 묶음은 아직 없다(spec 006 Q2) */
+type RunNowSource = Source | "youth";
 
 function describe(summary: { status: string; newIncidents: number; updatedIncidents: number; error?: string }, read: string): string {
   if (summary.status === "failed") return summary.error ?? "이유 없음";
@@ -36,11 +40,26 @@ function serviceKey(): string {
   return key;
 }
 
+function youthKey(): string {
+  const key = process.env.YOUTH_POLICY_API_KEY;
+  if (!key) throw new Error("온통청년 키가 서버에 없습니다.");
+  return key;
+}
+
+// spec 006 FR-004: 정책은 사건을 만들지 않아 요약 문구가 다르다
+async function runYouthNow(): Promise<RunResult> {
+  const s = await collectYouthPolicies({ db: createAdminClient(), fetchPage: youthPolicyApiFetcher(youthKey()), trigger: "manual" });
+  revalidatePath("/admin/watch");
+  const summary = s.status === "failed" ? (s.error ?? "이유 없음") : `정책 ${s.policies}건 읽음, 새 정책 ${s.newPolicies}건, 바뀐 정책 ${s.changedPolicies}건`;
+  return { ok: true, runId: s.runId, status: s.status, summary };
+}
+
 // spec 005 FR-001 (PRD FR-21, IA AD_070200_TB): 지금 한 번 실행. 실제 API로, 방식은 "손으로"
-export async function runNow(source: Source): Promise<RunResult> {
+export async function runNow(source: RunNowSource): Promise<RunResult> {
   const denied = await denyUnlessAdmin();
   if (denied) return denied;
   try {
+    if (source === "youth") return await runYouthNow();
     const db = createAdminClient();
     const now = new Date();
     const result = source === "myhome"

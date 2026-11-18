@@ -11,7 +11,9 @@ export const metadata = { title: "수집 현황 | 관리자 | HomeFit AI" };
 // 지금 한 번 실행은 수집 입구와 같은 상한 안에서 끝나야 한다
 export const maxDuration = 300;
 
-const SOURCE: Record<string, string> = { myhome_notice: "마이홈 공고", kma_forecast: "기상청 예보" };
+const SOURCE: Record<string, string> = { myhome_notice: "마이홈 공고", kma_forecast: "기상청 예보", youth_policy: "온통청년 정책" };
+// spec 006 FR-004: 지금 한 번 실행 버튼이 있는 출처
+const RUNNABLE = [["myhome", "myhome_notice"], ["weather", "kma_forecast"], ["youth", "youth_policy"]] as const;
 const STATUS: Record<string, string> = { succeeded: "성공", failed: "수집 오류", running: "도는 중" };
 const TRIGGER: Record<string, string> = { scheduled: "정기", manual: "손으로", simulation: "시뮬레이터" };
 
@@ -32,8 +34,7 @@ export default async function AdminWatchPage() {
     <>
       <h2>출처별 상태</h2>
       <div className={styles.grid}>
-        {(["myhome", "weather"] as const).map((source) => {
-          const code = source === "myhome" ? "myhome_notice" : "kma_forecast";
+        {RUNNABLE.map(([source, code]) => {
           const failures = consecutiveFailures(runs.data, code);
           return (
             <section key={source} className={styles.card} aria-label={SOURCE[code]}>
