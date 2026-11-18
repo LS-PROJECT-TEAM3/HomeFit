@@ -4,10 +4,12 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Empty, LoadError, Loading } from "@/app/_components/states";
 import { HOUSING_LABELS } from "@/incident/home-form";
+import { withEstimate } from "@/incident/energy-estimate";
+import { loadEstimateBasis, type EstimateBasis } from "@/incident/energy-estimate.server";
 import { listMyInterestHomes, type InterestHome } from "@/incident/interest-homes.server";
 import { realCost } from "@/incident/real-cost";
 import { currentUserId } from "@/lib/supabase/server";
-import { kstMonth, TotalText } from "./cost-view";
+import { EstimateNote, kstMonth, TotalText } from "./cost-view";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "관심 주택 | 집 비교 | HomeFit AI" };
@@ -17,21 +19,26 @@ async function HomeList() {
   const userId = await currentUserId();
   if (!userId) redirect("/login");
   let homes: InterestHome[];
+  let basis: EstimateBasis;
   try {
     homes = await listMyInterestHomes(userId);
+    basis = await loadEstimateBasis(homes, new Date()); // spec 011 FR-002
   } catch {
     return <LoadError>관심 주택을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
   if (homes.length === 0) return <Empty>아직 등록한 관심 주택이 없습니다. 보고 있는 집을 넣으면 내 집과 한 달 실질 주거비를 비교합니다.</Empty>;
   const month = kstMonth(new Date());
   return (
+    <>
     <ul className={styles.list}>
       {homes.map((home) => (
         <li key={home.id}>
-          <Link href={`/compare/${home.id}`}><strong>{home.name}</strong></Link> · {HOUSING_LABELS[home.housingType]} · 한 달 <TotalText cost={realCost(home, month)} />
+          <Link href={`/compare/${home.id}`}><strong>{home.name}</strong></Link> · {HOUSING_LABELS[home.housingType]} · 한 달 <TotalText cost={realCost(withEstimate(home, basis.averages), month)} />
         </li>
       ))}
     </ul>
+    <EstimateNote basis={basis} />
+    </>
   );
 }
 
