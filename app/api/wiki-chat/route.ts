@@ -4,7 +4,7 @@ import { answerWikiQuestion } from "@/chat/wiki-chat.server";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 
 /**
- * spec 009 FR-009~014: 위키 챗봇 질문 받기. 관리자만(화면 Gate와 별도로 서버에서도 막음, PRD FR-19).
+ * spec 010 FR-009~014: 위키 챗봇 질문 받기. 관리자만(화면 Gate와 별도로 서버에서도 막음, PRD FR-19).
  * 키는 서버에만 있고(lib/llm) 오류 내용은 돌려주지 않는다 (PRD FR-27)
  */
 export async function POST(request: Request) {

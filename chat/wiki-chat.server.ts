@@ -9,8 +9,8 @@ import { callLlm, newCallContext } from "@/lib/llm/call.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-// spec 009 FR-010·011·013·014: 위키 파일을 읽어 찾고, AI로 답하고, chat_logs에 남긴다.
-// 위키 파일은 배포 묶음에 들어간 것을 바로 읽는다(spec 009 Q3, next.config.ts outputFileTracingIncludes)
+// spec 010 FR-010·011·013·014: 위키 파일을 읽어 찾고, AI로 답하고, chat_logs에 남긴다.
+// 위키 파일은 배포 묶음에 들어간 것을 바로 읽는다(spec 010 Q3, next.config.ts outputFileTracingIncludes)
 
 export type WikiChatReply =
   | { kind: "answer"; answer: string; sources: WikiSource[]; isMock: boolean; remaining: number }
@@ -32,7 +32,7 @@ async function askedToday(userId: string, now: Date): Promise<number> {
   return count ?? 0;
 }
 
-/** AI 실패는 던진다. 실패한 질문은 기록·한도에 세지 않는다(spec 009 Q5) */
+/** AI 실패는 던진다. 실패한 질문은 기록·한도에 세지 않는다(spec 010 Q5) */
 async function answerFromChunks(question: string, picked: WikiChunk[]): Promise<WikiAnswer & { isMock: boolean }> {
   if (picked.length === 0) return { answer: WIKI_NOT_FOUND, sourceIds: [], isMock: false };
   const result = await callLlm(createAdminClient(), {

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { currentHashes, lint } from "../scripts/wiki-lint.mjs";
 import { search } from "../scripts/wiki-search.mjs";
 
-// spec 009 FR-007(점검은 표로만), FR-002(원본 바뀜), FR-001·FR-005(필수 절·목차). plan 009 2단계
+// spec 010 FR-007(점검은 표로만), FR-002(원본 바뀜), FR-001·FR-005(필수 절·목차). plan 010 2단계
 
 let root: string;
 

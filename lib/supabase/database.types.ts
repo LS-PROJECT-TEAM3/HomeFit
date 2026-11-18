@@ -108,7 +108,7 @@ type NoticeFollowRow = {
 
 type NoticeSummaryRow = { source_code: string; announcement_id: string; summary: string; model: string; created_at: string };
 
-// 0018: 위키 챗봇 질문 기록 (ERD chat_logs, spec 009)
+// 0018: 위키 챗봇 질문 기록 (ERD chat_logs, spec 010)
 type ChatLogRow = { id: string; user_id: string; question: string; answer: string; cited_pages: Json; created_at: string };
 
 // 기본값이 있는 칸은 넣을 때 빼도 된다

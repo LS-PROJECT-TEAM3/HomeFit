@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { chunkWiki, pickChunks, splitWikiPage } from "@/chat/wiki-pages";
 
-// spec 009 FR-010(위키 쪽만 근거), FR-011(없으면 찾지 않음). plan 009 4단계 함수 시험
+// spec 010 FR-010(위키 쪽만 근거), FR-011(없으면 찾지 않음). plan 010 4단계 함수 시험
 const page = [
   "---",
   "type: 규칙",

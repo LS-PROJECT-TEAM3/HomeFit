@@ -1,4 +1,4 @@
-# 랄프 루프 진행 기록 (spec 009 plan 6단계)
+# 랄프 루프 진행 기록 (spec 010 plan 6단계)
 
 목표: `tests/wiki-chat-eval.test.ts`(정답표 5문항, 실제 wiki/)가 통과하도록 `chat/wiki-pages.ts`의 찾기만 고친다. 시험·정답표·wiki/는 고치지 않는다. AI_PROVIDER=mock(실제 API 안 부름).
 

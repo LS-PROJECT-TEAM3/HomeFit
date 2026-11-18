@@ -1,12 +1,12 @@
-// spec 009 FR-010~012·FR-014: 위키 챗봇 지시문, 질문 글 만들기, 답 검사, 질문 검사, 하루 한도. 순수 함수
+// spec 010 FR-010~012·FR-014: 위키 챗봇 지시문, 질문 글 만들기, 답 검사, 질문 검사, 하루 한도. 순수 함수
 import type { WikiChunk } from "@/chat/wiki-pages";
 
 export const WIKI_NOT_FOUND = "위키에 없습니다";
-/** spec 009 Q1(사용자 결정 2026-11-18): 관리자 한 명당 하루 20번, 답 600자 */
+/** spec 010 Q1(사용자 결정 2026-11-18): 관리자 한 명당 하루 20번, 답 600자 */
 export const WIKI_DAILY_LIMIT = 20;
 export const WIKI_ANSWER_MAX = 600;
 export const WIKI_QUESTION_MAX = 300;
-/** AI에 넘기는 조각 수 상한 (spec 009 경계·예외 "여러 쪽과 겹침") */
+/** AI에 넘기는 조각 수 상한 (spec 010 경계·예외 "여러 쪽과 겹침") */
 export const WIKI_MAX_CHUNKS = 4;
 
 const KST_OFFSET_MS = 9 * 3_600_000;
@@ -47,7 +47,7 @@ export function parseWikiAnswer(raw: unknown, allowedIds: ReadonlySet<string>): 
   return sourceIds.length === 0 ? { answer: WIKI_NOT_FOUND, sourceIds: [] } : { answer, sourceIds };
 }
 
-/** mock 공급자는 내용 없는 시험용 값을 주므로, 찾은 조각을 그대로 보여 주는 "모의 답"을 만든다(spec 009 경계·예외) */
+/** mock 공급자는 내용 없는 시험용 값을 주므로, 찾은 조각을 그대로 보여 주는 "모의 답"을 만든다(spec 010 경계·예외) */
 export function buildMockAnswer(chunks: readonly WikiChunk[]): WikiAnswer {
   const pages = [...new Set(chunks.map((c) => c.page))].join(", ");
   return { answer: `모의 답(실제 AI 답 아님): 위키에서 관련 조각 ${chunks.length}개를 찾았습니다. 쪽: ${pages}`, sourceIds: chunks.map((c) => c.id) };
@@ -67,7 +67,7 @@ export function canAskToday(askedToday: number): boolean {
   return askedToday < WIKI_DAILY_LIMIT;
 }
 
-/** 한국 날짜 자정 시각(UTC). 하루 질문 수를 셀 때 시작점 (spec 009 Q4) */
+/** 한국 날짜 자정 시각(UTC). 하루 질문 수를 셀 때 시작점 (spec 010 Q4) */
 export function kstDayStart(now: Date): Date {
   const kst = now.getTime() + KST_OFFSET_MS;
   return new Date(kst - (kst % DAY_MS) - KST_OFFSET_MS);

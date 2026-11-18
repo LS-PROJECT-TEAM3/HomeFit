@@ -4,7 +4,7 @@ import {
 } from "@/chat/wiki-answer";
 import type { WikiChunk } from "@/chat/wiki-pages";
 
-// spec 009 FR-010~012, FR-014, 경계·예외. plan 009 4단계 함수 시험
+// spec 010 FR-010~012, FR-014, 경계·예외. plan 010 4단계 함수 시험
 const chunks: WikiChunk[] = [
   { id: "W1", page: "규칙-사람 승인", heading: "내용", text: "관리자도 승인을 건너뛰지 못한다." },
   { id: "W2", page: "화면-메뉴와 화면 목록", heading: "충돌", text: "건축물 정보: IA 보류, PRD 1차." },
@@ -68,7 +68,7 @@ describe("하루 질문 한도", () => {
     expect(canAskToday(WIKI_DAILY_LIMIT)).toBe(false);
   });
 
-  it("하루는 한국 날짜 자정부터(spec 009 Q4)", () => {
+  it("하루는 한국 날짜 자정부터(spec 010 Q4)", () => {
     // 2026-11-18T15:30Z = 한국 19일 00:30 → 하루 시작은 19일 00:00 KST = 18일 15:00Z
     expect(kstDayStart(new Date("2026-11-18T15:30:00Z")).toISOString()).toBe("2026-11-18T15:00:00.000Z");
     // 2026-11-18T14:59Z = 한국 18일 23:59 → 18일 00:00 KST = 17일 15:00Z

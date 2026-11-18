@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-18 (v1.9, spec 009: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`)
+- 최종 갱신: 2026-11-18 (v1.9, spec 010: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -270,7 +270,7 @@ erDiagram
 | created_at | timestamptz | ✔ | 시각 | [PRD FR-20] |
 
 #### wiki_chunks — 위키 쪽 조각
-> **미룸 (v1.9, spec 009 Q3, 사용자 결정 2026-11-18)**: 위키 챗봇은 배포 묶음 안의 `wiki/` 파일을 바로 읽어 낱말로 찾는다. 이 표는 만들지 않았고, 임베딩이 필요해지면 다시 정한다.
+> **미룸 (v1.9, spec 010 Q3, 사용자 결정 2026-11-18)**: 위키 챗봇은 배포 묶음 안의 `wiki/` 파일을 바로 읽어 낱말로 찾는다. 이 표는 만들지 않았고, 임베딩이 필요해지면 다시 정한다.
 
 | 필드 | 타입 | 필수 | 설명 | 출처 |
 |---|---|---|---|---|
@@ -286,8 +286,8 @@ erDiagram
 |---|---|---|---|---|
 | id | uuid (PK) | ✔ | | [평가항목 P3-21] |
 | user_id | uuid (FK profiles) | ✔ | 물은 관리자 | [평가항목 P3-21] |
-| question | text | ✔ | 1~300자 (0018) | [PRD FR-26] [spec 009 FR-014] |
-| answer | text | ✔ | 근거가 없으면 "위키에 없습니다". 600자 이내 (0018) | [PRD FR-26] [spec 009 Q1] |
+| question | text | ✔ | 1~300자 (0018) | [PRD FR-26] [spec 010 FR-014] |
+| answer | text | ✔ | 근거가 없으면 "위키에 없습니다". 600자 이내 (0018) | [PRD FR-26] [spec 010 Q1] |
 | cited_pages | jsonb | ✔ | 출처 위키 쪽 목록(비면 위키에 없음) | [PRD FR-26] |
 | created_at | timestamptz | ✔ | 하루 질문 수는 이 칸으로 계산(계산 값) | [PRD FR-26] |
 
@@ -424,7 +424,7 @@ erDiagram
 ## 확인 필요
 | # | 질문 | 막고 있는 필드 | 출처 |
 |---|---|---|---|
-| Q1 | 기록 찾기의 임베딩(글을 숫자 목록으로 바꾸는 것)을 무엇으로 만드나? Claude API는 임베딩을 만들지 않아 별도 방법이 필요하다(외부 서비스면 먼저 묻는다). 위키 챗봇은 임베딩을 쓰지 않는다(v1.9, spec 009 Q3) | knowledge_chunks.embedding | [PRD FR-18] |
+| Q1 | 기록 찾기의 임베딩(글을 숫자 목록으로 바꾸는 것)을 무엇으로 만드나? Claude API는 임베딩을 만들지 않아 별도 방법이 필요하다(외부 서비스면 먼저 묻는다). 위키 챗봇은 임베딩을 쓰지 않는다(v1.9, spec 010 Q3) | knowledge_chunks.embedding | [PRD FR-18] |
 | Q2 | 습도 기준값(곰팡이 위험)과 창 종류별 표면 온도 계산 값 | (코드 설정) | [문제정의 확인 필요 4·8] |
 | Q3 | 시세 비교에 필요한 최소 거래 건수 | (코드 설정) | [문제정의 확인 필요 9] |
 | Q4 | 몇 시간 지난 측정값까지 습도 사건에 쓸까 | indoor_measurements.measured_at 사용 규칙 | [CUJ-02 MOT] |
@@ -440,7 +440,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
-| 2026-11-18 | v1.9 | spec 009(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-18 | v1.9 | spec 010(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
 | 2026-11-18 | v1.8 | notice_summaries에 정책 요약도 저장(source_code `youth_policy`, announcement_id = 정책 ID). 칸 변경 없음 (spec 006 v0.3 FR-007) |
 | 2026-11-18 | v1.8 | interest_areas 만듦(마이그레이션 0017). last_median_value를 월세 중간값으로 좁히고 last_median_deposit 추가(사용자 결정 "월세·보증금 둘 다", spec 008). sources `rtms_trade` |
 | 2026-11-18 | v1.7 | schedule_items: incident_id·response_plan_id를 비울 수 있게, source_code·announcement_id 추가(공고에서 온 일정, 마이그레이션 0016). 사용자 결정 2026-11-18 "표 고치기", spec 007 |

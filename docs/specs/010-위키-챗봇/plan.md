@@ -1,6 +1,6 @@
 # plan: 프로젝트 위키와 위키 챗봇
 
-- 기능 ID: 009
+- 기능 ID: 010
 - 상태: 승인됨 (사용자 2026-11-18 "이제 진짜로 진행하자")
 - 버전: v0.1
 - 작성일 / 최종 갱신: 2026-11-18 / 2026-11-18
@@ -145,7 +145,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 ### 6단계 작업
 - [x] 사용자(팀)가 `docs/wiki-chat.md`에 질문 5개와 정답(답·출처 쪽) 작성
 - [x] `tests/wiki-chat-eval.test.ts`: 실제 `wiki/` 파일로 5문항의 찾기 결과가 정답 출처를 포함하는지(있음 3, 충돌 1), 없음 1은 0개인지
-- [x] Ralph Loop: `/ralph-loop "tests/wiki-chat-eval.test.ts가 통과할 때까지 chat/wiki-pages.ts의 찾기를 고쳐라. 바퀴마다 npm test -- wiki-chat-eval 결과를 docs/specs/009-위키-챗봇/ralph-progress.md에 한 줄. 시험·정답표·wiki/는 고치지 마라. 통과하면 <promise>DONE</promise>" --max-iterations 5 --completion-promise "DONE"` (AI_PROVIDER=mock)
+- [x] Ralph Loop: `/ralph-loop "tests/wiki-chat-eval.test.ts가 통과할 때까지 chat/wiki-pages.ts의 찾기를 고쳐라. 바퀴마다 npm test -- wiki-chat-eval 결과를 docs/specs/010-위키-챗봇/ralph-progress.md에 한 줄. 시험·정답표·wiki/는 고치지 마라. 통과하면 <promise>DONE</promise>" --max-iterations 5 --completion-promise "DONE"` (AI_PROVIDER=mock)
 - [ ] 실제 Gemini로 5문항과 숨은 지시 시험(시험용 쪽 사본으로)을 돌려 `docs/wiki-chat.md`에 결과·틀린 이유 기록
 
 ### 새 의존성 기록
@@ -271,3 +271,4 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | 2026-11-18 | v0.1 | 승인 |
 | 2026-11-18 | v0.1 | 3단계 끝. 넣기 4묶음, --record, 점검 0건. 묶음 1에서 원본에 GLOSSARY.md를 더함(spec Q2) |
 | 2026-11-18 | v0.1 | 2단계 끝. 구현 중 더함: 원본 지문은 줄바꿈(CRLF)을 LF로 맞춰 계산(git autocrlf로 컴퓨터마다 달라지는 것 막기), 인라인 코드 속 링크 무시, wiki/CLAUDE.md는 쪽으로 보지 않음, 필수 절에 `## 내용` 포함 |
+| 2026-11-18 | v0.1 | 기능 번호 009 → 010. main에 먼저 들어간 조각 E가 `docs/specs/009-실질주거비-비교`를 써서 번호가 겹침(사용자 결정). 요구 ID(FR-009 등)와 QA ID(C-9xx·H-9xx)는 그대로 |
