@@ -2,15 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { readCostForm } from "@/app/_components/cost-fields";
 import { parseHomeForm, parseMeasurementForm, type HomeFormInput, type MeasurementFormInput } from "@/incident/home-form";
+import { parseCostFields, type CostFieldsInput } from "@/incident/interest-home-form";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 
 export type HomeState = {
-  errors?: Partial<Record<"sigunguCode" | "housingType" | "exclusiveArea" | "windowType" | "contractType" | "deposit" | "monthlyRent" | "maintenanceFee" | "contractEndDate", string>>;
+  errors?: Partial<Record<"sigunguCode" | "housingType" | "exclusiveArea" | "windowType" | "contractType" | "deposit" | "monthlyRent" | "maintenanceFee" | "contractEndDate" | keyof CostFieldsInput, string>>;
   error?: string;
   saved?: boolean;
   /** 저장하지 못했을 때 입력을 되살린다(React가 제출 뒤 폼을 비움) */
   values?: HomeFormInput;
+  /** spec 009 FR-002 실질 주거비 칸 입력 */
+  costs?: CostFieldsInput;
 };
 
 export type MeasurementState = {
@@ -34,8 +38,13 @@ export async function saveHome(_prev: HomeState, formData: FormData): Promise<Ho
     contractType: text(formData, "contractType"), deposit: text(formData, "deposit"), monthlyRent: text(formData, "monthlyRent"),
     maintenanceFee: text(formData, "maintenanceFee"), contractEndDate: text(formData, "contractEndDate"),
   };
+  const costs = readCostForm(formData);
   const parsed = parseHomeForm(values);
-  if (!parsed.ok) return { errors: parsed.errors, values };
+  const parsedCosts = parseCostFields(costs);
+  if (!parsed.ok || !parsedCosts.ok) {
+    return { errors: { ...(parsed.ok ? {} : parsed.errors), ...(parsedCosts.ok ? {} : parsedCosts.errors) }, values, costs };
+  }
+  const c = parsedCosts.value;
 
   const supabase = await createClient();
   const { error } = await supabase.from("homes").upsert(
@@ -44,13 +53,14 @@ export async function saveHome(_prev: HomeState, formData: FormData): Promise<Ho
       exclusive_area_m2: parsed.value.exclusiveAreaM2, window_type: parsed.value.windowType,
       contract_type: parsed.value.contractType, deposit: parsed.value.deposit, monthly_rent: parsed.value.monthlyRent,
       maintenance_fee: parsed.value.maintenanceFee, contract_end_date: parsed.value.contractEndDate,
+      energy_cost: c.energyCost, electricity_kwh: c.electricityKwh, transit_fare: c.transitFare, trips_per_day: c.tripsPerDay, commute_days: c.commuteDays,
       created_by: userId, updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },
   );
-  if (error) return { error: "내 집 정보를 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.", values };
+  if (error) return { error: "내 집 정보를 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.", values, costs };
   revalidatePath("/my/home");
-  return { saved: true, values };
+  return { saved: true, values, costs };
 }
 
 /** FR-002 (spec 003): 실내 온습도 측정값 쌓기. 내 집이 있어야 한다 */

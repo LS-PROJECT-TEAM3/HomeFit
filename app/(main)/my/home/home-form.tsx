@@ -3,6 +3,8 @@
 import { useActionState, useState } from "react";
 import { HOUSING_LABELS, WINDOW_LABELS, type HomeFormInput } from "@/incident/home-form";
 import { SIDO_OPTIONS } from "@/watch/sido";
+import { CostFields, costInput } from "@/app/_components/cost-fields";
+import { filledStatus, Fold } from "@/app/_components/fold";
 import { SigunguField } from "../conditions/sigungu-field";
 import { saveHome, type HomeState } from "./actions";
 import type { MyHome } from "./load";
@@ -26,7 +28,8 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 export function HomeForm({ initial }: { initial: MyHome | null }) {
   const [state, action, pending] = useActionState<HomeState, FormData>(saveHome, {});
   const values = state.values ?? toInput(initial);
-  return <HomeFields key={JSON.stringify(values)} values={values} state={state} action={action} pending={pending} />;
+  const costs = state.costs ?? costInput(initial);
+  return <HomeFields key={JSON.stringify([values, costs])} values={values} costs={costs} state={state} action={action} pending={pending} />;
 }
 
 // 사용자 요청(2026-11-17): 전용면적을 평으로도 넣는다. 저장은 ㎡, 저장된 값은 ㎡로 보여 준다
@@ -63,8 +66,7 @@ function AmountField({ name, label, value, error }: { name: "deposit" | "monthly
 
 function ContractFields({ values, errors }: { values: HomeFormInput; errors: NonNullable<HomeState["errors"]> }) {
   return (
-    <fieldset className={styles.checks}>
-      <legend className={styles.label}>계약 정보 (선택)</legend>
+    <>
       <p className={styles.help}>넣으면 홈에서 월 예상 주거비(월세 + 관리비)와 계약 만료까지 남은 날을 보여 드립니다.</p>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="contractType">계약 형태</label>
@@ -85,20 +87,33 @@ function ContractFields({ values, errors }: { values: HomeFormInput; errors: Non
           aria-invalid={Boolean(errors.contractEndDate)} aria-describedby="contractEndDate-error" />
         <FieldError id="contractEndDate-error" message={errors.contractEndDate} />
       </div>
-    </fieldset>
+    </>
   );
 }
 
-type FieldsProps = { values: HomeFormInput; state: HomeState; action: (formData: FormData) => void; pending: boolean };
+// 사용자 요청(2026-11-18): 묶음마다 오류가 있으면 펼친다(접힌 칸의 오류를 놓치지 않게)
+const BASIC_KEYS = ["sigunguCode", "housingType", "exclusiveArea", "windowType"] as const;
+const CONTRACT_KEYS = ["contractType", "deposit", "monthlyRent", "maintenanceFee", "contractEndDate"] as const;
+const COST_KEYS = ["energyCost", "electricityKwh", "transitFare", "tripsPerDay", "commuteDays"] as const;
 
-function HomeFields({ values, state, action, pending }: FieldsProps) {
+function hasError(errors: NonNullable<HomeState["errors"]>, keys: readonly string[]): boolean {
+  return keys.some((key) => Boolean((errors as Record<string, string | undefined>)[key]));
+}
+
+type FieldsProps = { values: HomeFormInput; costs: NonNullable<HomeState["costs"]>; state: HomeState; action: (formData: FormData) => void; pending: boolean };
+
+function HomeFields({ values, costs, state, action, pending }: FieldsProps) {
   const [sidoCode, setSidoCode] = useState(values.sidoCode);
   const errors = state.errors ?? {};
+  const basic = [values.sigunguCode, values.housingType, values.exclusiveArea, values.windowType];
+  const basicDone = basic.every((v) => v.trim() !== "");
   return (
     <form action={action} className={styles.form} noValidate>
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
       {state.saved ? <p className={styles.notice} role="status">저장했습니다.</p> : null}
 
+      {/* 사용자 요청(2026-11-18): 필수 묶음은 다 채울 때까지 펼치고, 선택 묶음은 접어 둔다 */}
+      <Fold title="기본 정보 (필수)" status={filledStatus(basic)} open={!basicDone || hasError(errors, BASIC_KEYS)}>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="sidoCode">시도 (필수)</label>
         <select id="sidoCode" name="sidoCode" value={sidoCode} onChange={(e) => setSidoCode(e.target.value)} className={styles.input}>
@@ -132,8 +147,15 @@ function HomeFields({ values, state, action, pending }: FieldsProps) {
         <p id="windowType-help" className={styles.help}>모르면 &lsquo;모름&rsquo;을 고르세요. 더 조심해야 하는 홑유리로 계산합니다.</p>
         <FieldError id="windowType-error" message={errors.windowType} />
       </fieldset>
+      </Fold>
 
-      <ContractFields values={values} errors={errors} />
+      <Fold title="계약 정보 (선택)" status={filledStatus(CONTRACT_KEYS.map((k) => values[k]))} open={hasError(errors, CONTRACT_KEYS)}>
+        <ContractFields values={values} errors={errors} />
+      </Fold>
+      {/* spec 009 FR-002: 집 비교의 내 집 줄 */}
+      <Fold title="실질 주거비 (선택)" status={filledStatus(COST_KEYS.map((k) => costs[k]))} open={hasError(errors, COST_KEYS)}>
+        <CostFields values={costs} errors={errors} />
+      </Fold>
 
       <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : "저장"}</button>
     </form>

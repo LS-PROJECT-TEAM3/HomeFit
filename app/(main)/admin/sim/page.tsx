@@ -11,9 +11,9 @@ export const maxDuration = 300;
 
 // 묶음마다 무엇을 보여 주는지 (CUJ-04 1단계: 정답이 붙은 묶음)
 const NOTICE_HELP: Record<string, string> = {
-  sample: "기준 공고 묶음", changed: "마감일·월세가 바뀜 → 알림", malformed: "모양이 깨진 응답 → 수집 오류", failure: "API 실패 → 수집 오류",
+  sample: "기준 공고 묶음", changed: "마감일이 하루 늦음 → 알림", malformed: "모양이 깨진 응답 → 수집 오류", failure: "API 실패 → 수집 오류",
   bulk: "공고가 많은 묶음", fresh: "새 공고", correction: "정정 공고 → 알림", relaxed: "조건 완화 → 알림", extended: "마감 연장 → 알림",
-  later: "나중 회차", "bulk-changed": "많은 공고 중 일부 바뀜",
+  later: "나중 회차", "bulk-changed": "많은 공고의 마감일이 3일 늦음 → 알림",
 };
 const WEATHER_HELP: Record<string, string> = {
   cold: "추운 밤 + 높은 습도 → 결로 위험", colder: "더 추워짐 → 알림 갱신", humid: "습도만 높음", safe: "위험 없음 → 알림 0",

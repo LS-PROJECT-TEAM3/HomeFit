@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-18 (v1.8, 사용자 결정 2026-11-18: interest_areas 보증금 지난번 값)
+- 최종 갱신: 2026-11-18 (v1.9, 승인 2026-11-18: interest_homes 표, homes 실질 주거비 칸 5개)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -34,6 +34,7 @@ erDiagram
     PROFILES ||--o{ CHAT_LOGS : "위키 챗봇"
     WIKI_CHUNKS }o--o{ CHAT_LOGS : "출처"
     RUNS ||--o| EVAL_RESULTS : "채점"
+    PROFILES ||--o{ INTEREST_HOMES : "관심 주택 (v1.9)"
 ```
 
 ## 엔터티
@@ -76,6 +77,11 @@ erDiagram
 | contract_end_date | date | | 계약 만료일 | [PRD FR-03] |
 | window_type | text: `single` / `double` / `unknown` | ✔ | 창 종류(홑유리 / 이중유리 / 모름) | [PRD FR-03] [CUJ-02 1단계] |
 | created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
+| energy_cost | integer (원) | | 한 달 에너지비 직접 입력 (v1.9) | [PRD FR-28 v1.10] |
+| electricity_kwh | integer | | 한 달 전기 사용량. 넣으면 한전 주택용 저압 요금표로 계산(직접 입력이 있으면 그것을 씀) (v1.9) | [PRD FR-28 v1.10] |
+| transit_fare | integer (원) | | 출퇴근 편도 요금 (v1.9) | [PRD FR-28 v1.10] |
+| trips_per_day | integer | | 하루 탈 횟수. 비우면 2 (v1.9) | [PRD FR-28 v1.10] |
+| commute_days | integer | | 한 달 출근 일수. 비우면 22 (v1.9) | [PRD FR-28 v1.10] |
 | updated_at | timestamptz | ✔ | | [평가항목 P3-10] |
 
 #### indoor_measurements — 측정값(실내 온습도)
@@ -88,6 +94,24 @@ erDiagram
 | measured_at | timestamptz | ✔ | 측정 시각. 몇 시간 지난 값까지 쓸지는 Q4 | [PRD FR-04] [GLOSSARY 측정값] |
 | created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
 | created_at | timestamptz | ✔ | 입력 시각 | [평가항목 P3-10] |
+
+#### interest_homes — 관심 주택 (v1.9)
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| id | uuid (PK) | ✔ | 회원당 여러 개 | [PRD FR-28] |
+| user_id | uuid (FK profiles) | ✔ | | [PRD FR-28] |
+| name | text | ✔ | 내가 알아볼 이름(40자 안). 상세 주소는 받지 않는다 | [IA CP_040100_PG] [PRD 8절 개인정보] |
+| sigungu_code | text | ✔ | 시군구 코드 | [IA CP_040100_PG] |
+| housing_type | text (homes와 같은 값) | ✔ | 주택 유형 | [GLOSSARY 관심 주택] |
+| exclusive_area_m2 | numeric | | 전용면적 | [IA CP_040100_PG] |
+| deposit | bigint (원) | | 보증금 | [IA CP_040100_PG] |
+| monthly_rent | integer (원) | ✔ | 월세(전세면 0) | [PRD FR-28] |
+| maintenance_fee | integer (원) | | 관리비 | [PRD FR-28] |
+| energy_cost, electricity_kwh, transit_fare, trips_per_day, commute_days | | | homes와 같은 뜻 | [PRD FR-28 v1.10] |
+| created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
+| created_at, updated_at | timestamptz | ✔ | | [평가항목 P3-10] |
+
+실질 주거비 = 월세 + 관리비 + 에너지비 + 교통비 (계산 값, 저장하지 않음). 에너지비 = energy_cost, 없으면 electricity_kwh로 계산, 둘 다 없으면 "미입력". 교통비 = transit_fare × trips_per_day × commute_days. [GLOSSARY 실질 주거비]
 
 #### interest_areas — 관심 지역
 | 필드 | 타입 | 필수 | 설명 | 출처 |
@@ -439,6 +463,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-18 | v1.9 (승인 2026-11-18, 마이그레이션 0020) | interest_homes 표 추가, homes에 energy_cost·electricity_kwh·transit_fare·trips_per_day·commute_days. 실질 주거비 알파(PRD v1.10 FR-28, spec 009) |
 | 2026-11-18 | v1.8 | notice_summaries에 정책 요약도 저장(source_code `youth_policy`, announcement_id = 정책 ID). 칸 변경 없음 (spec 006 v0.3 FR-007) |
 | 2026-11-18 | v1.8 | interest_areas 만듦(마이그레이션 0017). last_median_value를 월세 중간값으로 좁히고 last_median_deposit 추가(사용자 결정 "월세·보증금 둘 다", spec 008). sources `rtms_trade` |
 | 2026-11-18 | v1.7 | schedule_items: incident_id·response_plan_id를 비울 수 있게, source_code·announcement_id 추가(공고에서 온 일정, 마이그레이션 0016). 사용자 결정 2026-11-18 "표 고치기", spec 007 |

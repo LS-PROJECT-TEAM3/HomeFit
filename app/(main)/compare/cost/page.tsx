@@ -1,63 +1,75 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { LoadError, Loading } from "@/app/_components/states";
-import { SkeletonNotice } from "@/app/_components/page-status";
-import { monthlyHousingCost } from "@/incident/home-dashboard";
+import { Empty, LoadError, Loading } from "@/app/_components/states";
+import { listMyInterestHomes } from "@/incident/interest-homes.server";
+import { compareRealCosts, type CompareRow, type CostInput } from "@/incident/real-cost";
 import { currentUserId } from "@/lib/supabase/server";
 import { loadMyHome } from "../../my/home/load";
+import { CostCell, kstMonth, TotalText, won } from "../cost-view";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "실질 비용 비교 | 집 비교 | HomeFit AI" };
 
-function won(value: number | null): string {
-  return value === null ? "—" : `${value.toLocaleString("ko-KR")}원`;
+function diffText(row: CompareRow): string {
+  if (row.isMine) return "기준";
+  if (row.diffFromMine === null) return "—";
+  if (row.diffFromMine === 0) return "같음";
+  return `${row.diffFromMine > 0 ? "+" : "−"}${won(Math.abs(row.diffFromMine))} ${row.diffFromMine > 0 ? "더 듦" : "덜 듦"}`;
+}
+
+type Loaded = { rows: CompareRow[]; hasMine: boolean; empty: boolean };
+
+async function load(userId: string): Promise<Loaded> {
+  const [{ home }, homes] = await Promise.all([loadMyHome(userId), listMyInterestHomes(userId)]);
+  // E7: 내 집이 없거나 월세(계약)가 없으면 내 집 줄을 넣지 않는다
+  const mine: CostInput | null = home && home.monthlyRent !== null ? { ...home, monthlyRent: home.monthlyRent } : null;
+  return { rows: compareRealCosts({ myHome: mine, homes, month: kstMonth(new Date()) }), hasMine: mine !== null, empty: homes.length === 0 && !mine };
 }
 
 async function CostTable() {
   await connection();
   const userId = await currentUserId();
   if (!userId) redirect("/login");
-  let home;
+  let loaded: Loaded;
   try {
-    home = (await loadMyHome(userId)).home;
+    loaded = await load(userId);
   } catch {
-    return <LoadError>내 집 정보를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
+    return <LoadError>비교할 자료를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
-  const cost = home ? monthlyHousingCost(home) : null;
-  const rent = cost && cost.status !== "no_contract" ? cost.rent : null;
-  const fee = cost && cost.status !== "no_contract" ? cost.fee : null;
-  const total = cost && cost.status !== "no_contract" ? cost.total : null;
+  if (loaded.empty) return <Empty>내 집 계약 정보나 관심 주택을 넣으면 여기서 비교합니다. <Link href="/compare/new">관심 주택 등록</Link></Empty>;
   return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
-        <caption className={styles.muted}>한 달 기준. 에너지비·교통비는 추정값이 들어올 자리입니다.</caption>
-        <thead>
-          <tr><th scope="col">집</th><th scope="col">월세</th><th scope="col">관리비</th><th scope="col">에너지비(추정)</th><th scope="col">교통비(추정)</th><th scope="col">합계</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">내 집</th>
-            <td>{won(rent)}</td><td>{won(fee)}</td><td>다음 단계</td><td>다음 단계</td><td><strong>{won(total)}</strong></td>
-          </tr>
-          <tr>
-            <th scope="row">관심 주택</th>
-            <td colSpan={5} className={styles.muted}>관심 주택을 등록하면 여기에 줄이 생깁니다.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <>
+      {loaded.hasMine ? null : <p className={styles.muted}>내 집에 월세를 넣으면 내 집 대비 차이가 보입니다. <Link href="/my/home">내 집 입력</Link></p>}
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <caption className={styles.muted}>한 달 기준, 합계가 낮은 순. 괄호는 값의 종류(입력·계산). 미입력 칸은 합계에서 빠집니다.</caption>
+          <thead>
+            <tr><th scope="col">집</th><th scope="col">월세</th><th scope="col">관리비</th><th scope="col">에너지비</th><th scope="col">교통비</th><th scope="col">합계</th><th scope="col">내 집 대비</th></tr>
+          </thead>
+          <tbody>
+            {loaded.rows.map((row) => (
+              <tr key={row.id}>
+                <th scope="row">{row.isMine ? <Link href="/my/home">내 집</Link> : <Link href={`/compare/${row.id}`}>{row.name}</Link>}</th>
+                <td><CostCell item={row.cost.rent} /></td><td><CostCell item={row.cost.fee} /></td>
+                <td><CostCell item={row.cost.energy} /></td><td><CostCell item={row.cost.transit} /></td>
+                <td><TotalText cost={row.cost} /></td><td>{diffText(row)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className={styles.muted}>에너지비 &ldquo;계산&rdquo;은 전기 사용량으로 한전 주택용 저압 요금표(기본요금 + 전력량요금)를 쓴 값이고 부가세·기금·기후환경·연료비조정 요금은 빠져 있습니다. 교통비는 편도 요금 × 하루 횟수 × 한 달 출근 일수입니다.</p>
+    </>
   );
 }
 
-// IA CP_040200_PG 실질 주거비 비교 (PRD FR-28 알파). spec 004 뼈대: 내 집 줄만 실제 값
+// IA CP_040200_PG 실질 주거비 비교 (spec 009 FR-005, PRD FR-28 v1.10 알파)
 export default function CompareCostPage() {
   return (
-    <>
-      <SkeletonNotice>내 집 줄은 내 집 화면에 넣은 월세·관리비로 채웁니다. 관심 주택·에너지비·교통비는 다음 단계입니다.</SkeletonNotice>
-      <Suspense fallback={<Loading />}>
-        <CostTable />
-      </Suspense>
-    </>
+    <Suspense fallback={<Loading />}>
+      <CostTable />
+    </Suspense>
   );
 }
