@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-17 (v1.5, 승인 2026-11-17: homes.maintenance_fee)
+- 최종 갱신: 2026-11-18 (v1.7, 사용자 결정 2026-11-18: schedule_items 공고 출처)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -237,8 +237,10 @@ erDiagram
 |---|---|---|---|---|
 | id | uuid (PK) | ✔ | | [IA SC_060000_PG] |
 | user_id | uuid (FK profiles) | ✔ | | [PRD FR-16] |
-| response_plan_id | uuid (FK response_plans, 유일) | ✔ | 두 번 승인해도 일정 하나 | [PRD FR-16] |
-| incident_id | uuid (FK incidents) | ✔ | 출처 사건 링크 | [IA SC_060100_PG] |
+| response_plan_id | uuid (FK response_plans, 유일) | | 두 번 승인해도 일정 하나. 알림에서 온 일정만 (v1.7) | [PRD FR-16] |
+| incident_id | uuid (FK incidents) | | 출처 사건 링크. 알림에서 온 일정만 (v1.7) | [IA SC_060100_PG] |
+| source_code | text (FK sources) | | 공고에서 온 일정의 출처 `myhome_notice` (v1.7) | [PRD FR-16 v1.9] [spec 007] |
+| announcement_id | text | | 공고에서 온 일정의 공고 ID. (user_id, source_code, announcement_id) 유일 → 두 번 눌러도 하나 (v1.7) | [spec 007 FR-002] |
 | title | text | ✔ | | [IA SC_060000_PG] |
 | due_date | date | | 마감일. 지나면 "마감 지남" (계산 표시) | [PRD FR-16] |
 | checklist_state | jsonb | ✔ | 항목별 완료 여부 | [PRD FR-16] |
@@ -436,6 +438,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
+| 2026-11-18 | v1.7 | schedule_items: incident_id·response_plan_id를 비울 수 있게, source_code·announcement_id 추가(공고에서 온 일정, 마이그레이션 0016). 사용자 결정 2026-11-18 "표 고치기", spec 007 |
 | 2026-11-18 | v1.6 | llm_calls.purpose에 `chat_answer`(챗봇 답변, 마이그레이션 0014) |
 | 2026-11-18 | v1.6 | policy_conditions.target_groups(대상) 추가. 사용자 결정 2026-11-18 |
 | 2026-11-17 | v1.5 | homes.maintenance_fee(월 관리비) 추가. 홈 "월 예상 주거비"(PRD v1.6 FR-13) 계산용 |
