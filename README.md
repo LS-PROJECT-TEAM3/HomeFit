@@ -71,7 +71,7 @@
 | 평가 항목 점검표 | [docs/프로젝트3-평가항목.md](docs/프로젝트3-평가항목.md) |
 | 조각 표(분배·작업 순서) | [docs/plan.md](docs/plan.md) |
 | 데이터 출처 | [docs/data-sources.md](docs/data-sources.md) |
-| 커넥터, 서브에이전트 | `docs/connectors.md`, `docs/agents.md` (조각 C1 작업 중) |
+| 커넥터, 서브에이전트 | [docs/connectors.md](docs/connectors.md), [docs/agents.md](docs/agents.md) |
 | 디버그 기록, 전체 QA 모음 | [docs/debug-note.md](docs/debug-note.md), [docs/qa.md](docs/qa.md) |
 | 시연 순서 | [docs/demo-order.md](docs/demo-order.md) (초안, 팀 확인 전) |
 | 발표 슬라이드 | `slides/index.html` (조각 C2 작업 중) |
