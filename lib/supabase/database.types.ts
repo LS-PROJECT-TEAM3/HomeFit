@@ -72,8 +72,9 @@ type IncidentActionRow = {
   id: string; incident_id: string; actor_id: string; action: string; reason: string | null; created_at: string;
 };
 
+// 0016 (spec 007): 출처는 알림(incident_id·response_plan_id) 또는 공고(source_code·announcement_id)
 type ScheduleItemRow = {
-  id: string; user_id: string; response_plan_id: string; incident_id: string; title: string;
+  id: string; user_id: string; response_plan_id: string | null; incident_id: string | null; source_code: string | null; announcement_id: string | null; title: string;
   due_date: string | null; checklist_state: Json; created_at: string; updated_at: string;
 };
 
@@ -151,7 +152,7 @@ export type Database = {
       incident_actions: Table<IncidentActionRow, Optional<IncidentActionRow, "id" | "reason" | "created_at">>;
       schedule_items: Table<
         ScheduleItemRow,
-        Optional<ScheduleItemRow, "id" | "due_date" | "created_at" | "updated_at">
+        Optional<ScheduleItemRow, "id" | "due_date" | "created_at" | "updated_at" | "response_plan_id" | "incident_id" | "source_code" | "announcement_id">
       >;
       notification_settings: Table<
         NotificationSettingRow,
@@ -170,6 +171,7 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      add_notice_to_schedule: { Args: { p_announcement_id: string; p_checklist: Json }; Returns: string };
       approve_incident: { Args: { p_incident_id: string }; Returns: string };
       collection_status: {
         Args: { p_source: string };
