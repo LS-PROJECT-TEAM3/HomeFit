@@ -72,7 +72,7 @@
 | 안내서 이름 | 이 저장소 |
 |---|---|
 | 문제 정의 | [docs/문제정의.md](docs/문제정의.md), [GLOSSARY.md](GLOSSARY.md), [docs/adr/](docs/adr/) |
-| 인터뷰 | [interviews/](interviews/) (사람·AI 구분 표시) |
+| 인터뷰, 팀 밖 설문 | [interviews/](interviews/) (사람·AI 구분 표시). 종합: [interviews/종합.md](interviews/종합.md) (구글폼 팀 밖 설문 12명은 8절, 1:1 인터뷰와 따로 셈) |
 | IA | [docs/IA.md](docs/IA.md), [docs/IA.xlsx](docs/IA.xlsx) |
 | uj.md | [docs/journeys/](docs/journeys/README.md) |
 | prd.md | [docs/PRD.md](docs/PRD.md) |
