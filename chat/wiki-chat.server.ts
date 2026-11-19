@@ -45,6 +45,12 @@ async function answerFromChunks(question: string, picked: WikiChunk[]): Promise<
   return { ...result.data, isMock: false };
 }
 
+/** 화면을 처음 열 때 보일 오늘 남은 질문 수 (PR #15 리뷰 8) */
+export async function remainingToday(userId: string, now: Date): Promise<number> {
+  return Math.max(0, WIKI_DAILY_LIMIT - (await askedToday(userId, now)));
+}
+
+// shortcut: 세기 → AI 부르기 → 넣기 순서라 같은 관리자가 동시에 여러 번 보내면 20번을 조금 넘을 수 있다. 관리자 전용이라 둔다. 사용자에게 열거나 비용이 커지면 DB 함수 하나로 세기·넣기를 묶는다(PR #15 리뷰 3)
 export async function answerWikiQuestion(userId: string, question: string, now: Date): Promise<WikiChatReply> {
   const asked = await askedToday(userId, now);
   if (!canAskToday(asked)) return { kind: "limit" };

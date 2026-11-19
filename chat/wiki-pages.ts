@@ -40,17 +40,20 @@ function questionWords(question: string): string[][] {
 /**
  * 질문 낱말을 많이 덮는 조각부터 limit개. 고른 조각에는 W1, W2… 번호를 다시 붙인다.
  * 질문 낱말이 2개 이상 겹치는 조각만 쓴다(질문 낱말이 하나면 그 하나). 낱말 하나만 우연히 겹친 조각으로 답을 지어내지 않게(FR-011)
+ * 쪽 이름·절 제목에 든 낱말은 한 번 더 센다. 제목이 질문과 딱 맞는 쪽이 긴 본문에 밀리지 않게(PR #15 리뷰, 정답표 Q6)
  */
 export function pickChunks(question: string, chunks: readonly WikiChunk[], limit: number): WikiChunk[] {
   const words = questionWords(question);
   if (words.length === 0) return [];
   const minScore = Math.min(2, words.length);
+  const hits = (text: string) => words.filter((forms) => forms.some((form) => text.includes(form))).length;
   return chunks
     .map((chunk, order) => {
-      const haystack = `${chunk.page} ${chunk.heading} ${chunk.text}`.toLowerCase();
-      return { chunk, order, score: words.filter((forms) => forms.some((form) => haystack.includes(form))).length };
+      const title = `${chunk.page} ${chunk.heading}`.toLowerCase();
+      const matched = hits(`${title} ${chunk.text.toLowerCase()}`);
+      return { chunk, order, matched, score: matched + hits(title) };
     })
-    .filter((item) => item.score >= minScore)
+    .filter((item) => item.matched >= minScore)
     .sort((a, b) => b.score - a.score || a.order - b.order)
     .slice(0, limit)
     .map((item, i) => ({ ...item.chunk, id: `W${i + 1}` }));

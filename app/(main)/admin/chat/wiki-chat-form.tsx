@@ -5,34 +5,37 @@ import { WIKI_DAILY_LIMIT, WIKI_QUESTION_MAX, checkQuestion, readWikiReply, type
 import styles from "@/app/_components/hub.module.css";
 import own from "./wiki-chat.module.css";
 
+type Asked = { view: WikiChatView; remaining: number | null };
+
+/** 질문 하나를 보내고 화면에 보일 값과 남은 질문 수(모르면 null)를 돌려준다 */
+async function askWiki(question: string): Promise<Asked> {
+  try {
+    const response = await fetch("/api/wiki-chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question }) });
+    const view = readWikiReply(response.ok, await response.json().catch(() => null));
+    return { view, remaining: view.ok ? view.remaining : response.status === 429 ? 0 : null };
+  } catch {
+    return { view: { ok: false, message: "연결이 끊겼습니다. 잠시 뒤 다시 물어 주세요." }, remaining: null };
+  }
+}
+
 // spec 012 FR-010·011·014·016: 위키에 묻고, 답·출처(펼쳐서 절 내용)·남은 질문 수를 보인다
-export function WikiChatForm() {
+export function WikiChatForm({ initialRemaining }: { initialRemaining: number | null }) {
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
   const [asked, setAsked] = useState("");
   const [view, setView] = useState<WikiChatView | null>(null);
-  const [remaining, setRemaining] = useState<number | null>(null);
+  const [remaining, setRemaining] = useState(initialRemaining);
 
   const send = async () => {
     const checked = checkQuestion(text);
-    if (!checked.ok) {
-      setView({ ok: false, message: checked.message });
-      return;
-    }
+    if (!checked.ok) return setView({ ok: false, message: checked.message });
     setPending(true);
     setAsked(checked.question);
     setView(null);
-    try {
-      const response = await fetch("/api/wiki-chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: checked.question }) });
-      const next = readWikiReply(response.ok, await response.json().catch(() => null));
-      if (next.ok) setRemaining(next.remaining);
-      if (response.status === 429) setRemaining(0);
-      setView(next);
-    } catch {
-      setView({ ok: false, message: "연결이 끊겼습니다. 잠시 뒤 다시 물어 주세요." });
-    } finally {
-      setPending(false);
-    }
+    const result = await askWiki(checked.question);
+    if (result.remaining !== null) setRemaining(result.remaining);
+    setView(result.view);
+    setPending(false);
   };
 
   return (
@@ -49,33 +52,37 @@ export function WikiChatForm() {
         </div>
         <button type="submit" className={styles.primaryButton} disabled={pending || remaining === 0}>{pending ? "찾는 중…" : "묻기"}</button>
       </form>
-
       <div aria-live="polite">
         {pending ? <p role="status">위키를 찾는 중…</p> : null}
         {view && !view.ok ? <p role="alert" className={own.error}>{view.message}</p> : null}
-        {view && view.ok ? (
-          <div className={own.answer}>
-            <p className={styles.muted}>질문: {asked}</p>
-            {view.isMock ? <p className={`${styles.badge} ${own.mock}`}>모의 답 · 실제 AI 답이 아닙니다</p> : null}
-            <p className={own.answerText}>{view.answer}</p>
-            {view.sources.length > 0 ? (
-              <>
-                <h3 className={own.sourcesTitle}>출처 {view.sources.length}개</h3>
-                <ul className={own.sources}>
-                  {view.sources.map((s) => (
-                    <li key={s.id}>
-                      <details>
-                        <summary>[{s.id}] {s.page} · {s.heading}</summary>
-                        <p className={own.sourceText}>{s.text}</p>
-                      </details>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : <p className={styles.muted}>출처 없음</p>}
-          </div>
-        ) : null}
+        {view && view.ok ? <WikiAnswer view={view} asked={asked} /> : null}
       </div>
     </section>
+  );
+}
+
+/** 답, "모의 답" 표시, 출처(누르면 그 절 내용 펼침) (FR-010·016) */
+function WikiAnswer({ view, asked }: { view: Extract<WikiChatView, { ok: true }>; asked: string }) {
+  return (
+    <div className={own.answer}>
+      <p className={styles.muted}>질문: {asked}</p>
+      {view.isMock ? <p className={`${styles.badge} ${own.mock}`}>모의 답 · 실제 AI 답이 아닙니다</p> : null}
+      <p className={own.answerText}>{view.answer}</p>
+      {view.sources.length === 0 ? <p className={styles.muted}>출처 없음</p> : (
+        <>
+          <h3 className={own.sourcesTitle}>출처 {view.sources.length}개</h3>
+          <ul className={own.sources}>
+            {view.sources.map((s) => (
+              <li key={s.id}>
+                <details>
+                  <summary>[{s.id}] {s.page} · {s.heading}</summary>
+                  <p className={own.sourceText}>{s.text}</p>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
   );
 }

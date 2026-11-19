@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { WIKI_MAX_CHUNKS } from "@/chat/wiki-answer";
 import { chunkWiki, pickChunks } from "@/chat/wiki-pages";
 
-// spec 012 FR-015, SC-008: 정답표(docs/wiki-chat.md 1절, 사용자 확정 2026-11-18) 5문항으로 실제 wiki/ 찾기를 확인한다.
+// spec 012 FR-015, SC-008: 정답표(docs/wiki-chat.md 1절, 사용자 확정 2026-11-18, Q6은 2026-11-19 추가) 6문항으로 실제 wiki/ 찾기를 확인한다.
 // 정답표와 이 목록은 결과를 보고 고치지 않는다. 틀리면 찾기(chat/wiki-pages.ts)를 고친다(plan 012 6단계 랄프 루프)
 const ANSWER_KEY = [
   { id: "Q1", kind: "있음", question: "관리자도 사건을 대신 승인할 수 있어?", pages: ["규칙-사람 승인"] },
@@ -12,6 +12,8 @@ const ANSWER_KEY = [
   { id: "Q3", kind: "있음", question: "슬랙 알림에는 어떤 내용이 들어가?", pages: ["규칙-알림과 슬랙"] },
   { id: "Q4", kind: "없음", question: "대표님 점심 메뉴는?", pages: [] },
   { id: "Q5", kind: "충돌", question: "건축물 정보 조회는 1차 범위야?", pages: ["화면-메뉴와 화면 목록"] },
+  // Q6: PR #15 리뷰 "제목이 딱 맞는 쪽이 밀림"을 막는 문항(사용자 결정 2026-11-19)
+  { id: "Q6", kind: "있음", question: "하지 않을 것은 뭐야?", pages: ["요구-출시 범위와 하지 않을 것"] },
 ] as const;
 
 const wikiDir = join(process.cwd(), "wiki");

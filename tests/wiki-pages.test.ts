@@ -66,6 +66,14 @@ describe("pickChunks", () => {
     expect(pickChunks("대표님 점심 메뉴는?", chunks, 4)).toEqual([]);
   });
 
+  it("쪽 이름에 질문 낱말이 있으면 본문만 겹친 조각보다 앞에 온다(PR #15 리뷰)", () => {
+    const titled = chunkWiki([
+      { page: "가-긴 본문", markdown: "# 가\n## 내용\n- 하지 않을 일과 하지 않을 것을 길게 적었다." },
+      { page: "나-하지 않을 것", markdown: "# 나\n## 내용\n- 크롤링은 하지 않는다." },
+    ]);
+    expect(pickChunks("하지 않을 것은 뭐야?", titled, 4)[0]).toMatchObject({ page: "나-하지 않을 것" });
+  });
+
   it("빈 질문은 빈 목록", () => {
     expect(pickChunks("   ", chunks, 4)).toEqual([]);
   });
