@@ -28,10 +28,32 @@
   border-radius: var(--radius-card);
   color: var(--color-text);
   text-decoration: none;
+  transition: border-color var(--transition-hover);
 }
 
 .item:hover {
   border-color: var(--color-primary);
+}
+
+.item:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* spec 013: 계약 만료 알림은 승인한 계획과 다른 묶음으로 보이게 왼쪽 주황 띠(글자로도 "승인할 일 아님") */
+.reminder {
+  border-left: 4px solid var(--color-accent);
+}
+
+.group {
+  display: grid;
+  gap: var(--space-half);
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-muted-text);
 }
 
 .itemTitle {
