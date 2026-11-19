@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Empty, LoadError, Loading } from "@/app/_components/states";
+import { withEstimate } from "@/incident/energy-estimate";
+import { loadEstimateBasis, type EstimateBasis } from "@/incident/energy-estimate.server";
 import { listMyInterestHomes } from "@/incident/interest-homes.server";
 import { compareRealCosts, type CompareRow, type CostInput } from "@/incident/real-cost";
 import { currentUserId } from "@/lib/supabase/server";
 import { loadMyHome } from "../../my/home/load";
-import { CostCell, kstMonth, TotalText, won } from "../cost-view";
+import { CostCell, EstimateNote, kstMonth, TotalText, won } from "../cost-view";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "실질 비용 비교 | 집 비교 | HomeFit AI" };
@@ -19,13 +21,18 @@ function diffText(row: CompareRow): string {
   return `${row.diffFromMine > 0 ? "+" : "−"}${won(Math.abs(row.diffFromMine))} ${row.diffFromMine > 0 ? "더 듦" : "덜 듦"}`;
 }
 
-type Loaded = { rows: CompareRow[]; hasMine: boolean; empty: boolean };
+type Loaded = { rows: CompareRow[]; hasMine: boolean; empty: boolean; basis: EstimateBasis };
 
 async function load(userId: string): Promise<Loaded> {
   const [{ home }, homes] = await Promise.all([loadMyHome(userId), listMyInterestHomes(userId)]);
   // E7: 내 집이 없거나 월세(계약)가 없으면 내 집 줄을 넣지 않는다
-  const mine: CostInput | null = home && home.monthlyRent !== null ? { ...home, monthlyRent: home.monthlyRent } : null;
-  return { rows: compareRealCosts({ myHome: mine, homes, month: kstMonth(new Date()) }), hasMine: mine !== null, empty: homes.length === 0 && !mine };
+  const mine = home && home.monthlyRent !== null ? { ...home, monthlyRent: home.monthlyRent } : null;
+  // spec 011 FR-002: 내 집과 관심 주택 모두 사용량을 모르면 시군구 평균으로 추정
+  const now = new Date();
+  const basis = await loadEstimateBasis(mine ? [...homes, mine] : homes, now);
+  const myHome: CostInput | null = mine ? withEstimate(mine, basis.averages) : null;
+  const others = homes.map((h) => withEstimate(h, basis.averages));
+  return { rows: compareRealCosts({ myHome, homes: others, month: kstMonth(now) }), hasMine: mine !== null, empty: homes.length === 0 && !mine, basis };
 }
 
 async function CostTable() {
@@ -44,7 +51,7 @@ async function CostTable() {
       {loaded.hasMine ? null : <p className={styles.muted}>내 집에 월세를 넣으면 내 집 대비 차이가 보입니다. <Link href="/my/home">내 집 입력</Link></p>}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
-          <caption className={styles.muted}>한 달 기준, 합계가 낮은 순. 괄호는 값의 종류(입력·계산). 미입력 칸은 합계에서 빠집니다.</caption>
+          <caption className={styles.muted}>한 달 기준, 합계가 낮은 순. 괄호는 값의 종류(입력·계산·추정값). 미입력 칸은 합계에서 빠집니다.</caption>
           <thead>
             <tr><th scope="col">집</th><th scope="col">월세</th><th scope="col">관리비</th><th scope="col">에너지비</th><th scope="col">교통비</th><th scope="col">합계</th><th scope="col">내 집 대비</th></tr>
           </thead>
@@ -60,6 +67,7 @@ async function CostTable() {
           </tbody>
         </table>
       </div>
+      <EstimateNote basis={loaded.basis} />
       <p className={styles.muted}>에너지비 &ldquo;계산&rdquo;은 전기 사용량으로 한전 주택용 저압 요금표(기본요금 + 전력량요금)를 쓴 값이고 부가세·기금·기후환경·연료비조정 요금은 빠져 있습니다. 교통비는 편도 요금 × 하루 횟수 × 한 달 출근 일수입니다.</p>
     </>
   );

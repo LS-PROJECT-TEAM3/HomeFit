@@ -1,6 +1,7 @@
 /* spec 004 v0.2 앱 틀: PC 왼쪽 사이드바, 휴대폰 위쪽 메뉴 버튼. 색·간격은 app/tokens.css 변수만 */
 .shell {
   min-height: 100vh;
+  min-height: 100dvh; /* 휴대폰 주소창 높이를 빼고 잰다 */
 }
 
 .content {
@@ -86,7 +87,7 @@
 /* 지금 보는 화면: 색과 함께 왼쪽 막대(모양)로도 표시 */
 .navLink[aria-current="page"] {
   background: var(--color-muted-bg);
-  color: var(--color-primary);
+  color: var(--color-primary-hover); /* primary는 흐린 칸 위 4.47:1이라 한 단계 진하게 */
   box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
@@ -94,7 +95,7 @@
   margin-left: auto;
   min-width: 24px;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-accent);
   color: var(--color-on-accent);
   font-size: var(--font-size-sm);
@@ -114,6 +115,7 @@
     top: 0;
     align-self: start;
     height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
     border-bottom: none;
     border-right: 1px solid var(--color-border);

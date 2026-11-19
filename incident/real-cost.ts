@@ -27,14 +27,16 @@ export function electricityBill(kwh: number, month: number): number {
   return RATE_TABLE.base[tier] + Math.floor(energy + 1e-9);
 }
 
-/** 값의 종류: 입력값 / 계산값 / 미입력 (spec 009 FR-005 칸마다 글자로) */
-export type CostItem = { value: number | null; kind: "input" | "calculated" | "missing" };
+/** 값의 종류: 입력값 / 계산값 / 추정값(spec 011 FR-002) / 미입력 (spec 009 FR-005 칸마다 글자로) */
+export type CostItem = { value: number | null; kind: "input" | "calculated" | "estimated" | "missing" };
 export type CostInput = {
   monthlyRent: number; maintenanceFee: number | null;
   energyCost: number | null; electricityKwh: number | null;
   transitFare: number | null; tripsPerDay: number | null; commuteDays: number | null;
+  /** spec 011 FR-001: 그 집 시군구의 한전 가구 평균(kWh/월). 없으면 추정하지 않는다 */
+  estimatedKwh?: number | null;
 };
-export type RealCost = { rent: CostItem; fee: CostItem; energy: CostItem; transit: CostItem; total: number; missing: string[] };
+export type RealCost = { rent: CostItem; fee: CostItem; energy: CostItem; transit: CostItem; total: number; missing: string[]; estimated: string[] };
 
 // E6: 하루 횟수·출근 일수가 비면 출퇴근 2번, 한 달 22일
 const DEFAULT_TRIPS = 2;
@@ -42,10 +44,11 @@ const DEFAULT_DAYS = 22;
 
 const input = (value: number | null): CostItem => (value === null ? { value: null, kind: "missing" } : { value, kind: "input" });
 
-// E4: 직접 입력 > 전기 사용량 계산 > 미입력
+// E4: 직접 입력 > 전기 사용량 계산 > 추정(spec 011 FR-002) > 미입력
 function energyItem(home: CostInput, month: number): CostItem {
   if (home.energyCost !== null) return { value: home.energyCost, kind: "input" };
   if (home.electricityKwh !== null) return { value: electricityBill(home.electricityKwh, month), kind: "calculated" };
+  if (home.estimatedKwh && home.estimatedKwh > 0) return { value: electricityBill(home.estimatedKwh, month), kind: "estimated" };
   return { value: null, kind: "missing" };
 }
 
@@ -63,6 +66,7 @@ export function realCost(home: CostInput, month: number): RealCost {
     ...items,
     total: entries.reduce((sum, [, item]) => sum + (item.value ?? 0), 0),
     missing: entries.filter(([, item]) => item.kind === "missing").map(([key]) => labels[key]),
+    estimated: entries.filter(([, item]) => item.kind === "estimated").map(([key]) => labels[key]),
   };
 }
 

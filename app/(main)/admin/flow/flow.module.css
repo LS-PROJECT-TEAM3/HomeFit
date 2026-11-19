@@ -26,10 +26,6 @@
   display: none;
 }
 
-.box summary:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
 
 .name {
   display: block;
@@ -51,6 +47,7 @@
 .succeeded { border: 2px solid var(--color-status-success); }
 .failed { border: 2px solid var(--color-status-failed); }
 .waiting { border: 2px dashed var(--color-status-waiting); }
+.running { border: 2px dashed var(--color-primary); }
 .skipped { border: 2px solid var(--color-border); }
 .not_reached,
 .off { border: 2px dotted var(--color-status-off); color: var(--color-muted-text); }

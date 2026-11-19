@@ -52,11 +52,11 @@ export function CondensationSimulator() {
           </select>
         </div>
       </div>
-      <div className={styles.result} role="status" aria-live="polite" style={{ color: result?.risk ? "var(--color-danger)" : "var(--color-status-success)" }}>
+      <div className={`${styles.result} ${result === null ? "" : result.risk ? styles.resultRisk : styles.resultSafe}`} role="status" aria-live="polite">
         {result === null ? (
-          <span style={{ color: "var(--color-text)" }}>숫자를 넣어 주세요. 실내 온도 -10~45°C, 습도 0~100%.</span>
+          <span>숫자를 넣어 주세요. 실내 온도 -10~45°C, 습도 0~100%.</span>
         ) : (
-          <span style={{ color: "var(--color-text)" }}>
+          <span>
             <strong>{result.risk ? "결로 위험" : "결로 위험 낮음"}</strong> · 창 표면 {result.surface.toFixed(1)}°C(추정) · 이슬점 {result.dew.toFixed(1)}°C
             {result.risk ? " · 창 표면이 이슬점 + 1°C 이하라 물방울이 맺힐 수 있습니다" : " · 창 표면이 이슬점보다 1°C 넘게 따뜻합니다"}
           </span>
