@@ -50,4 +50,9 @@ describe("safeNextPath (바깥 주소로 보내지 않기)", () => {
   it("바깥 주소·이상한 값은 홈으로", () => {
     for (const bad of [null, "", "https://evil.example", "//evil.example", "/\\evil.example", "reset"]) expect(safeNextPath(bad)).toBe("/");
   });
+  // PR #19 리뷰: 주소를 해석할 때 탭·줄바꿈이 지워져 "//evil.example"이 되는 것을 막는다
+  it("탭·줄바꿈·캐리지 리턴 같은 제어 문자가 있으면 홈으로", () => {
+    for (const bad of ["/\t/evil.example", "/\n/evil.example", "/\r/evil.example", "/reset-password\u0000"]) expect(safeNextPath(bad)).toBe("/");
+    for (const bad of ["/\t/evil.example", "/\n/evil.example", "/\r/evil.example"]) expect(new URL(bad, "http://localhost:3000").host).toBe("evil.example");
+  });
 });

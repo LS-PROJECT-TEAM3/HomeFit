@@ -1,7 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { appBaseUrl } from "@/incident/notify.server";
 import { MIN_PASSWORD, checkEmail, checkNewPassword } from "@/lib/supabase/auth-rules";
 import { createClient } from "@/lib/supabase/server";
 
@@ -52,9 +52,9 @@ export async function requestPasswordReset(_prev: AuthState, formData: FormData)
   const email = String(formData.get("email") ?? "").trim();
   const invalid = checkEmail(email);
   if (invalid) return { error: invalid };
-  const origin = (await headers()).get("origin") ?? "";
   const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/auth/confirm?next=/reset-password/new` });
+  // 요청 헤더(Origin)가 아니라 고정한 사이트 주소로 돌아올 곳을 만든다(헤더가 없거나 바뀌어도 같은 곳, PR #19 리뷰)
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${appBaseUrl()}/auth/confirm?next=/reset-password/new` });
   // E3: 요청이 너무 잦으면 Supabase가 429로 막는다. 그 밖의 오류도 가입 여부를 드러내지 않게 같은 안내
   if (error?.status === 429) return { error: "메일 요청이 너무 잦습니다. 잠시 뒤 다시 요청해 주세요." };
   if (error) console.error("비밀번호 재설정 메일 요청 실패", error.status ?? "상태 없음");

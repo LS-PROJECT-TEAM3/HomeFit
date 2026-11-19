@@ -32,8 +32,11 @@ export function checkNewPassword(password: string, confirm: string): string | nu
   return null;
 }
 
+// 주소를 해석할 때 탭·줄바꿈 같은 제어 문자는 지워져 "/\t/evil" → "//evil"(바깥 사이트)이 된다(PR #19 리뷰)
+const CONTROL_CHAR = /[\u0000-\u001F\u007F]/;
+
 /** 메일 링크의 next 값으로 바깥 사이트에 보내지 않는다. 이 사이트 안 주소만 */
 export function safeNextPath(next: string | null): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return "/";
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\") || CONTROL_CHAR.test(next)) return "/";
   return next;
 }
