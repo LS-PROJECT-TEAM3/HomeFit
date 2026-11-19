@@ -3,13 +3,10 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Empty, LoadError, Loading } from "@/app/_components/states";
-import { withEstimate } from "@/incident/energy-estimate";
-import { loadEstimateBasis, type EstimateBasis } from "@/incident/energy-estimate.server";
-import { listMyInterestHomes } from "@/incident/interest-homes.server";
-import { compareRealCosts, type CompareRow, type CostInput } from "@/incident/real-cost";
+import type { CompareRow } from "@/incident/real-cost";
 import { currentUserId } from "@/lib/supabase/server";
-import { loadMyHome } from "../../my/home/load";
-import { CostCell, EstimateNote, kstMonth, TotalText, won } from "../cost-view";
+import { CostCell, EstimateNote, TotalText, won } from "../cost-view";
+import { loadCompare, type LoadedCompare } from "../load-compare";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "실질 비용 비교 | 집 비교 | HomeFit AI" };
@@ -21,27 +18,13 @@ function diffText(row: CompareRow): string {
   return `${row.diffFromMine > 0 ? "+" : "−"}${won(Math.abs(row.diffFromMine))} ${row.diffFromMine > 0 ? "더 듦" : "덜 듦"}`;
 }
 
-type Loaded = { rows: CompareRow[]; hasMine: boolean; empty: boolean; basis: EstimateBasis };
-
-async function load(userId: string): Promise<Loaded> {
-  const [{ home }, homes] = await Promise.all([loadMyHome(userId), listMyInterestHomes(userId)]);
-  // E7: 내 집이 없거나 월세(계약)가 없으면 내 집 줄을 넣지 않는다
-  const mine = home && home.monthlyRent !== null ? { ...home, monthlyRent: home.monthlyRent } : null;
-  // spec 011 FR-002: 내 집과 관심 주택 모두 사용량을 모르면 시군구 평균으로 추정
-  const now = new Date();
-  const basis = await loadEstimateBasis(mine ? [...homes, mine] : homes, now);
-  const myHome: CostInput | null = mine ? withEstimate(mine, basis.averages) : null;
-  const others = homes.map((h) => withEstimate(h, basis.averages));
-  return { rows: compareRealCosts({ myHome, homes: others, month: kstMonth(now) }), hasMine: mine !== null, empty: homes.length === 0 && !mine, basis };
-}
-
 async function CostTable() {
   await connection();
   const userId = await currentUserId();
   if (!userId) redirect("/login");
-  let loaded: Loaded;
+  let loaded: LoadedCompare;
   try {
-    loaded = await load(userId);
+    loaded = await loadCompare(userId);
   } catch {
     return <LoadError>비교할 자료를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
