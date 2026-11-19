@@ -21,8 +21,8 @@ export function MoveInChecklist({ homeId, homeName, initial, initialNote }: Prop
   return (
     <form action={formAction} className={styles.form} aria-label={`${homeName} 입주 전 점검`}>
       <input type="hidden" name="homeId" value={homeId} />
-      <p className={styles.muted} role="status">{checked.size}/{MOVE_IN_ITEMS.length} 확인</p>
-      <ul className={`${styles.list} ${styles.plainList}`}>
+      <p className={`${styles.muted} ${styles.fullRow}`} role="status">{checked.size}/{MOVE_IN_ITEMS.length} 확인</p>
+      <ul className={`${styles.list} ${styles.plainList} ${styles.fullRow}`}>
         {MOVE_IN_ITEMS.map((item) => (
           <li key={item.key}>
             <label>
@@ -31,12 +31,12 @@ export function MoveInChecklist({ homeId, homeName, initial, initialNote }: Prop
           </li>
         ))}
       </ul>
-      <div className={styles.field}>
+      <div className={`${styles.field} ${styles.fullRow}`}>
         <label htmlFor="move-in-note">메모 (500자 안)</label>
         <textarea id="move-in-note" name="note" className={styles.input} rows={3} maxLength={500} defaultValue={initialNote} placeholder="예: 북향이라 오후에 어두움, 욕실 실리콘 교체 필요" />
       </div>
-      {state.error ? <p role="alert">{state.error}</p> : null}
-      {state.savedAt && !pending ? <p role="status" className={styles.muted}>저장했습니다.</p> : null}
+      {state.error ? <p role="alert" className={styles.fullRow}>{state.error}</p> : null}
+      {state.savedAt && !pending ? <p role="status" className={`${styles.muted} ${styles.fullRow}`}>저장했습니다.</p> : null}
       <button type="submit" className={styles.primaryButton} disabled={pending}>{pending ? "저장하는 중…" : "점검 저장"}</button>
     </form>
   );

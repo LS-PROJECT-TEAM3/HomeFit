@@ -24,18 +24,18 @@ export function DefectForm({ today }: { today: string }) {
         </select>
         {err.kind ? <span role="alert">{err.kind}</span> : null}
       </div>
-      <div className={styles.field}>
+      <div className={`${styles.field} ${styles.fullRow}`}>
         <label htmlFor="defect-memo">무엇이 어떻게 (500자 안)</label>
         <textarea id="defect-memo" name="memo" rows={3} maxLength={500} defaultValue={v?.memo ?? ""} className={styles.input} placeholder="예: 욕실 천장 모서리에서 물이 떨어짐, 관리실에 알림" aria-invalid={Boolean(err.memo)} />
         {err.memo ? <span role="alert">{err.memo}</span> : null}
       </div>
-      <div className={styles.field}>
+      <div className={`${styles.field} ${styles.fullRow}`}>
         <label htmlFor="defect-photo">사진 1장 (선택, jpg·png·webp, 4MB 안)</label>
         <input id="defect-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" className={styles.input} />
         {err.photo ? <span role="alert">{err.photo}</span> : null}
       </div>
-      {state.error ? <p role="alert">{state.error}</p> : null}
-      {state.savedAt ? <p role="status" className={styles.muted}>저장했습니다.</p> : null}
+      {state.error ? <p role="alert" className={styles.fullRow}>{state.error}</p> : null}
+      {state.savedAt ? <p role="status" className={`${styles.muted} ${styles.fullRow}`}>저장했습니다.</p> : null}
       <button type="submit" className={styles.primaryButton} disabled={pending}>{pending ? "저장하는 중…" : "하자 기록 저장"}</button>
     </form>
   );
