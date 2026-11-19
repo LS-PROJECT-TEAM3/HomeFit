@@ -1042,10 +1042,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "보류",
+      "priority": "MVP",
       "status": "신규",
       "url": "/energy/heating",
-      "note": "범위 밖 (spec 009·011)"
+      "note": "지역·한 달 도시가스 사용량(MJ)으로 소매요금표 계산, 줄인 사용량 표(PRD v1.14, spec 016) v1.12"
     },
     {
       "menu_code": "CP",
@@ -1062,10 +1062,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "보류",
+      "priority": "MVP",
       "status": "신규",
       "url": "/compare/recommend",
-      "note": "범위 밖 안내만(PRD 9절)"
+      "note": "관심 주택 실질 주거비 낮은 순위와 근거 글, 칸이 덜 찬 집은 따로(점수 없음, PRD v1.13, spec 015) v1.11"
     },
     {
       "menu_code": "KN",
