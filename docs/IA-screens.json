@@ -18,7 +18,7 @@
       "status": "신규",
       "url": "/",
       "menu_entry": true,
-      "note": "벤토 카드 5개: 나의 주거 정보, 월 예상 주거비(월세+관리비), 주거환경 분석 현황, 새 위험·주거 기회, 승인 대기·처리 현황(v1.4). 숫자를 누르면 해당 목록으로 이동. 비로그인이면 로그인으로"
+      "note": "벤토 카드 5개: 나의 주거 정보, 월 예상 주거비(월세+관리비), 주거환경 분석 현황, 새 위험·주거 기회, 승인 대기·처리 현황(v1.4). 숫자를 누르면 해당 목록으로 이동. 비로그인이면 로그인으로 v1.14: 바깥 날씨 카드(기온·습도·날씨 글, spec 020)"
     },
     {
       "menu_code": "MB",
@@ -298,10 +298,10 @@
       "type": "페이지",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "보류",
       "status": "신규",
       "url": "/my/home/defects",
-      "note": "입주 때와 사는 동안의 하자(누수, 곰팡이, 고장) 기록과 사진"
+      "note": "집 점검 탭 QC_100200_TB에서 하자 기록을 함(화면 하나로, spec 019) v1.13"
     },
     {
       "menu_code": "MY",
@@ -462,10 +462,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "보류",
       "status": "신규",
       "url": "/compare/[id]/check",
-      "note": "Housing QC 체크리스트(채광, 소음, 냄새, 곰팡이, 수압, 관리비 포함 항목 등)"
+      "note": "집 점검 탭 QC_100100_TB에서 관심 주택을 골라 같은 점검을 함(화면 하나로, spec 019) v1.13"
     },
     {
       "menu_code": "CP",
@@ -942,10 +942,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/qc/checklist",
-      "note": "뼈대, 저장 안 함 (spec 004 FR-004)"
+      "note": "관심 주택을 골라 항목 체크·메모를 저장(interest_homes.move_in_checklist, spec 019). 안전 판정은 하지 않음 v1.13"
     },
     {
       "menu_code": "QC",
@@ -962,10 +962,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/qc/records",
-      "note": "실내 측정 추이, 하자 기록은 MY_030202_PG"
+      "note": "실내 온습도 추이 + 하자 기록(날짜·종류·메모·사진 1장 넣기·지우기, defect_records, spec 019) v1.13"
     },
     {
       "menu_code": "QC",
