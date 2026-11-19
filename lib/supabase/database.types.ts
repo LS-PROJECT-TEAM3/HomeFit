@@ -121,6 +121,9 @@ type NoticeSummaryRow = { source_code: string; announcement_id: string; summary:
 // spec 010 FR-003, 마이그레이션 0019: 쓰기는 admin_update_member_input 함수로만
 export type AuditLogRow = { id: string; actor_id: string; target_table: string; target_id: string; before: Json; after: Json; reason: string; created_at: string };
 
+// 0018: 위키 챗봇 질문 기록 (ERD chat_logs, spec 012)
+type ChatLogRow = { id: string; user_id: string; question: string; answer: string; cited_pages: Json; created_at: string };
+
 // 기본값이 있는 칸은 넣을 때 빼도 된다
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -182,6 +185,7 @@ export type Database = {
       audit_logs: Table<AuditLogRow, Optional<AuditLogRow, "id" | "created_at">>;
       notice_follows: Table<NoticeFollowRow, Optional<NoticeFollowRow, "reason" | "decided_at">>;
       notice_summaries: Table<NoticeSummaryRow, Optional<NoticeSummaryRow, "created_at">>;
+      chat_logs: Table<ChatLogRow, Optional<ChatLogRow, "id" | "cited_pages" | "created_at">>;
       llm_calls: Table<
         LlmCallRow,
         Optional<LlmCallRow, "id" | "run_id" | "model" | "error_kind" | "input_tokens" | "output_tokens" | "created_at">
