@@ -10,7 +10,7 @@ import type { Policy } from "@/watch/youth-policy";
 import hub from "@/app/_components/hub.module.css";
 import styles from "./policy.module.css";
 
-export const metadata = { title: "청년 주거지원 정책 | 직장과 정책 | HomeFit AI" };
+export const metadata = { title: "청년 주거지원 정책 | 청년 정책 | HomeFit AI" };
 
 // 정책 설명이 길어 첫 줄만 보인다. 전체는 원문에서
 const SUMMARY_PREVIEW = 120;

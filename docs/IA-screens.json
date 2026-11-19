@@ -1123,9 +1123,9 @@
       "login": "필요",
       "dev": "외부연동",
       "priority": "보류",
-      "status": "신규",
+      "status": "삭제",
       "url": "/policy/commute",
-      "note": "범위 밖 안내만(PRD FR-33 보류)"
+      "note": "v1.15 삭제(사용자 결정 2026-11-19). 출퇴근은 PRD FR-33 보류"
     }
   ]
 }
