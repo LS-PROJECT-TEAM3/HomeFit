@@ -26,6 +26,14 @@ describe("fetchMonth (한전 한 달치)", () => {
     expect((error as Error).message).toContain("500");
     expect((error as Error).message).not.toContain("test-key");
   });
+  it("200이어도 모양이 다르면 던진다(통계 없음으로 기억하지 않음, PR #15 리뷰)", async () => {
+    respond(200, JSON.stringify({ result: "error", data: "잘못된 인증키" }));
+    await expect(fetchMonth(region, period)).rejects.toThrow("모양이 다름");
+  });
+  it("200이어도 JSON이 아니면 던진다", async () => {
+    respond(200, "<html>점검 중</html>");
+    await expect(fetchMonth(region, period)).rejects.toThrow("JSON이 아님");
+  });
   it("키가 없으면 부르지 않고 던진다", async () => {
     vi.stubEnv("KEPCO_API_KEY", "");
     const fetchSpy = vi.fn();

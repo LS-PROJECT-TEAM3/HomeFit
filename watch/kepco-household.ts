@@ -30,13 +30,25 @@ const toNumber = (value: unknown): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
-/** 시군구를 지정해 부른 응답의 첫 행. 모양이 다르거나 값이 없으면 null(E2) */
+const SHAPE_ERROR = "한전 가구평균 응답 모양이 다름";
+
+/**
+ * 시군구를 지정해 부른 응답의 첫 행. 통계가 없으면(빈 목록, 본문 404, 0 이하 값) null(E2).
+ * 모양이 다르거나 오류 코드가 있으면 던진다. "통계 없음"으로 하루 기억하지 않고 수집 오류로 보이게(팀 규칙 "읽기 실패는 오류로", PR #15 리뷰)
+ */
 export function parseHouseholdAverage(json: unknown): HouseholdAverage | null {
-  const data = (json as { data?: unknown } | null)?.data;
-  if (!Array.isArray(data) || data.length === 0) return null;
-  const row = data[0] as Record<string, unknown>;
+  if (typeof json !== "object" || json === null) throw new Error(SHAPE_ERROR);
+  const body = json as { data?: unknown; errCd?: unknown };
+  if (body.errCd !== undefined) {
+    if (String(body.errCd) === "404") return null;
+    throw new Error(`한전 가구평균 오류 ${String(body.errCd)}`);
+  }
+  if (!Array.isArray(body.data)) throw new Error(SHAPE_ERROR);
+  if (body.data.length === 0) return null;
+  const row = body.data[0] as Record<string, unknown> | null;
+  if (typeof row !== "object" || row === null || typeof row.year !== "string" || typeof row.month !== "string") throw new Error(SHAPE_ERROR);
   // 가이드 표는 powerUseage, 예시는 powerUsage로 적어 둘 다 읽는다
   const kwh = householdAverageKwh(toNumber(row.powerUsage ?? row.powerUseage));
-  if (kwh === null || typeof row.year !== "string" || typeof row.month !== "string") return null;
+  if (kwh === null) return null;
   return { kwh, households: toNumber(row.houseCnt), year: row.year, month: row.month };
 }

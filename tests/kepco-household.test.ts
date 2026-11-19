@@ -33,10 +33,18 @@ describe("parseHouseholdAverage", () => {
     const row = { year: "2026", month: "09", houseCnt: 10, powerUseage: 199.4, bill: 1 };
     expect(parseHouseholdAverage({ data: [row] })?.kwh).toBe(199.4);
   });
-  it("E2: 빈 목록·모양이 다름·0 이하는 null", () => {
+  it("E2: 통계가 없음(빈 목록, 본문 404, 0 이하)은 null", () => {
     expect(parseHouseholdAverage(KEPCO_HOUSE_EMPTY)).toBeNull();
-    expect(parseHouseholdAverage(KEPCO_HOUSE_BAD)).toBeNull();
-    expect(parseHouseholdAverage(null)).toBeNull();
+    expect(parseHouseholdAverage({ errCd: "404", errMsg: "NotFound" })).toBeNull();
     expect(parseHouseholdAverage({ data: [{ year: "2026", month: "09", houseCnt: 1, powerUsage: 0 }] })).toBeNull();
+  });
+  // PR #15 리뷰(현경): 키 오류인데 200으로 온 응답을 "통계 없음"으로 하루 기억하면 안 된다. 읽기 실패는 오류로(팀 규칙)
+  it("모양이 다른 응답은 '통계 없음'이 아니라 오류로 던진다", () => {
+    expect(() => parseHouseholdAverage(KEPCO_HOUSE_BAD)).toThrow("한전 가구평균 응답 모양이 다름");
+    expect(() => parseHouseholdAverage(null)).toThrow("한전 가구평균 응답 모양이 다름");
+    expect(() => parseHouseholdAverage({ data: [{ powerUsage: "231" }] })).toThrow("한전 가구평균 응답 모양이 다름");
+  });
+  it("본문에 404가 아닌 오류 코드가 있으면 그 코드와 함께 던진다", () => {
+    expect(() => parseHouseholdAverage({ errCd: "401", errMsg: "Unauthorized" })).toThrow("한전 가구평균 오류 401");
   });
 });
