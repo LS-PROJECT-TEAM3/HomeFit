@@ -11,7 +11,7 @@
 - 시험·리뷰·문서화: @.claude/rules/quality.md
 - 디자인 기본선: @.claude/rules/design.md
 - Git·보안·병렬 작업: @.claude/rules/git-security.md
-- 스킬: `.claude/skills/` (harness-ia, harness-journeys, harness-prd, harness-erd, harness-intent, harness-spec-plan, harness-qa, grill-with-docs, grilling, domain-modeling)
+- 스킬: `.claude/skills/` (harness-ia, harness-journeys, harness-prd, harness-erd, harness-intent, harness-spec-plan, harness-qa, grill-with-docs, grilling, domain-modeling, wiki-ingest, wiki-query, wiki-lint)
 - 위 파일과 이 파일이 다르면 이 파일이 우선한다. 규칙을 바꾸면 PR로 바꾸고 이유를 적는다.
 - `harness.md` 6절의 "사용자"는 이 저장소에서 작업하는 팀원 누구나다.
 
@@ -22,7 +22,7 @@
 - 사건 알림(슬랙)은 사용자가 "내 정보 → 알림"에서 직접 켠 경우에만 본인에게 보낸다. 켜는 것이 알림 승인이고, 대응은 여전히 하나씩 승인한다. 출처: PRD v1.2 FR-37
 - 읽기 실패는 "변화 없음"이 아니라 수집 오류로 기록한다. 같은 변화를 다시 읽어도 사건·조치가 두 번 생기지 않는다.
 - 비교·저장·권한 검사는 코드로 한다. LLM(개발 Gemini, 배포 Claude, 시험 mock. `AI_PROVIDER`로 고름)은 요약·대응안 초안·기록 찾기 답변에만 쓰고 출처를 함께 보여 준다. 시험과 Ralph Loop는 실제 API를 부르지 않는다.
-- 위키(`wiki/`): 원본 문서는 사람이 PR로 고치고 Claude는 읽기만 한다. 문서가 바뀌면 위키에 넣을 계획부터 보여 주고 사람이 확인한 뒤 반영한다. 두 문서가 다르게 말하면 한쪽으로 정리하지 않고 충돌로 둘 다 적는다. 점검은 고치지 않고 표로만 보고한다.
+- 위키(`wiki/`): 원본 문서는 사람이 PR로 고치고 Claude는 읽기만 한다. 문서가 바뀌면 위키에 넣을 계획부터 보여 주고 사람이 확인한 뒤 반영한다. 두 문서가 다르게 말하면 한쪽으로 정리하지 않고 충돌로 둘 다 적는다. 점검은 고치지 않고 표로만 보고한다. 위키 반영은 위키 담당(docs/plan.md 조각 A)만 하고, 다른 팀원은 원본만 고친다. 담당은 main을 받은 뒤 점검으로 바뀐 원본을 찾아 반영한다(spec 012 Q8, 2026-11-18)
 - 인터뷰 기록(`interviews/`)은 사람인지 AI인지 표시한다. AI 인터뷰·가짜 데이터를 실제 조사처럼 쓰지 않는다. 인터뷰 대상의 신원은 어디에도 적지 않는다.
 
 ## 하지 않을 것
