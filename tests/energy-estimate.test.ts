@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { barHeights, homeUsage, householdAverageKwh, sigungusNeedingEstimate, usageTier, withEstimate, yearlyBills } from "@/incident/energy-estimate";
+import { barHeights, homeUsage, householdAverageKwh, sigungusNeedingAptEstimate, sigungusNeedingEstimate, usageTier, withEstimate, yearlyBills } from "@/incident/energy-estimate";
+import { panelFactor, panelMonthlyKwh } from "@/incident/energy-panel";
 import { electricityBill, realCost, type CostInput } from "@/incident/real-cost";
 
 // spec 011 FR-001~003, 경계 E1~E4
@@ -64,11 +65,23 @@ describe("sigungusNeedingEstimate (E1)", () => {
   });
 });
 
-describe("withEstimate", () => {
-  it("그 시군구 평균이 있으면 추정 kWh, 없으면 null", () => {
-    const averages = new Map([["11680", { kwh: 326.76 }]]);
-    expect(withEstimate({ sigunguCode: "11680" }, averages).estimatedKwh).toBe(326.76);
-    expect(withEstimate({ sigunguCode: "41135" }, averages).estimatedKwh).toBeNull();
+describe("withEstimate (spec 017 FR-002)", () => {
+  const averages = new Map([["11680", { kwh: 326.76 }]]);
+  it("한전 시군구 평균 × 주택 종류·면적 비율, 소수 첫째 자리(E5)", () => {
+    const home = { sigunguCode: "11680", housingType: "officetel" as const, exclusiveAreaM2: 20 };
+    const result = withEstimate(home, averages);
+    expect(result.estimatedKwh).toBe(Math.round(326.76 * panelFactor("officetel", 20) * 10) / 10);
+    expect(result.estimateBasis).toBe("kepco");
+  });
+  it("E4: 한전 값이 없으면 패널 전국 평균 × 비율(미입력으로 두지 않음)", () => {
+    const result = withEstimate({ sigunguCode: "41135", housingType: "apartment" as const, exclusiveAreaM2: 84 }, averages);
+    expect(result.estimatedKwh).toBe(Math.round(panelMonthlyKwh() * panelFactor("apartment", 84) * 10) / 10);
+    expect(result.estimateBasis).toBe("national");
+  });
+  it("SC-001: 같은 시군구에서 작은 집이 덜 나온다", () => {
+    const small = withEstimate({ sigunguCode: "11680", housingType: "officetel" as const, exclusiveAreaM2: 20 }, averages).estimatedKwh ?? 0;
+    const large = withEstimate({ sigunguCode: "11680", housingType: "apartment" as const, exclusiveAreaM2: 110 }, averages).estimatedKwh ?? 0;
+    expect(small).toBeLessThan(large);
   });
 });
 
@@ -99,5 +112,39 @@ describe("barHeights (막대 높이)", () => {
   it("모두 0이거나 비면 0", () => {
     expect(barHeights([0, 0], 80)).toEqual([0, 0]);
     expect(barHeights([], 80)).toEqual([]);
+  });
+});
+
+// spec 018 FR-001·FR-003, E1·E5
+describe("아파트 시군구 평균 사용금액 (spec 018)", () => {
+  const apt = new Map([["11680", { perM2: 2922 }]]);
+  it("아파트·면적 있음 → 원/㎡ × 면적을 추정 금액으로", () => {
+    const result = withEstimate({ sigunguCode: "11680", housingType: "apartment" as const, exclusiveAreaM2: 84.5 }, new Map(), apt);
+    expect(result.estimatedEnergyCost).toBe(246_909);
+  });
+  it("E5·FR-003: 아파트가 아니거나 면적이 없거나 그 시군구 값이 없으면 금액 추정 없음(spec 017 kWh 추정은 그대로)", () => {
+    expect(withEstimate({ sigunguCode: "11680", housingType: "officetel" as const, exclusiveAreaM2: 20 }, new Map(), apt).estimatedEnergyCost).toBeNull();
+    expect(withEstimate({ sigunguCode: "11680", housingType: "apartment" as const, exclusiveAreaM2: null }, new Map(), apt).estimatedEnergyCost).toBeNull();
+    const other = withEstimate({ sigunguCode: "41135", housingType: "apartment" as const, exclusiveAreaM2: 84 }, new Map(), apt);
+    expect(other.estimatedEnergyCost).toBeNull();
+    expect(other.estimatedKwh).toBeGreaterThan(0);
+  });
+  it("sigungusNeedingAptEstimate: 입력·kWh가 없는 아파트 중 면적이 있는 집의 시군구만, 겹치지 않게", () => {
+    const homes = [
+      { sigunguCode: "11680", housingType: "apartment" as const, exclusiveAreaM2: 84, energyCost: null, electricityKwh: null },
+      { sigunguCode: "11680", housingType: "apartment" as const, exclusiveAreaM2: 59, energyCost: null, electricityKwh: null },
+      { sigunguCode: "11440", housingType: "officetel" as const, exclusiveAreaM2: 20, energyCost: null, electricityKwh: null },
+      { sigunguCode: "11200", housingType: "apartment" as const, exclusiveAreaM2: null, energyCost: null, electricityKwh: null },
+      { sigunguCode: "41135", housingType: "apartment" as const, exclusiveAreaM2: 84, energyCost: 90_000, electricityKwh: null },
+    ];
+    expect(sigungusNeedingAptEstimate(homes)).toEqual(["11680"]);
+  });
+});
+
+describe("realCost 에너지비 순서에 아파트 금액 추정 (spec 018 FR-003)", () => {
+  it("입력 > kWh 계산 > 아파트 금액 추정 > kWh 추정", () => {
+    expect(realCost({ ...base, electricityKwh: 200, estimatedEnergyCost: 150_000, estimatedKwh: 300 }, 1).energy.kind).toBe("calculated");
+    expect(realCost({ ...base, estimatedEnergyCost: 150_000, estimatedKwh: 300 }, 1).energy).toEqual({ value: 150_000, kind: "estimated" });
+    expect(realCost({ ...base, estimatedEnergyCost: null, estimatedKwh: 300 }, 1).energy).toEqual({ value: electricityBill(300, 1), kind: "estimated" });
   });
 });

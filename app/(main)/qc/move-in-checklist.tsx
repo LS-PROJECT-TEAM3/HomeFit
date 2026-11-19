@@ -1,40 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
+import { MOVE_IN_ITEMS, type MoveInChecklist as Checklist } from "@/incident/move-in-checklist";
+import { saveMoveInChecklist } from "./checklist/actions";
 import styles from "@/app/_components/hub.module.css";
 
-// spec 004 FR-004, PRD FR-29: 입주 전 점검 항목. 뼈대라 체크는 이 화면에서만 기억하고 저장하지 않는다
-const ITEMS = [
-  "채광: 낮에 불을 끄고도 방이 밝은가",
-  "소음: 창을 닫고 바깥·옆집 소리가 들리는가",
-  "냄새: 하수구·곰팡이 냄새가 나는가",
-  "곰팡이: 창틀·벽 모서리·욕실 실리콘에 검은 자국이 있는가",
-  "수압: 싱크대·샤워기 물을 같이 틀어도 세게 나오는가",
-  "관리비: 포함 항목(인터넷·수도·청소)과 금액을 받았는가",
-  "창 종류: 홑유리인지 이중유리인지 (결로와 난방비에 영향)",
-];
+type Props = { homeId: string; homeName: string; initial: Checklist; initialNote: string };
 
-export function MoveInChecklist() {
-  const [done, setDone] = useState<Set<number>>(new Set());
-  const toggle = (index: number) =>
-    setDone((prev) => {
+// spec 019 FR-001 (PRD FR-29): 관심 주택 한 곳의 입주 전 점검. 저장하면 그 관심 주택에 남는다
+export function MoveInChecklist({ homeId, homeName, initial, initialNote }: Props) {
+  const [state, formAction, pending] = useActionState(saveMoveInChecklist, {});
+  const [checked, setChecked] = useState<Set<string>>(() => new Set(Object.keys(initial)));
+  const toggle = (key: string) =>
+    setChecked((prev) => {
       const next = new Set(prev);
-      if (next.has(index)) next.delete(index);
-      else next.add(index);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   return (
-    <>
-      <p className={styles.muted} role="status">{done.size}/{ITEMS.length} 확인</p>
-      <ul className={`${styles.list} ${styles.plainList}`}>
-        {ITEMS.map((item, index) => (
-          <li key={item}>
+    <form action={formAction} className={styles.form} aria-label={`${homeName} 입주 전 점검`}>
+      <input type="hidden" name="homeId" value={homeId} />
+      <p className={`${styles.muted} ${styles.fullRow}`} role="status">{checked.size}/{MOVE_IN_ITEMS.length} 확인</p>
+      <ul className={`${styles.list} ${styles.plainList} ${styles.fullRow}`}>
+        {MOVE_IN_ITEMS.map((item) => (
+          <li key={item.key}>
             <label>
-              <input type="checkbox" checked={done.has(index)} onChange={() => toggle(index)} /> {item}
+              <input type="checkbox" name="checked" value={item.key} checked={checked.has(item.key)} onChange={() => toggle(item.key)} /> {item.label}
             </label>
           </li>
         ))}
       </ul>
-    </>
+      <div className={`${styles.field} ${styles.fullRow}`}>
+        <label htmlFor="move-in-note">메모 (500자 안)</label>
+        <textarea id="move-in-note" name="note" className={styles.input} rows={3} maxLength={500} defaultValue={initialNote} placeholder="예: 북향이라 오후에 어두움, 욕실 실리콘 교체 필요" />
+      </div>
+      {state.error ? <p role="alert" className={styles.fullRow}>{state.error}</p> : null}
+      {state.savedAt && !pending ? <p role="status" className={`${styles.muted} ${styles.fullRow}`}>저장했습니다.</p> : null}
+      <button type="submit" className={styles.primaryButton} disabled={pending}>{pending ? "저장하는 중…" : "점검 저장"}</button>
+    </form>
   );
 }

@@ -1,0 +1,267 @@
+{
+  "source": {
+    "name": "한국가스공사 「시도별 용도별 도시가스 소매요금표」(주택용)",
+    "url": "https://www.data.go.kr/data/15157367/fileData.do",
+    "basedOn": "2025-12-01",
+    "unit": "원/MJ, 부가세 별도",
+    "sheet": "2025년 요금표.xlsx 2025.12 시트"
+  },
+  "regions": [
+    {
+      "name": "서울특별시",
+      "supplier": "서울5사",
+      "basicFee": 1250,
+      "basicFeeNote": null,
+      "cookingPerMj": 22.3617,
+      "heatingPerMj": 22.3617
+    },
+    {
+      "name": "경기도",
+      "supplier": "삼천리 외",
+      "basicFee": 1250,
+      "basicFeeNote": null,
+      "cookingPerMj": 22.6226,
+      "heatingPerMj": 22.6226
+    },
+    {
+      "name": "인천광역시",
+      "supplier": "인천 외",
+      "basicFee": 1000,
+      "basicFeeNote": null,
+      "cookingPerMj": 22.5084,
+      "heatingPerMj": 22.5084
+    },
+    {
+      "name": "부산시",
+      "supplier": "부산",
+      "basicFee": 900,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.2186,
+      "heatingPerMj": 23.2186
+    },
+    {
+      "name": "대구시",
+      "supplier": "대성",
+      "basicFee": 900,
+      "basicFeeNote": "(개 900) (취 1,490)",
+      "cookingPerMj": 23.6361,
+      "heatingPerMj": 23.6361
+    },
+    {
+      "name": "광주시",
+      "supplier": "해양",
+      "basicFee": 750,
+      "basicFeeNote": null,
+      "cookingPerMj": 22.0252,
+      "heatingPerMj": 23.297
+    },
+    {
+      "name": "대전시",
+      "supplier": "충남",
+      "basicFee": 850,
+      "basicFeeNote": null,
+      "cookingPerMj": 22.8732,
+      "heatingPerMj": 24.0015
+    },
+    {
+      "name": "울산시",
+      "supplier": "경동",
+      "basicFee": 778,
+      "basicFeeNote": null,
+      "cookingPerMj": 22.818,
+      "heatingPerMj": 22.818
+    },
+    {
+      "name": "세종시",
+      "supplier": "중부",
+      "basicFee": 820,
+      "basicFeeNote": "(취) 2,533 (개·중) 820",
+      "cookingPerMj": 22.2887,
+      "heatingPerMj": 24.4433
+    },
+    {
+      "name": "강원 춘천시",
+      "supplier": "강원",
+      "basicFee": 1150,
+      "basicFeeNote": null,
+      "cookingPerMj": 24.1221,
+      "heatingPerMj": 24.1221
+    },
+    {
+      "name": "강원 원주시",
+      "supplier": "참빛원주",
+      "basicFee": 1150,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.4348,
+      "heatingPerMj": 23.4348
+    },
+    {
+      "name": "강원 영동지역",
+      "supplier": "참빛영동,속초",
+      "basicFee": 1150,
+      "basicFeeNote": null,
+      "cookingPerMj": 25.0337,
+      "heatingPerMj": 25.0337
+    },
+    {
+      "name": "평창",
+      "supplier": "명성",
+      "basicFee": 1150,
+      "basicFeeNote": null,
+      "cookingPerMj": 24.6592,
+      "heatingPerMj": 24.6592
+    },
+    {
+      "name": "충북 청주시",
+      "supplier": "충청ES",
+      "basicFee": 1050,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.4509,
+      "heatingPerMj": 23.2208
+    },
+    {
+      "name": "충북 충주시",
+      "supplier": "참빛충북",
+      "basicFee": 1050,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.8443,
+      "heatingPerMj": 23.5906
+    },
+    {
+      "name": "충남 천안시",
+      "supplier": "JB",
+      "basicFee": 1000,
+      "basicFeeNote": null,
+      "cookingPerMj": 24.1111,
+      "heatingPerMj": 24.1111
+    },
+    {
+      "name": "충남 서산시",
+      "supplier": "서해",
+      "basicFee": 1000,
+      "basicFeeNote": null,
+      "cookingPerMj": 24.0552,
+      "heatingPerMj": 24.0552
+    },
+    {
+      "name": "전북 전주시",
+      "supplier": "전북",
+      "basicFee": 900,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.0303,
+      "heatingPerMj": 23.0303
+    },
+    {
+      "name": "전북 군산시",
+      "supplier": "군산",
+      "basicFee": 900,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.6869,
+      "heatingPerMj": 23.6869
+    },
+    {
+      "name": "전북 익산시",
+      "supplier": "전북ES",
+      "basicFee": 900,
+      "basicFeeNote": "(취1,465) (개900)",
+      "cookingPerMj": 24.5417,
+      "heatingPerMj": 24.5417
+    },
+    {
+      "name": "전남 목포시",
+      "supplier": "MC",
+      "basicFee": 870,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.9447,
+      "heatingPerMj": 23.9447
+    },
+    {
+      "name": "전남 순천시",
+      "supplier": "전남",
+      "basicFee": 870,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.9772,
+      "heatingPerMj": 23.9772
+    },
+    {
+      "name": "전남 여수시",
+      "supplier": "대화",
+      "basicFee": 870,
+      "basicFeeNote": null,
+      "cookingPerMj": 22.9782,
+      "heatingPerMj": 22.9782
+    },
+    {
+      "name": "전남 나주시",
+      "supplier": "해양",
+      "basicFee": 870,
+      "basicFeeNote": null,
+      "cookingPerMj": 24.3031,
+      "heatingPerMj": 24.3031
+    },
+    {
+      "name": "경북 구미시",
+      "supplier": "영남ES",
+      "basicFee": 750,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.6062,
+      "heatingPerMj": 23.6062
+    },
+    {
+      "name": "경북 포항시",
+      "supplier": "영남ES",
+      "basicFee": 750,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.5198,
+      "heatingPerMj": 23.5198
+    },
+    {
+      "name": "경북 경주시",
+      "supplier": "서라벌",
+      "basicFee": 750,
+      "basicFeeNote": null,
+      "cookingPerMj": 23.3923,
+      "heatingPerMj": 23.3923
+    },
+    {
+      "name": "경북 안동시",
+      "supplier": "대성청정E",
+      "basicFee": 750,
+      "basicFeeNote": null,
+      "cookingPerMj": 24.3795,
+      "heatingPerMj": 24.3795
+    },
+    {
+      "name": "경남 창원시",
+      "supplier": "경남",
+      "basicFee": 850,
+      "basicFeeNote": "(취·지) 1,700 (개) 850",
+      "cookingPerMj": 24.2101,
+      "heatingPerMj": 24.2101
+    },
+    {
+      "name": "경남 진주시",
+      "supplier": "지에스이",
+      "basicFee": 1100,
+      "basicFeeNote": "(취) 1,100 (지) 1,700 (개) 1,100",
+      "cookingPerMj": 24.7753,
+      "heatingPerMj": 24.7753
+    },
+    {
+      "name": "경남 양산시",
+      "supplier": "경동",
+      "basicFee": 850,
+      "basicFeeNote": "(지) 1,700 (취·개)    850",
+      "cookingPerMj": 23.9659,
+      "heatingPerMj": 23.9659
+    },
+    {
+      "name": "제주",
+      "supplier": "제주",
+      "basicFee": 1000,
+      "basicFeeNote": "(개) 1,000 (일) 2,400",
+      "cookingPerMj": 27.0619,
+      "heatingPerMj": 27.0619
+    }
+  ]
+}

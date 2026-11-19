@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Empty, LoadError, Loading } from "@/app/_components/states";
-import { SkeletonNotice } from "@/app/_components/page-status";
 import { HumidityTrend } from "@/app/_components/humidity-trend";
 import { currentUserId } from "@/lib/supabase/server";
 import { loadMyHome } from "../../my/home/load";
+import { Defects } from "./defects";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "주거환경·하자 기록 | 집 점검 | HomeFit AI" };
@@ -26,7 +26,7 @@ async function Records() {
   return <HumidityTrend measurements={mine.measurements} />;
 }
 
-// 기획안 Housing QC "주거환경 및 하자 기록" (spec 004 v0.2). 하자 기록은 IA MY_030202_PG(2차)
+// IA QC_100200_TB 주거환경·하자 기록 (spec 004 v0.2, 하자 기록 spec 019)
 export default function QcRecordsPage() {
   return (
     <>
@@ -38,7 +38,10 @@ export default function QcRecordsPage() {
       </section>
       <section className={`${styles.card} ${styles.section}`} aria-labelledby="defect-title">
         <h2 id="defect-title">하자 기록</h2>
-        <SkeletonNotice>누수·곰팡이·고장을 날짜·사진과 남길 자리입니다(PRD FR-30, 2차). 누수·건물 하자는 알림으로 예측하지 않습니다.</SkeletonNotice>
+        <p className={styles.muted}>누수·곰팡이·고장을 날짜·사진과 남깁니다. 사진은 본인만 볼 수 있습니다. 원인·책임을 판정하거나 하자를 예측하지는 않습니다.</p>
+        <Suspense fallback={<Loading />}>
+          <Defects />
+        </Suspense>
       </section>
     </>
   );

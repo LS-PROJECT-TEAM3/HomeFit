@@ -16,7 +16,7 @@ const MAIN: Item[] = [
   { href: "/compare", label: "집 비교", icon: "compare" },
   { href: "/qc", label: "집 점검", icon: "check" },
   { href: "/energy", label: "에너지 분석", icon: "energy" },
-  { href: "/policy", label: "직장과 정책", icon: "policy" },
+  { href: "/policy", label: "청년 정책", icon: "policy" },
   { href: "/incidents", label: "위험·기회 알림", icon: "bell" },
   { href: "/knowledge", label: "AI 도우미", icon: "ai" },
 ];

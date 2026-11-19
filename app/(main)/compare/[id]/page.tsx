@@ -30,7 +30,7 @@ async function Detail({ params }: { params: PageProps<"/compare/[id]">["params"]
   }
   if (!home) return <LoadError>볼 수 없는 관심 주택입니다. <Link href="/compare">목록으로</Link></LoadError>;
   const basis = await loadEstimateBasis([home], new Date()); // spec 011 FR-002
-  const cost = realCost(withEstimate(home, basis.averages), kstMonth(new Date()));
+  const cost = realCost(withEstimate(home, basis.averages, basis.aptAverages), kstMonth(new Date()));
   return (
     <>
       <section className={styles.card} aria-labelledby="cost-title">

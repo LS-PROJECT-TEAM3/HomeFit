@@ -6,6 +6,7 @@ import { currentUserId } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import { loadHomeDashboard, type HomeDashboard } from "./dashboard-load";
 import { AlertsCard, DecisionCard, EnvironmentCard, HomeInfoCard, HousingCostCard, ScheduleCard, TimelineCard } from "./home-cards";
+import { WeatherCard } from "./weather-card";
 import styles from "./page.module.css";
 
 async function Dashboard() {
@@ -24,6 +25,7 @@ async function Dashboard() {
   return (
     <div className={styles.bento}>
       <HomeInfoCard data={data} today={today} />
+      <WeatherCard data={data} now={now} />
       <HousingCostCard data={data} />
       <EnvironmentCard data={data} now={now} />
       <AlertsCard data={data} />

@@ -2,14 +2,24 @@ import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "공공데이터 출처 | AI 도우미 | HomeFit AI" };
 
-// 기획안 AI Assistant "공공데이터 출처 기반 안내": 앱이 실제로 쓰는 출처 (docs/data-sources 후보, spec 004)
-const SOURCES = [
-  ["마이홈 공공임대 모집공고", "국토교통부 마이홈 API(공공데이터포털). 하루 1번 수집", "맞춤 공고, 주거 기회 알림"],
-  ["기상청 단기예보", "공공데이터포털 15084084. 하루 2번(새벽·오후 발표 뒤)", "습도·결로 위험 알림"],
-  ["법정동 코드", "행정안전부 법정동코드 API. 시군구 목록, 30일 저장", "조건·내 집의 시군구"],
-  ["기상청 격자 좌표", "단기예보 활용가이드(2610) 격자 엑셀", "시군구 → 예보 위치"],
-  ["내가 넣은 측정값", "실내 온도·습도(사용자 입력)", "결로 계산의 측정값"],
-] as const;
+type Source = { name: string; where: string; use: string; terms: string };
+
+// IA KN_050200_TB: 앱이 실제로 쓰는 출처와 이용 조건. 내용은 docs/data-sources.md 1·2.6절을 따른다(2026-11-19 맞춤)
+const SOURCES: Source[] = [
+  { name: "마이홈 공공임대 모집공고", where: "공공데이터포털 15108420 · 매일 09:00", use: "맞춤 공고, 주거 기회 알림, 챗봇", terms: "무료, 이용 제한 없음" },
+  { name: "온통청년 청년정책", where: "온통청년 오픈 API · 매일 09:10", use: "청년 주거지원 정책, 챗봇", terms: "무료, 심의 승인 뒤 키 발급" },
+  { name: "기상청 단기예보", where: "공공데이터포털 15084084 · 매일 05:30, 17:30", use: "습도·결로 위험 알림, 챗봇", terms: "무료, 공공누리 제1유형(출처 표시)" },
+  { name: "기상청 초단기실황·초단기예보", where: "단기예보 조회서비스 · 홈을 열 때(10분 기억)", use: "홈 바깥 날씨", terms: "무료, 공공누리 제1유형(출처 표시)" },
+  { name: "전월세 실거래가(아파트·오피스텔·연립다세대·단독다가구)", where: "공공데이터포털 15126472~15126475 · 매월 2일 10:00", use: "시세 변화 알림", terms: "무료, 이용 제한 없음" },
+  { name: "법정동 코드", where: "공공데이터포털 15077871 · 필요할 때(30일 기억)", use: "조건·내 집의 시군구", terms: "무료, 이용 제한 없음" },
+  { name: "건축HUB 건축물대장", where: "공공데이터포털 15134735 · 조회할 때만", use: "건축물 기본 정보", terms: "무료, 이용 제한 없음(갱신 월간)" },
+  { name: "한국전력 가구평균 전력사용량", where: "전력데이터개방포털 · 화면을 열 때(하루 기억)", use: "에너지비 추정", terms: "무료, 이용 제한 없음" },
+  { name: "국토교통부 공동주택 에너지 사용 정보", where: "공공데이터포털 15012964 · 화면을 열 때(하루 기억)", use: "아파트 에너지비 추정", terms: "무료, 자동 승인" },
+  { name: "한국가스공사 도시가스 소매요금표", where: "공공데이터포털 15157367 파일 · 연 1회 받아 둠", use: "냉난방비 시뮬레이션", terms: "무료, 이용 제한 없음" },
+  { name: "에너지경제연구원 가구에너지패널조사 14차", where: "KESIS 공개 결과표 파일 · 2023년 기준 값", use: "주택 종류·면적별 에너지비 보정", terms: "공개 자료" },
+  { name: "기상청 격자 좌표", where: "단기예보 활용가이드 격자 엑셀", use: "시군구 → 예보 위치", terms: "단기예보와 같음" },
+  { name: "내가 넣은 값", where: "내 집 실내 온습도, 관심 주택, 점검·하자 기록", use: "결로 계산, 집 비교, 챗봇", terms: "본인만 봄" },
+];
 
 export default function KnowledgeSourcesPage() {
   return (
@@ -17,11 +27,11 @@ export default function KnowledgeSourcesPage() {
       <h2 id="src-title">이 앱이 쓰는 자료</h2>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
-          <thead><tr><th scope="col">자료</th><th scope="col">어디서·얼마나 자주</th><th scope="col">쓰는 곳</th></tr></thead>
-          <tbody>{SOURCES.map(([name, where, use]) => <tr key={name}><th scope="row">{name}</th><td>{where}</td><td>{use}</td></tr>)}</tbody>
+          <thead><tr><th scope="col">자료</th><th scope="col">어디서·얼마나 자주</th><th scope="col">쓰는 곳</th><th scope="col">이용 조건</th></tr></thead>
+          <tbody>{SOURCES.map((s) => <tr key={s.name}><th scope="row">{s.name}</th><td>{s.where}</td><td>{s.use}</td><td>{s.terms}</td></tr>)}</tbody>
         </table>
       </div>
-      <p className={styles.muted}>AI 글은 요약·대응안 초안에만 쓰고, 숫자 비교·판단은 코드로 합니다(CLAUDE.md 팀 규칙).</p>
+      <p className={styles.muted}>AI 글은 요약·대응안 초안·답변에만 쓰고, 숫자 비교·판단은 코드로 합니다. 공고 신청 자격은 판정하지 않고 공고문에서 확인하도록 안내합니다.</p>
     </section>
   );
 }

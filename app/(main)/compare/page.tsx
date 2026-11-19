@@ -33,7 +33,7 @@ async function HomeList() {
     <ul className={styles.list}>
       {homes.map((home) => (
         <li key={home.id}>
-          <Link href={`/compare/${home.id}`}><strong>{home.name}</strong></Link> · {HOUSING_LABELS[home.housingType]} · 한 달 <TotalText cost={realCost(withEstimate(home, basis.averages), month)} />
+          <Link href={`/compare/${home.id}`}><strong>{home.name}</strong></Link> · {HOUSING_LABELS[home.housingType]} · 한 달 <TotalText cost={realCost(withEstimate(home, basis.averages, basis.aptAverages), month)} />
         </li>
       ))}
     </ul>

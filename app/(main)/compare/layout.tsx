@@ -6,7 +6,7 @@ import styles from "@/app/_components/hub.module.css";
 const TABS: Tab[] = [
   { href: "/compare", label: "관심 주택" }, // spec 009
   { href: "/compare/cost", label: "실질 비용 비교" },
-  { href: "/compare/recommend", label: "추천 결과", note: "범위 밖" },
+  { href: "/compare/recommend", label: "추천 결과" }, // spec 015
 ];
 
 export default function CompareLayout({ children }: LayoutProps<"/compare">) {

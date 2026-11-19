@@ -36,7 +36,7 @@ async function History() {
   );
 }
 
-// 기획안 AI Assistant "과거 분석 및 처리 기록" (spec 004). 찾기(검색)는 다음 단계
+// IA KN_050100_TB 처리 기록 (spec 004). 낱말로 찾기는 기록 찾기 탭(spec 005 FR-006)
 export default function KnowledgeHistoryPage() {
   return (
     <section className={styles.card} aria-labelledby="history-title">

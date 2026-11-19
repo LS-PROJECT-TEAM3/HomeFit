@@ -14,6 +14,10 @@ export default function LoginPage() {
         <p className={styles.lead}>내 집의 결로 위험과 조건에 맞는 주거 지원 공고 변화를 알림으로 받아 보세요.</p>
         <CredentialsForm action={signIn} submitLabel="로그인" passwordAutoComplete="current-password" />
         <p className={styles.links}>
+          {/* spec 014 FR-001 */}
+          <Link href="/reset-password">비밀번호를 잊으셨나요?</Link>
+        </p>
+        <p className={styles.links}>
           처음이신가요? <Link href="/signup">회원가입</Link>
         </p>
       </section>

@@ -31,7 +31,12 @@ type InterestHomeRow = {
   deposit: number | null; monthly_rent: number; maintenance_fee: number | null;
   energy_cost: number | null; electricity_kwh: number | null; transit_fare: number | null; trips_per_day: number | null; commute_days: number | null;
   created_by: string; created_at: string; updated_at: string;
+  /** 0021 (spec 019 FR-001): 입주 전 점검 항목 키 → 확인했는지, 메모 */
+  move_in_checklist: Json; move_in_note: string | null;
 };
+
+// 0021: 하자 기록 (ERD defect_records, spec 019)
+type DefectRecordRow = { id: string; home_id: string; occurred_on: string; kind: string; memo: string; photo_path: string | null; created_by: string; created_at: string };
 
 type IndoorMeasurementRow = {
   id: string; home_id: string; temperature_c: number; humidity_pct: number; measured_at: string;
@@ -135,7 +140,7 @@ export type Database = {
         PolicyConditionRow,
         Optional<PolicyConditionRow, "sigungu_code" | "supply_types" | "max_monthly_rent" | "age" | "target_groups" | "updated_at">
       >;
-      interest_homes: Table<InterestHomeRow, Optional<InterestHomeRow, "id" | "exclusive_area_m2" | "deposit" | "maintenance_fee" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days" | "created_at" | "updated_at">>;
+      interest_homes: Table<InterestHomeRow, Optional<InterestHomeRow, "id" | "exclusive_area_m2" | "deposit" | "maintenance_fee" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days" | "created_at" | "updated_at" | "move_in_checklist" | "move_in_note">>;
       interest_areas: Table<InterestAreaRow, Optional<InterestAreaRow, "id" | "last_median_value" | "last_median_deposit" | "created_at">>;
       homes: Table<HomeRow, Optional<HomeRow, "id" | "contract_type" | "deposit" | "monthly_rent" | "maintenance_fee" | "contract_end_date" | "updated_at" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days">>;
       indoor_measurements: Table<IndoorMeasurementRow, Optional<IndoorMeasurementRow, "id" | "created_at">>;
@@ -186,6 +191,7 @@ export type Database = {
       notice_follows: Table<NoticeFollowRow, Optional<NoticeFollowRow, "reason" | "decided_at">>;
       notice_summaries: Table<NoticeSummaryRow, Optional<NoticeSummaryRow, "created_at">>;
       chat_logs: Table<ChatLogRow, Optional<ChatLogRow, "id" | "cited_pages" | "created_at">>;
+      defect_records: Table<DefectRecordRow, Optional<DefectRecordRow, "id" | "photo_path" | "created_at">>;
       llm_calls: Table<
         LlmCallRow,
         Optional<LlmCallRow, "id" | "run_id" | "model" | "error_kind" | "input_tokens" | "output_tokens" | "created_at">
