@@ -10,7 +10,7 @@ export async function loadEnergyUsage(userId: string, now: Date): Promise<Energy
   if (!home) return { hasHome: false };
   const basis = home.electricityKwh === null
     ? await loadEstimateBasis([{ ...home, energyCost: null }], now)
-    : { averages: new Map(), failed: 0, requested: 0 };
+    : { averages: new Map(), failed: 0, requested: 0, aptAverages: new Map(), aptFailed: 0 };
   // spec 017 FR-002: 한전 시군구 평균(없으면 패널 전국 평균) × 주택 종류·면적 비율
   const usage = homeUsage({ electricityKwh: home.electricityKwh, estimatedKwh: withEstimate(home, basis.averages).estimatedKwh });
   return { hasHome: true, usage, basis };

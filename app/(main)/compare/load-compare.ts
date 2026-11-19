@@ -15,7 +15,7 @@ export async function loadCompare(userId: string): Promise<LoadedCompare> {
   // spec 011 FR-002: 내 집과 관심 주택 모두 사용량을 모르면 시군구 평균으로 추정
   const now = new Date();
   const basis = await loadEstimateBasis(mine ? [...homes, mine] : homes, now);
-  const myHome: CostInput | null = mine ? withEstimate(mine, basis.averages) : null;
-  const others = homes.map((h) => withEstimate(h, basis.averages));
+  const myHome: CostInput | null = mine ? withEstimate(mine, basis.averages, basis.aptAverages) : null;
+  const others = homes.map((h) => withEstimate(h, basis.averages, basis.aptAverages));
   return { rows: compareRealCosts({ myHome, homes: others, month: kstMonth(now) }), hasMine: mine !== null, empty: homes.length === 0 && !mine, basis };
 }

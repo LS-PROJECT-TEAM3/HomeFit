@@ -35,6 +35,8 @@ export type CostInput = {
   transitFare: number | null; tripsPerDay: number | null; commuteDays: number | null;
   /** spec 011 FR-001: 그 집 시군구의 한전 가구 평균(kWh/월). 없으면 추정하지 않는다 */
   estimatedKwh?: number | null;
+  /** spec 018 FR-001: 아파트 시군구 평균 에너지 사용금액(원/㎡) × 면적(원/월). kWh 추정보다 먼저 */
+  estimatedEnergyCost?: number | null;
 };
 export type RealCost = { rent: CostItem; fee: CostItem; energy: CostItem; transit: CostItem; total: number; missing: string[]; estimated: string[] };
 
@@ -44,10 +46,11 @@ const DEFAULT_DAYS = 22;
 
 const input = (value: number | null): CostItem => (value === null ? { value: null, kind: "missing" } : { value, kind: "input" });
 
-// E4: 직접 입력 > 전기 사용량 계산 > 추정(spec 011 FR-002) > 미입력
+// E4: 직접 입력 > 전기 사용량 계산 > 아파트 금액 추정(spec 018 FR-003) > kWh 추정(spec 011·017) > 미입력
 function energyItem(home: CostInput, month: number): CostItem {
   if (home.energyCost !== null) return { value: home.energyCost, kind: "input" };
   if (home.electricityKwh !== null) return { value: electricityBill(home.electricityKwh, month), kind: "calculated" };
+  if (home.estimatedEnergyCost && home.estimatedEnergyCost > 0) return { value: home.estimatedEnergyCost, kind: "estimated" };
   if (home.estimatedKwh && home.estimatedKwh > 0) return { value: electricityBill(home.estimatedKwh, month), kind: "estimated" };
   return { value: null, kind: "missing" };
 }

@@ -1,4 +1,5 @@
 // spec 011 FR-001·FR-003: 시군구 가구 평균 전력사용량으로 추정, 12개월 예상 요금. 순수 함수
+import { aptEnergyCost } from "@/watch/apt-energy";
 import { panelFactor, panelMonthlyKwh } from "./energy-panel";
 import type { HousingType } from "./home-form";
 import { electricityBill, RATE_TABLE } from "./real-cost";
@@ -27,15 +28,28 @@ export function sigungusNeedingEstimate(homes: readonly NeedsEstimate[]): string
 export type EstimateBasisKind = "kepco" | "national";
 type EstimateTarget = { sigunguCode: string; housingType: HousingType; exclusiveAreaM2: number | null };
 
+/** spec 018 E5: 입력·kWh가 없는 아파트 중 면적이 있는 집의 시군구만, 겹치지 않게 */
+export function sigungusNeedingAptEstimate(homes: readonly (NeedsEstimate & { housingType?: HousingType; exclusiveAreaM2?: number | null })[]): string[] {
+  const targets = homes.filter((h) => h.housingType === "apartment" && typeof h.exclusiveAreaM2 === "number" && h.energyCost === null && h.electricityKwh === null);
+  return [...new Set(targets.map((h) => h.sigunguCode))];
+}
+
 /**
- * spec 011 FR-002 → spec 017 FR-002: 그 집에 추정 kWh를 붙인다(쓸지는 realCost가 E1 순서로 정한다).
- * 한전 시군구 평균이 있으면 그 값, 없으면 패널 전국 평균에 주택 종류·면적 비율을 곱한다(E4)
+ * spec 011 FR-002 → spec 017 FR-002 → spec 018: 그 집에 추정값을 붙인다(쓸지는 realCost가 E1 순서로 정한다).
+ * kWh: 한전 시군구 평균이 있으면 그 값, 없으면 패널 전국 평균에 주택 종류·면적 비율을 곱한다(spec 017 E4).
+ * 금액: 아파트이고 면적이 있고 그 시군구 아파트 평균(원/㎡)이 있으면 × 면적(spec 018 FR-001)
  */
-export function withEstimate<T extends EstimateTarget>(home: T, averages: ReadonlyMap<string, { kwh: number }>): T & { estimatedKwh: number; estimateBasis: EstimateBasisKind } {
+export function withEstimate<T extends EstimateTarget>(
+  home: T, averages: ReadonlyMap<string, { kwh: number }>, aptAverages: ReadonlyMap<string, { perM2: number }> = new Map(),
+): T & { estimatedKwh: number; estimateBasis: EstimateBasisKind; estimatedEnergyCost: number | null } {
   const kepco = householdAverageKwh(averages.get(home.sigunguCode)?.kwh);
   const base = kepco ?? panelMonthlyKwh();
   const kwh = Math.round(base * panelFactor(home.housingType, home.exclusiveAreaM2) * 10) / 10; // E5
-  return { ...home, estimatedKwh: kwh, estimateBasis: kepco === null ? "national" : "kepco" };
+  const apt = home.housingType === "apartment" && home.exclusiveAreaM2 !== null ? aptAverages.get(home.sigunguCode) : undefined;
+  return {
+    ...home, estimatedKwh: kwh, estimateBasis: kepco === null ? "national" : "kepco",
+    estimatedEnergyCost: apt && home.exclusiveAreaM2 !== null ? aptEnergyCost(apt.perM2, home.exclusiveAreaM2) : null,
+  };
 }
 
 export type HomeUsage = { kwh: number; kind: "input" | "estimated" };
