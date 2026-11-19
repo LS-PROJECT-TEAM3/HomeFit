@@ -1,0 +1,8 @@
+/* spec 019 FR-003: 하자 사진 작은 보기 */
+.thumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-border);
+}
