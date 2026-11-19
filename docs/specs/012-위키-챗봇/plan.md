@@ -3,7 +3,7 @@
 - 기능 ID: 012
 - 상태: 승인됨 (사용자 2026-11-18 "이제 진짜로 진행하자")
 - 버전: v0.1
-- 작성일 / 최종 갱신: 2026-11-18 / 2026-11-18
+- 작성일 / 최종 갱신: 2026-11-18 / 2026-11-19
 - 기준 spec: ./spec.md (v0.1, 승인됨)
 - 근거 문서: docs/ERD.md(chat_logs, wiki_chunks, llm_calls), docs/IA.md(AD_070700_TB), CLAUDE.md(폴더, 팀 작업 규칙 "위키"), 수업 교안 P2-S10a 참고본(`ref-모퉁이식당/p2/wiki`: CLAUDE.md, ingest·query·lint SKILL.md, tools/lint.mjs, tools/search.mjs), 교안 개념-랄프 루프·P3-S19
 
@@ -263,6 +263,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | 다른 조각과 ERD·database.types 충돌 | 합칠 때 충돌 | 위키 관련 줄만, 늦게 합치는 사람이 같이 정리(plan.md 2절) |
 | 원본이 계속 바뀜 | 점검이 늘 "원본 바뀜" | main을 받은 뒤 담당이 반영(spec Q8). 시험에는 넣지 않음 |
 | 랄프 루프가 시험을 고쳐 통과시킴 | 거짓 통과 | 프롬프트에 금지, 루프 뒤 `git diff tests docs/wiki-chat.md wiki` 확인 |
+| 0018을 SQL Editor로 적용해 Supabase 마이그레이션 기록표에 0018이 없음 | `supabase db push`를 쓰면 0018을 안 돌린 것으로 봄 | 그대로 둔다(A안, 사용자 결정 2026-11-19). 팀은 `db push`를 쓰지 않고(저장소에 CLI 설정 없음) 0018 파일은 다시 돌려도 멈추지 않는다. `db push`를 쓰기로 하면 그때 기록표 전체를 파일과 맞춘다(`supabase migration repair`, 팀 DB라 먼저 묻기) |
 
 ## 변경 기록
 | 날짜 | 버전 | 바뀐 내용 |
@@ -273,3 +274,4 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | 2026-11-18 | v0.1 | 2단계 끝. 구현 중 더함: 원본 지문은 줄바꿈(CRLF)을 LF로 맞춰 계산(git autocrlf로 컴퓨터마다 달라지는 것 막기), 인라인 코드 속 링크 무시, wiki/CLAUDE.md는 쪽으로 보지 않음, 필수 절에 `## 내용` 포함 |
 | 2026-11-18 | v0.1 | 기능 번호 009 → 010. main에 먼저 들어간 조각 E가 `docs/specs/009-실질주거비-비교`를 써서 번호가 겹침(사용자 결정). 요구 ID(FR-009 등)와 QA ID(C-9xx·H-9xx)는 그대로 |
 | 2026-11-18 | v0.1 | 기능 번호 010 → 012. 열린 PR #11(조각 B)이 먼저 spec 010을 쓰고, 그 Intent가 spec 011을 "에너지 면적 추정"용으로 남겨 둠(사용자 결정) |
+| 2026-11-19 | v0.1 | 5절 위험에 0018 마이그레이션 기록표 줄 더함: 그대로 두기(A안, 사용자 결정) |
