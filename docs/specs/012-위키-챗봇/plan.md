@@ -146,7 +146,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 - [x] 사용자(팀)가 `docs/wiki-chat.md`에 질문 5개와 정답(답·출처 쪽) 작성
 - [x] `tests/wiki-chat-eval.test.ts`: 실제 `wiki/` 파일로 5문항의 찾기 결과가 정답 출처를 포함하는지(있음 3, 충돌 1), 없음 1은 0개인지
 - [x] Ralph Loop: `/ralph-loop "tests/wiki-chat-eval.test.ts가 통과할 때까지 chat/wiki-pages.ts의 찾기를 고쳐라. 바퀴마다 npm test -- wiki-chat-eval 결과를 docs/specs/012-위키-챗봇/ralph-progress.md에 한 줄. 시험·정답표·wiki/는 고치지 마라. 통과하면 <promise>DONE</promise>" --max-iterations 5 --completion-promise "DONE"` (AI_PROVIDER=mock)
-- [ ] 실제 Gemini로 5문항과 숨은 지시 시험(시험용 쪽 사본으로)을 돌려 `docs/wiki-chat.md`에 결과·틀린 이유 기록
+- [x] 실제 Gemini로 5문항과 숨은 지시 시험(시험용 쪽 사본으로)을 돌려 `docs/wiki-chat.md`에 결과·틀린 이유 기록
 
 ### 새 의존성 기록
 없음
