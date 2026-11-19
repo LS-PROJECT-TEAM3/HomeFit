@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { buildWikiGraph, graphBounds, graphNeighbors, layoutWikiGraph } from "@/chat/wiki-graph";
+import { buildWikiGraph, graphBounds, graphNeighbors, layoutWikiGraph, panBox, zoomBox } from "@/chat/wiki-graph";
 
 // spec 012 FR-017(위키 그래프), SC-015. plan 012 7단계 함수 시험
 const page = (name: string, summary: string, links: string[]) => ({
@@ -84,5 +84,25 @@ describe("실제 wiki/ (C-913)", () => {
     const names = new Set(graph.nodes.map((n) => n.page));
     for (const e of graph.edges) expect(names.has(e.from) && names.has(e.to)).toBe(true);
     expect(graph.edges.length).toBeGreaterThan(graph.nodes.length);
+  });
+});
+
+describe("panBox · zoomBox (마우스로 지도 옮기기·휠 확대)", () => {
+  it("끌면 끈 방향 반대로 보기 상자가 움직인다(화면 점 단위를 그래프 단위로 바꿔서)", () => {
+    // 그래프 폭 200단위를 화면 400점에 그리면 1점 = 0.5단위
+    expect(panBox([0, 0, 200, 100], 40, -20, 400)).toEqual([-20, 10, 200, 100]);
+  });
+
+  it("휠 확대는 마우스 자리를 그대로 두고 상자를 줄인다", () => {
+    const [x, y, w, h] = zoomBox([0, 0, 200, 100], 0.5, { fx: 0.25, fy: 0.5 }, 400);
+    expect([w, h]).toEqual([100, 50]);
+    // 마우스 자리(가로 1/4, 세로 1/2)가 확대 전후로 같은 그래프 자리(50, 50)
+    expect(x + w * 0.25).toBeCloseTo(50);
+    expect(y + h * 0.5).toBeCloseTo(50);
+  });
+
+  it("너무 크게·작게는 막는다(전체 폭의 1/8 ~ 3배)", () => {
+    expect(zoomBox([0, 0, 50, 25], 0.1, { fx: 0.5, fy: 0.5 }, 400)[2]).toBe(50);
+    expect(zoomBox([0, 0, 1200, 600], 2, { fx: 0.5, fy: 0.5 }, 400)[2]).toBe(1200);
   });
 });

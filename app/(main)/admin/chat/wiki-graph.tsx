@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { graphBounds, graphNeighbors, type PlacedNode, type ViewBox, type WikiGraph } from "@/chat/wiki-graph";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { graphBounds, graphNeighbors, panBox, zoomBox, type PlacedNode, type ViewBox, type WikiGraph } from "@/chat/wiki-graph";
 import styles from "@/app/_components/hub.module.css";
 import own from "./wiki-graph.module.css";
 
@@ -17,42 +17,98 @@ const radius = (n: PlacedNode) => 4 + Math.min(n.degree, 14) * 0.55;
 const ZOOM_MS = 700; // 시안과 같은 확대 시간. 움직임 줄이기면 0
 const START_RATIO = 1.8;
 const MAX_LINKED = 8;
+const WHEEL_STEP = 1.15; // 휠 한 칸에 15%씩 확대·축소
 
-/** 켤 쪽에 맞춰 보기 상자를 부드럽게 옮긴다. 그래프 상자 비율은 화면 크기가 바뀔 때마다 다시 잰다 */
-function useZoom(nodes: readonly PlacedNode[], active: readonly string[]) {
-  const svgRef = useRef<SVGSVGElement>(null);
+/** 그래프 상자 비율(가로/세로). 화면 크기가 바뀔 때마다 다시 잰다 */
+function useRatio(svgRef: RefObject<SVGSVGElement | null>) {
   const [ratio, setRatio] = useState(START_RATIO);
-  const key = active.join("|");
-  const target = useMemo<ViewBox>(() => {
-    const picked = key ? nodes.filter((n) => key.split("|").includes(n.page)) : nodes;
-    return graphBounds(picked, key ? (picked.length === 1 ? 110 : 80) : 40, ratio);
-  }, [nodes, key, ratio]);
-  const [box, setBox] = useState<ViewBox>(target);
-  const boxRef = useRef(box);
   useEffect(() => {
     const el = svgRef.current;
     if (!el) return;
     const observer = new ResizeObserver(() => setRatio(el.clientWidth / el.clientHeight || START_RATIO));
     observer.observe(el);
     return () => observer.disconnect();
+  }, [svgRef]);
+  return ratio;
+}
+
+/** 켤 쪽에 맞춰 보기 상자를 부드럽게 옮긴다. place는 마우스로 옮길 때 애니메이션 없이 바로 놓는다 */
+function useZoom(nodes: readonly PlacedNode[], active: readonly string[], resetCount: number) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const ratio = useRatio(svgRef);
+  const key = active.join("|");
+  const target = useMemo<ViewBox>(() => {
+    const picked = key ? nodes.filter((n) => key.split("|").includes(n.page)) : nodes;
+    return graphBounds(picked, key ? (picked.length === 1 ? 110 : 80) : 40, ratio);
+  }, [nodes, key, ratio]);
+  const fullWidth = useMemo(() => graphBounds(nodes, 40, ratio)[2], [nodes, ratio]);
+  const [box, setBox] = useState<ViewBox>(target);
+  const boxRef = useRef(box);
+  const frameRef = useRef(0);
+  const place = useCallback((next: ViewBox) => {
+    cancelAnimationFrame(frameRef.current);
+    boxRef.current = next;
+    setBox(next);
   }, []);
   useEffect(() => {
     const from = boxRef.current;
     const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : ZOOM_MS;
     const start = performance.now();
-    let frame = 0;
     const tick = (now: number) => {
       const t = duration === 0 ? 1 : Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3);
-      const next = from.map((v, i) => v + (target[i] - v) * eased) as ViewBox;
-      boxRef.current = next;
-      setBox(next);
-      if (t < 1) frame = requestAnimationFrame(tick);
+      boxRef.current = from.map((v, i) => v + (target[i] - v) * eased) as ViewBox;
+      setBox(boxRef.current);
+      if (t < 1) frameRef.current = requestAnimationFrame(tick);
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [target]);
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+    // resetCount: 마우스로 옮긴 뒤 "전체 보기"를 누르면 켤 쪽이 그대로여도 다시 맞춘다
+  }, [target, resetCount]);
+  useMousePan(svgRef, boxRef, place, fullWidth);
   return { svgRef, viewBox: box.join(" ") };
+}
+
+/**
+ * 마우스로 빈 곳을 끌면 지도가 따라 움직이고, 휠로 마우스 자리를 기준으로 확대·축소한다(옵시디언 그래프 뷰처럼, 사용자 요청 2026-11-19).
+ * 점 위에서 누르면 끌지 않고 고르기로 둔다. 손가락(터치)은 페이지 스크롤을 막지 않게 끌기에서 뺀다
+ */
+function useMousePan(svgRef: RefObject<SVGSVGElement | null>, boxRef: RefObject<ViewBox>, place: (next: ViewBox) => void, fullWidth: number) {
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    let last: { x: number; y: number } | null = null;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = el.getBoundingClientRect();
+      const at = { fx: (e.clientX - rect.left) / rect.width, fy: (e.clientY - rect.top) / rect.height };
+      place(zoomBox(boxRef.current, e.deltaY > 0 ? WHEEL_STEP : 1 / WHEEL_STEP, at, fullWidth));
+    };
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0 || (e.target as Element).closest("g[role=button]")) return;
+      last = { x: e.clientX, y: e.clientY };
+      el.setPointerCapture(e.pointerId);
+      el.dataset.dragging = "true";
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!last) return;
+      place(panBox(boxRef.current, e.clientX - last.x, e.clientY - last.y, el.getBoundingClientRect().width));
+      last = { x: e.clientX, y: e.clientY };
+    };
+    const onUp = () => { last = null; delete el.dataset.dragging; };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("pointerdown", onDown);
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointercancel", onUp);
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
+    };
+  }, [svgRef, boxRef, place, fullWidth]);
 }
 
 type CanvasProps = { graph: WikiGraph; hits: Set<string>; near: Set<string>; fromAnswer: boolean; onPick: (page: string) => void; svgRef: RefObject<SVGSVGElement | null>; viewBox: string };
@@ -62,7 +118,7 @@ function GraphCanvas({ graph, hits, near, fromAnswer, onPick, svgRef, viewBox }:
   const pos = new Map(graph.nodes.map((n) => [n.page, n]));
   const dim = hits.size > 0;
   return (
-    <svg ref={svgRef} className={`${own.svg} ${dim ? own.dim : ""}`} viewBox={viewBox} role="group" aria-label="위키 쪽 연결 그래프. 점을 Tab으로 옮겨 Enter로 고릅니다">
+    <svg ref={svgRef} className={`${own.svg} ${dim ? own.dim : ""}`} viewBox={viewBox} role="group" aria-label="위키 쪽 연결 그래프. 점을 Tab으로 옮겨 Enter로 고릅니다. 마우스로 빈 곳을 끌면 옮기고 휠로 확대·축소합니다">
       {graph.edges.map((e) => {
         const a = pos.get(e.from), b = pos.get(e.to);
         if (!a || !b) return null;
@@ -125,7 +181,8 @@ export function WikiGraphView({ graph, focus, onFocus }: { graph: WikiGraph | nu
   const nodes = useMemo(() => graph?.nodes ?? [], [graph]);
   const neighbors = useMemo(() => graphNeighbors(graph?.edges ?? []), [graph]);
   const active = focus.selected ? [focus.selected] : focus.pages;
-  const { svgRef, viewBox } = useZoom(nodes, active);
+  const [resetCount, setResetCount] = useState(0);
+  const { svgRef, viewBox } = useZoom(nodes, active, resetCount);
   if (!graph) return <section className={styles.card}><h2>위키 지도</h2><p role="alert">위키 그래프를 불러오지 못했습니다. 잠시 뒤 새로 고쳐 주세요. 질문은 위에서 그대로 할 수 있습니다.</p></section>;
   const hits = new Set(active);
   const near = new Set([...hits].flatMap((page) => [...(neighbors.get(page) ?? [])]).filter((page) => !hits.has(page)));
@@ -135,9 +192,10 @@ export function WikiGraphView({ graph, focus, onFocus }: { graph: WikiGraph | nu
     <section className={`${styles.card} ${own.card}`} aria-labelledby="wiki-graph-title">
       <div className={own.head}>
         <h2 id="wiki-graph-title">위키 지도</h2>
-        <button type="button" className={own.linkButton} onClick={() => onFocus({ pages: [], selected: null })}>전체 보기</button>
+        <button type="button" className={own.linkButton} onClick={() => { setResetCount((c) => c + 1); onFocus({ pages: [], selected: null }); }}>전체 보기</button>
       </div>
       <p className={styles.muted} role="status">{statusText(graph, focus)}</p>
+      <p className={styles.muted}>빈 곳을 끌면 지도가 움직이고, 휠로 확대·축소합니다. 점을 누르면 그 쪽 설명이 나옵니다.</p>
       <GraphCanvas graph={graph} hits={hits} near={near} fromAnswer={!focus.selected} onPick={pick} svgRef={svgRef} viewBox={viewBox} />
       <GraphLegend nodes={nodes} />
       {selected ? <PagePanel node={selected} linked={[...(neighbors.get(selected.page) ?? [])]} onPick={pick} /> : null}

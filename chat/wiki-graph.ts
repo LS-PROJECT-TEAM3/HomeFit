@@ -100,3 +100,17 @@ export function graphBounds(points: readonly Point[], pad: number, ratio: number
   if (w / h > ratio) h = w / ratio; else w = h * ratio;
   return [cx - w / 2, cy - h / 2, w, h];
 }
+
+/** 마우스로 끈 만큼(화면 점) 보기 상자를 옮긴다. widthPx는 그래프가 화면에 그려진 폭 */
+export function panBox(box: ViewBox, dxPx: number, dyPx: number, widthPx: number): ViewBox {
+  const scale = box[2] / (widthPx || 1);
+  return [box[0] - dxPx * scale, box[1] - dyPx * scale, box[2], box[3]];
+}
+
+/** 휠 확대·축소. 마우스 자리(상자 안 비율 fx·fy)는 그대로 두고, 폭은 전체 그래프 폭의 1/8 ~ 3배로 막는다 */
+export function zoomBox(box: ViewBox, factor: number, at: { fx: number; fy: number }, fullWidth: number): ViewBox {
+  const [x, y, w, h] = box;
+  const width = Math.min(fullWidth * 3, Math.max(fullWidth / 8, w * factor));
+  const height = h * (width / w);
+  return [x + (w - width) * at.fx, y + (h - height) * at.fy, width, height];
+}
