@@ -37,18 +37,30 @@
 - 기능 003~008(습도·결로, 화면 뼈대, 관리자 시연·기록 찾기, 청년 정책, 팔로우 공고 일정, 시세 변화)은 아래 "기능 목록" 표에서 상태와 확인 결과(qa)로 이어집니다
 
 ## 기능 목록
-상태는 각 spec 머리글 기준(2026-11-18)입니다. 실제로 확인한 결과(Pass/Fail/No Run, 수행자, 날짜, 증거)는 같은 폴더의 qa.md에 있습니다.
+상태는 각 spec 머리글 기준입니다(004와 009~020은 2026-11-19에 맞췄고, 나머지는 2026-11-18 기준 그대로입니다). 실제로 확인한 결과(Pass/Fail/No Run, 수행자, 날짜, 증거)는 같은 폴더의 qa.md에 있습니다.
 
 | 번호 | 기능 | spec 상태 | spec | 확인 결과 |
 |---|---|---|---|---|
 | 001 | 공고·정책 사건 | 승인됨 v0.5 | [spec](docs/specs/001-공고정책-사건/spec.md) | [qa](docs/specs/001-공고정책-사건/qa.md) |
 | 002 | LLM 공급자 | 승인됨 | [spec](docs/specs/002-LLM-공급자/spec.md) | [qa](docs/specs/002-LLM-공급자/qa.md) |
 | 003 | 습도·결로 위험 사건 | 승인됨 v0.2 | [spec](docs/specs/003-습도결로-사건/spec.md) | [qa](docs/specs/003-습도결로-사건/qa.md) |
-| 004 | 화면 뼈대 | 초안 v0.3 | [spec](docs/specs/004-화면-뼈대/spec.md) | [qa](docs/specs/004-화면-뼈대/qa.md) |
+| 004 | 화면 뼈대 | 초안 v0.6 | [spec](docs/specs/004-화면-뼈대/spec.md) | [qa](docs/specs/004-화면-뼈대/qa.md) |
 | 005 | 관리자 시연·기록 찾기 | 초안 v0.1 (승인 전) | [spec](docs/specs/005-관리자-시연-기록찾기/spec.md) | [qa](docs/specs/005-관리자-시연-기록찾기/qa.md) |
 | 006 | 온통청년 정책 수집 | v0.3 | [spec](docs/specs/006-청년정책-수집/spec.md) | [qa](docs/specs/006-청년정책-수집/qa.md) |
 | 007 | 팔로우 공고 일정 | v0.1 | [spec](docs/specs/007-팔로우공고-일정/spec.md) | [qa](docs/specs/007-팔로우공고-일정/qa.md) |
 | 008 | 시세 변화 사건 | v0.1 | [spec](docs/specs/008-시세-변화-사건/spec.md) | [qa](docs/specs/008-시세-변화-사건/qa.md) |
+| 009 | 실질 주거비 비교 | v0.1 | [spec](docs/specs/009-실질주거비-비교/spec.md) | [qa](docs/specs/009-실질주거비-비교/qa.md) |
+| 010 | 관리자 수정 기록·비슷한 지난 알림·시세 채점 | 승인됨 v0.2 | [spec](docs/specs/010-관리자수정-비슷한알림-시세채점/spec.md) | [qa](docs/specs/010-관리자수정-비슷한알림-시세채점/qa.md) |
+| 011 | 에너지비 추정·에너지 분석 화면 | 초안 v0.2 (승인 전) | [spec](docs/specs/011-에너지-추정/spec.md) | [qa](docs/specs/011-에너지-추정/qa.md) |
+| 012 | 위키·위키 챗봇 | 승인됨 v0.2 | [spec](docs/specs/012-위키-챗봇/spec.md) | [qa](docs/specs/012-위키-챗봇/qa.md) |
+| 013 | 계약 만료 일정 | 초안 v0.1 (승인 전) | [spec](docs/specs/013-계약만료-일정/spec.md) | [qa](docs/specs/013-계약만료-일정/qa.md) |
+| 014 | 비밀번호 재설정 | 초안 v0.1 (승인 전) | [spec](docs/specs/014-비밀번호-재설정/spec.md) | [qa](docs/specs/014-비밀번호-재설정/qa.md) |
+| 015 | 추천 결과 | 초안 v0.1 (승인 전) | [spec](docs/specs/015-추천-결과/spec.md) | [qa](docs/specs/015-추천-결과/qa.md) |
+| 016 | 냉난방비 계산 | 초안 v0.1 (승인 전) | [spec](docs/specs/016-냉난방비-계산/spec.md) | [qa](docs/specs/016-냉난방비-계산/qa.md) |
+| 017 | 주택 종류·면적 에너지 추정 | 초안 v0.1 (승인 전) | [spec](docs/specs/017-주택종류-면적-에너지-추정/spec.md) | [qa](docs/specs/017-주택종류-면적-에너지-추정/qa.md) |
+| 018 | 아파트 에너지 사용금액 | 초안 v0.1 (승인 전) | [spec](docs/specs/018-아파트-에너지-사용금액/spec.md) | [qa](docs/specs/018-아파트-에너지-사용금액/qa.md) |
+| 019 | 입주 전 점검·하자 기록 | 초안 v0.1 (승인 전) | [spec](docs/specs/019-입주전점검-하자기록/spec.md) | [qa](docs/specs/019-입주전점검-하자기록/qa.md) |
+| 020 | 홈 바깥 날씨 | 초안 v0.1 (승인 전) | [spec](docs/specs/020-홈-바깥-날씨/spec.md) | [qa](docs/specs/020-홈-바깥-날씨/qa.md) |
 
 ## 배포
 - `npm run deploy`: Vercel 운영 배포가 끝나면 배포된 주소(https://homefit-lac.vercel.app)로 수집을 한 번 바로 부릅니다. 팀이 "배포해줘"라고 할 때만 씁니다
