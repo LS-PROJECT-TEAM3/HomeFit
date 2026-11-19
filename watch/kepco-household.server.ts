@@ -15,12 +15,14 @@ export async function fetchMonth(region: { metroCd: string; cityCd: string }, pe
   // 그 달·시군구 통계가 없으면 404 {"errCd":"404","errMsg":"NotFound"}로 답한다(2026-11-18 실제 호출로 확인)
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`한전 가구평균 응답 HTTP ${response.status}`);
-  const text = await response.text();
+  let json: unknown;
   try {
-    return parseHouseholdAverage(JSON.parse(text));
+    json = JSON.parse(await response.text());
   } catch {
     throw new Error("한전 가구평균 응답이 JSON이 아님");
   }
+  // 모양이 다르면 여기서 던진다. null("통계 없음")로 하루 기억되지 않게 한다(PR #15 리뷰)
+  return parseHouseholdAverage(json);
 }
 
 /** 그 시군구의 가장 최근 달 가구 평균. 통계가 없으면 null, 키·네트워크 오류는 던진다(부르는 쪽이 수집 오류로 보여 준다) */

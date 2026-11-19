@@ -1,10 +1,14 @@
 import { loadMyHome } from "@/app/(main)/my/home/load";
+import { parseChecklist } from "@/incident/move-in-checklist";
+import type { DefectKind } from "@/incident/defect-form";
 import { listMyMatchedNotices } from "@/incident/notices.server";
+import { listMyPolicies } from "@/incident/policies.server";
 import { listSchedule } from "@/incident/schedule.server";
 import { callLlm, newCallContext } from "@/lib/llm/call.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
+import { defectSource, interestHomeSource, policySource } from "@/knowledge/chat-sources";
 import { buildChatPrompt, CHAT_JSON_SCHEMA, CHAT_SYSTEM_PROMPT, parseChatAnswer, rankSources, sourceLabel, type ChatSource } from "@/knowledge/chat";
 
 // spec 004 v0.3 FR-007: 챗봇 답. 내 처리 기록은 로그인 사용자 권한(RLS)으로, 예보는 내 집 시군구 것만 서버 권한으로 읽는다
@@ -90,10 +94,47 @@ async function homeAndForecastSources(userId: string, now: Date): Promise<ChatSo
   return result;
 }
 
+/** v0.5: 내 조건에 맞는 청년 주거 정책(조건이 없으면 없음) */
+async function policySources(today: string): Promise<ChatSource[]> {
+  const { items } = await listMyPolicies(today);
+  return items.slice(0, 30).map((item, i) => policySource(item.policy, i));
+}
+
+/** v0.5: 관심 주택과 입주 전 점검. 로그인 사용자 권한(RLS)으로 내 것만 */
+async function interestHomeSources(userId: string, month: number): Promise<ChatSource[]> {
+  const { data, error } = await (await createClient())
+    .from("interest_homes")
+    .select("id, name, housing_type, deposit, monthly_rent, maintenance_fee, energy_cost, electricity_kwh, transit_fare, trips_per_day, commute_days, move_in_checklist, move_in_note")
+    .eq("user_id", userId)
+    .order("created_at");
+  if (error) throw new Error("관심 주택을 읽지 못했습니다.");
+  return data.map((r, index) => interestHomeSource({
+    id: r.id, name: r.name, housingType: r.housing_type, deposit: r.deposit, monthlyRent: r.monthly_rent, maintenanceFee: r.maintenance_fee,
+    energyCost: r.energy_cost, electricityKwh: r.electricity_kwh, transitFare: r.transit_fare, tripsPerDay: r.trips_per_day, commuteDays: r.commute_days,
+    checklist: parseChecklist(r.move_in_checklist), note: r.move_in_note,
+  }, { index, month }));
+}
+
+/** v0.5: 내 집 하자 기록 최근 20건. 사진은 있는지만 */
+async function defectSources(userId: string): Promise<ChatSource[]> {
+  const supabase = await createClient();
+  const { data: home, error: homeError } = await supabase.from("homes").select("id").eq("user_id", userId).maybeSingle();
+  if (homeError) throw new Error("내 집을 읽지 못했습니다.");
+  if (!home) return [];
+  const { data, error } = await supabase.from("defect_records").select("occurred_on, kind, memo, photo_path").eq("home_id", home.id).order("occurred_on", { ascending: false }).limit(20);
+  if (error) throw new Error("하자 기록을 읽지 못했습니다.");
+  return data.map((r, i) => defectSource({ occurredOn: r.occurred_on, kind: r.kind as DefectKind, memo: r.memo, hasPhoto: r.photo_path !== null }, i));
+}
+
 export async function answerChat(userId: string, question: string, now: Date): Promise<ChatReply> {
-  const all = [
-    ...(await alertSources(userId)), ...(await scheduleSources()), ...(await noticeSources(toKstDate(now))), ...(await homeAndForecastSources(userId, now)),
-  ];
+  const today = toKstDate(now);
+  const month = Number(today.slice(5, 7));
+  // 서로 기다릴 필요가 없어 한꺼번에 읽는다
+  const groups = await Promise.all([
+    alertSources(userId), scheduleSources(), noticeSources(today), homeAndForecastSources(userId, now),
+    policySources(today), interestHomeSources(userId, month), defectSources(userId),
+  ]);
+  const all = groups.flat();
   const picked = rankSources(question, all, MAX_SOURCES);
   if (picked.length === 0) return { answer: NOT_FOUND, sources: [], isMock: false };
   const result = await callLlm(createAdminClient(), {

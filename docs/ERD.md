@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-18 (v1.10, spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
+- 최종 갱신: 2026-11-19 (v1.11, spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -12,6 +12,7 @@ erDiagram
     PROFILES ||--o| POLICY_CONDITIONS : "공고·정책 조건"
     PROFILES ||--o| HOMES : "내 집"
     HOMES ||--o{ INDOOR_MEASUREMENTS : "측정값"
+    HOMES ||--o{ DEFECT_RECORDS : "하자 기록 (v1.11)"
     PROFILES ||--o{ INTEREST_AREAS : "관심 지역"
     PROFILES ||--o| NOTIFICATION_SETTINGS : "슬랙 알림 설정"
 
@@ -109,8 +110,24 @@ erDiagram
 | energy_cost, electricity_kwh, transit_fare, trips_per_day, commute_days | | | homes와 같은 뜻 | [PRD FR-28 v1.10] |
 | created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
 | created_at, updated_at | timestamptz | ✔ | | [평가항목 P3-10] |
+| move_in_checklist | jsonb (객체) | ✔ (기본 `{}`) | 입주 전 점검: 항목 키 → 확인했는지. 항목 목록은 코드(`incident/move-in-checklist.ts`)에 있다 (v1.11) | [PRD FR-29] [IA QC_100100_TB] |
+| move_in_note | text | | 점검 메모 500자 안 (v1.11) | [PRD FR-29] |
 
 실질 주거비 = 월세 + 관리비 + 에너지비 + 교통비 (계산 값, 저장하지 않음). 에너지비 = energy_cost, 없으면 electricity_kwh로 계산, 둘 다 없으면 "미입력". 교통비 = transit_fare × trips_per_day × commute_days. [GLOSSARY 실질 주거비]
+
+#### defect_records — 하자 기록 (v1.11)
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| id | uuid (PK) | ✔ | | |
+| home_id | uuid (FK homes) | ✔ | 내 집 | [PRD FR-30] [IA MY_030202_PG] |
+| occurred_on | date | ✔ | 생긴 날 | [PRD FR-30 "날짜"] |
+| kind | text: `leak` 누수 / `mold` 곰팡이 / `breakdown` 고장 / `other` 기타 | ✔ | | [PRD FR-30] |
+| memo | text | ✔ | 무엇이 어떻게(500자 안) | [PRD FR-30] |
+| photo_path | text | | 저장소 `defect-photos`의 경로 `<회원 id>/<uuid>.<jpg·png·webp>`. 사진은 하나까지 | [PRD FR-30 "사진"] |
+| created_by | uuid | ✔ | 작성자 | [평가항목 P3-10] |
+| created_at | timestamptz | ✔ | | [평가항목 P3-10] |
+
+사진 저장소 `defect-photos`: 비공개, 파일 5MB까지, jpg·png·webp. 경로 첫 폴더가 내 회원 id인 파일만 올리고·보고·지운다(v1.11).
 
 #### interest_areas — 관심 지역
 | 필드 | 타입 | 필수 | 설명 | 출처 |
@@ -419,7 +436,7 @@ erDiagram
 | 표 | 일반 사용자 | 관리자 | 서버(수집·판단) |
 |---|---|---|---|
 | profiles | 내 행 읽기·이름 수정. role은 못 바꿈 | 전체 읽기 | |
-| policy_conditions, homes, indoor_measurements, interest_areas | 내 행만 읽기·쓰기 | 전체 읽기. 수정은 audit_logs와 함께 서버 함수로만 | 읽기 |
+| policy_conditions, homes, indoor_measurements, interest_areas, interest_homes | 내 행만 읽기·쓰기 | 전체 읽기. 수정은 audit_logs와 함께 서버 함수로만 | 읽기 |
 | sources, runs, run_steps, observations | 볼 수 없음 | 읽기, "지금 한 번 실행" | 읽기·쓰기 |
 | source_items | 로그인하면 읽기(공개 공고라서, 맞는 공고 목록) | 읽기 | 읽기·쓰기 |
 | notification_settings | 내 행만 읽기, 알림 켜기·끄기(enabled·enabled_at·updated_at)만 수정. 이메일·슬랙 사람 ID는 서버만 씀(0008) | **볼 수 없음**(슬랙 이메일은 개인 정보) | 읽기·쓰기 |
@@ -432,6 +449,8 @@ erDiagram
 | knowledge_chunks | 내 행 찾기 | | 쓰기 |
 | audit_logs | 볼 수 없음 | 추가·읽기. 수정·삭제 불가 | |
 | wiki_chunks, chat_logs | 볼 수 없음 | 챗봇 사용, 내 질문 기록 | 위키 반영 |
+| defect_records | 내 집 것만 읽기·넣기·지우기(고치기 없음) | 읽기 | |
+| 저장소 defect-photos | 내 회원 id 폴더만 올리기·보기·지우기 | 볼 수 없음 | |
 | eval_results | 볼 수 없음 | 읽기 | 쓰기 |
 | llm_calls | 볼 수 없음 | 읽기 | 쓰기 |
 
@@ -467,6 +486,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-18 | v1.10 | spec 012(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-19 | v1.11 (승인 2026-11-19 "추천대로 진행", 마이그레이션 0021) | interest_homes에 move_in_checklist(jsonb)·move_in_note, defect_records 표, 사진 저장소 defect-photos와 접근 규칙. PRD v1.17 FR-29·FR-30 1차, spec 019 |
 | 2026-11-18 | v1.9 (승인 2026-11-18, 마이그레이션 0020) | interest_homes 표 추가, homes에 energy_cost·electricity_kwh·transit_fare·trips_per_day·commute_days. 실질 주거비 알파(PRD v1.10 FR-28, spec 009) |
 | 2026-11-18 | v1.8 | notice_summaries에 정책 요약도 저장(source_code `youth_policy`, announcement_id = 정책 ID). 칸 변경 없음 (spec 006 v0.3 FR-007) |
 | 2026-11-18 | v1.8 | interest_areas 만듦(마이그레이션 0017). last_median_value를 월세 중간값으로 좁히고 last_median_deposit 추가(사용자 결정 "월세·보증금 둘 다", spec 008). sources `rtms_trade` |

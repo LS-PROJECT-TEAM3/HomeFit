@@ -4,7 +4,7 @@ import styles from "@/app/_components/hub.module.css";
 // IA QC_100000_PG 집 점검(v1.8), 기획안 9절 Housing QC (spec 004 v0.2): 하위 항목을 탭으로
 const TABS: Tab[] = [
   { href: "/qc", label: "결로 위험 시뮬레이터" },
-  { href: "/qc/checklist", label: "입주 전 품질 점검", note: "뼈대" },
+  { href: "/qc/checklist", label: "입주 전 품질 점검" }, // spec 019
   { href: "/qc/records", label: "주거환경·하자 기록" },
   { href: "/qc/building", label: "건축물 기본 정보" },
 ];

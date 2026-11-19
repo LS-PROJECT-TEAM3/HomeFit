@@ -18,7 +18,7 @@
       "status": "신규",
       "url": "/",
       "menu_entry": true,
-      "note": "벤토 카드 5개: 나의 주거 정보, 월 예상 주거비(월세+관리비), 주거환경 분석 현황, 새 위험·주거 기회, 승인 대기·처리 현황(v1.4). 숫자를 누르면 해당 목록으로 이동. 비로그인이면 로그인으로"
+      "note": "벤토 카드 5개: 나의 주거 정보, 월 예상 주거비(월세+관리비), 주거환경 분석 현황, 새 위험·주거 기회, 승인 대기·처리 현황(v1.4). 숫자를 누르면 해당 목록으로 이동. 비로그인이면 로그인으로 v1.14: 바깥 날씨 카드(기온·습도·날씨 글, spec 020)"
     },
     {
       "menu_code": "MB",
@@ -91,11 +91,32 @@
       "type": "페이지",
       "login": "불필요",
       "dev": "외부연동",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/reset-password",
       "menu_entry": true,
-      "note": "Supabase Auth 메일"
+      "note": "Supabase Auth 메일 요청, 링크 만료 안내(spec 014) v1.10"
+    },
+    {
+      "menu_code": "MB",
+      "no": [
+        1,
+        3,
+        1
+      ],
+      "path": [
+        "로그인",
+        "비밀번호 재설정",
+        "새 비밀번호"
+      ],
+      "type": "페이지",
+      "login": "필요",
+      "dev": "외부연동",
+      "priority": "MVP",
+      "status": "신규",
+      "url": "/reset-password/new",
+      "menu_entry": false,
+      "note": "메일 링크(/auth/confirm)를 거쳐 들어옴. 8자 이상·확인 칸 일치(spec 014) v1.10"
     },
     {
       "menu_code": "IC",
@@ -277,10 +298,10 @@
       "type": "페이지",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "보류",
       "status": "신규",
       "url": "/my/home/defects",
-      "note": "입주 때와 사는 동안의 하자(누수, 곰팡이, 고장) 기록과 사진"
+      "note": "집 점검 탭 QC_100200_TB에서 하자 기록을 함(화면 하나로, spec 019) v1.13"
     },
     {
       "menu_code": "MY",
@@ -441,10 +462,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "보류",
       "status": "신규",
       "url": "/compare/[id]/check",
-      "note": "Housing QC 체크리스트(채광, 소음, 냄새, 곰팡이, 수압, 관리비 포함 항목 등)"
+      "note": "집 점검 탭 QC_100100_TB에서 관심 주택을 골라 같은 점검을 함(화면 하나로, spec 019) v1.13"
     },
     {
       "menu_code": "CP",
@@ -525,7 +546,7 @@
       "status": "신규",
       "url": "/schedule",
       "menu_entry": true,
-      "note": "승인한 신청 준비 계획·대응 계획·재계약 판단 메모. 계약 만료 일정(2차)도 여기"
+      "note": "승인한 신청 준비 계획·대응 계획·재계약 판단 메모. 맨 위에 계약 만료 알림(만료 2달 전부터, 저장 안 함, spec 013) v1.9"
     },
     {
       "menu_code": "SC",
@@ -921,10 +942,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/qc/checklist",
-      "note": "뼈대, 저장 안 함 (spec 004 FR-004)"
+      "note": "관심 주택을 골라 항목 체크·메모를 저장(interest_homes.move_in_checklist, spec 019). 안전 판정은 하지 않음 v1.13"
     },
     {
       "menu_code": "QC",
@@ -941,10 +962,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "2차",
+      "priority": "MVP",
       "status": "신규",
       "url": "/qc/records",
-      "note": "실내 측정 추이, 하자 기록은 MY_030202_PG"
+      "note": "실내 온습도 추이 + 하자 기록(날짜·종류·메모·사진 1장 넣기·지우기, defect_records, spec 019) v1.13"
     },
     {
       "menu_code": "QC",
@@ -1021,10 +1042,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "보류",
+      "priority": "MVP",
       "status": "신규",
       "url": "/energy/heating",
-      "note": "범위 밖 (spec 009·011)"
+      "note": "지역·한 달 도시가스 사용량(MJ)으로 소매요금표 계산, 줄인 사용량 표(PRD v1.14, spec 016) v1.12"
     },
     {
       "menu_code": "CP",
@@ -1041,10 +1062,10 @@
       "type": "탭",
       "login": "필요",
       "dev": "개발",
-      "priority": "보류",
+      "priority": "MVP",
       "status": "신규",
       "url": "/compare/recommend",
-      "note": "범위 밖 안내만(PRD 9절)"
+      "note": "관심 주택 실질 주거비 낮은 순위와 근거 글, 칸이 덜 찬 집은 따로(점수 없음, PRD v1.13, spec 015) v1.11"
     },
     {
       "menu_code": "KN",
@@ -1102,9 +1123,9 @@
       "login": "필요",
       "dev": "외부연동",
       "priority": "보류",
-      "status": "신규",
+      "status": "삭제",
       "url": "/policy/commute",
-      "note": "범위 밖 안내만(PRD FR-33 보류)"
+      "note": "v1.15 삭제(사용자 결정 2026-11-19). 출퇴근은 PRD FR-33 보류"
     }
   ]
 }

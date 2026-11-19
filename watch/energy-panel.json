@@ -1,0 +1,22 @@
+{
+  "source": {
+    "name": "에너지경제연구원 「가구에너지패널조사」 14차(2023년 기준) 결과표 3. 가구당 에너지소비량",
+    "url": "https://kesis.keei.re.kr/board.es?mid=a10202030100&bid=0009&nPage=1&keyField=T&keyWord=2023%EB%85%84",
+    "basedOn": "2023",
+    "unit": "가구당 연간 일반전기 kWh(전국, 추정값)",
+    "sheet": "14차(2023년 기준)HEPS_결과표_3_가구당 에너지소비_260715.xlsx, 가. 주택종류별·다. 주택면적별, 1) 전국, 일반전기 행"
+  },
+  "nationalKwhPerYear": 3013.8,
+  "byTypeKwhPerYear": {
+    "detached": 2951.6,
+    "multiFamily": 2900.8,
+    "apartment": 3086.4
+  },
+  "byAreaKwhPerYear": [
+    { "label": "33㎡ 미만", "belowM2": 33, "kwh": 2019.8 },
+    { "label": "33~66㎡", "belowM2": 66, "kwh": 2813.3 },
+    { "label": "66~99㎡", "belowM2": 99, "kwh": 3190.6 },
+    { "label": "99~132㎡", "belowM2": 132, "kwh": 3364.2 },
+    { "label": "132㎡ 이상", "belowM2": null, "kwh": 4000.8 }
+  ]
+}

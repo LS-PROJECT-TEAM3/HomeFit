@@ -6,11 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import styles from "./chat-widget.module.css";
 
-// spec 004 v0.3 FR-007 (사용자 결정 2026-11-18): 모든 화면의 챗봇. 내 처리 기록과 공공데이터로만 답하고, 답마다 출처를 보인다
+// spec 004 v0.5 FR-007 (사용자 결정 2026-11-18, 자료 넓힘 2026-11-19): 모든 화면의 챗봇. 내 처리 기록·내 정보·공공데이터로만 답하고, 답마다 출처를 보인다
 type Source = { label: string; title: string; href?: string };
 type Message = { from: "me" | "bot"; text: string; sources?: Source[]; isMock?: boolean; failed?: boolean };
 
-const WELCOME: Message = { from: "bot", text: "안녕하세요. HomeFit 챗봇입니다. 내 알림·일정 기록과 공공데이터(마이홈 공고, 기상청 예보)로 답해 드립니다. 예: \"청년 전세임대 마감이 언제야?\"" };
+const WELCOME: Message = { from: "bot", text: "안녕하세요. HomeFit 챗봇입니다. 내 알림·일정, 내 집·관심 주택·하자 기록과 공공데이터(마이홈 공고, 청년 주거 정책, 기상청 예보)로 답해 드립니다. 예: \"청년 월세 지원 정책 뭐 있어?\", \"관심 주택 실질 주거비 비교해 줘\"" };
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);

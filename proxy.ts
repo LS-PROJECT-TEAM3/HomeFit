@@ -1,13 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { routeAccess } from "@/lib/supabase/auth-rules";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/env";
-
-// 로그인 없이 열 수 있는 주소 (IA MB_010000_PG, MB_010100_PG)
-const PUBLIC_PATHS = ["/login", "/signup"];
-
-function isPublic(pathname: string): boolean {
-  return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-}
 
 /**
  * 요청마다 Supabase 세션을 새로 고치고, 로그인하지 않았으면 로그인 화면으로 보낸다 (FR-001, FR-014).
@@ -30,10 +24,11 @@ export async function proxy(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims?.sub);
-  const { pathname } = request.nextUrl;
+  // 주소 규칙은 lib/supabase/auth-rules.ts (IA MB_010000~010301, spec 014)
+  const access = routeAccess(request.nextUrl.pathname);
 
-  if (!signedIn && !isPublic(pathname)) return redirectKeepingCookies(request, response, "/login");
-  if (signedIn && isPublic(pathname)) return redirectKeepingCookies(request, response, "/");
+  if (!signedIn && access === "private") return redirectKeepingCookies(request, response, "/login");
+  if (signedIn && access === "public") return redirectKeepingCookies(request, response, "/");
   return response;
 }
 
