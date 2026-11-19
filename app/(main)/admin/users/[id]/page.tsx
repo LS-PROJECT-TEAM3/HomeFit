@@ -8,6 +8,9 @@ import { createClient } from "@/lib/supabase/server";
 import { parseVirtualUserIds } from "@/watch/simulation";
 import { SIDO_OPTIONS } from "@/watch/sido";
 import { toKstDate } from "@/watch/kst";
+import { EDITABLE_FIELDS } from "@/incident/admin-edit";
+import { AuditLogList } from "./audit-log-list";
+import { EditDialog } from "./edit-dialog";
 import styles from "@/app/_components/hub.module.css";
 
 export const metadata = { title: "회원 상세 | 관리자 | HomeFit AI" };
@@ -25,7 +28,7 @@ async function loadMember(id: string) {
   const supabase = await createClient();
   const [profile, condition, home, incidents] = await Promise.all([
     supabase.from("profiles").select("id, role, created_at").eq("id", id).maybeSingle(),
-    supabase.from("policy_conditions").select("sido_code, sigungu_code, supply_types, max_monthly_rent, age, target_groups, updated_at").eq("user_id", id).maybeSingle(),
+    supabase.from("policy_conditions").select("user_id, sido_code, sigungu_code, supply_types, max_monthly_rent, age, target_groups, updated_at").eq("user_id", id).maybeSingle(),
     supabase.from("homes").select("id, sigungu_code, housing_type, exclusive_area_m2, contract_type, deposit, monthly_rent, maintenance_fee, contract_end_date, window_type").eq("user_id", id).maybeSingle(),
     supabase.from("incidents").select("id, incident_type, status, facts, is_simulated, detected_at").eq("user_id", id).order("detected_at", { ascending: false }).limit(30),
   ]);
@@ -39,11 +42,19 @@ async function loadMember(id: string) {
   return { profile: profile.data, condition: condition.data, home: home.data, incidents: incidents.data, measurement };
 }
 
+/** 고칠 수 있는 칸만 모달 첫 값으로 넘긴다 */
+function pick(table: keyof typeof EDITABLE_FIELDS, row: Record<string, unknown>): Record<string, number | string | null> {
+  return Object.fromEntries(Object.keys(EDITABLE_FIELDS[table]).map((name) => {
+    const value = row[name];
+    return [name, typeof value === "number" || typeof value === "string" ? value : null];
+  }));
+}
+
 function titleOf(facts: unknown): string {
   return typeof facts === "object" && facts !== null && "title" in facts && typeof facts.title === "string" ? facts.title : "제목 없음";
 }
 
-// IA AD_070101_PG 회원 상세 (PRD FR-20, spec 005 FR-005). 읽기만, 승인 버튼 없음(관리자는 대신 승인하지 못한다)
+// IA AD_070101_PG 회원 상세 (PRD FR-20, spec 005 FR-005). 공고 조건·내 집 숫자 칸만 사유와 함께 고친다(spec 010 FR-003). 승인 버튼 없음(관리자는 대신 승인하지 못한다)
 export default async function AdminUserDetailPage({ params }: PageProps<"/admin/users/[id]">) {
   await connection();
   const { id } = await params;
@@ -60,7 +71,7 @@ export default async function AdminUserDetailPage({ params }: PageProps<"/admin/
     <>
       <p><Link href="/admin/users">← 회원 목록</Link></p>
       <h2>회원 {id.slice(0, 8)}…{isVirtual ? " (가상 계정)" : ""}</h2>
-      <p className={styles.muted}>{data.profile.role === "admin" ? "관리자" : "회원"} · 가입 {toKstDate(new Date(data.profile.created_at))}. 읽기만 합니다.</p>
+      <p className={styles.muted}>{data.profile.role === "admin" ? "관리자" : "회원"} · 가입 {toKstDate(new Date(data.profile.created_at))}. 공고 조건·내 집의 숫자와 날짜만 사유와 함께 고칠 수 있고, 알림은 대신 승인하지 못합니다.</p>
       <div className={styles.grid}>
         <section className={styles.card} aria-labelledby="m-condition">
           <h2 id="m-condition">내 조건</h2>
@@ -73,6 +84,10 @@ export default async function AdminUserDetailPage({ params }: PageProps<"/admin/
               <li>대상: {condition.target_groups.length === 0 ? "모두" : condition.target_groups.map((t) => TARGET[t] ?? t).join(", ")}</li>
             </ul>
           ) : <p className={styles.muted}>조건을 아직 넣지 않았습니다.</p>}
+          {condition ? (
+            <EditDialog table="policy_conditions" targetId={id} memberId={id} title="공고 조건"
+              values={pick("policy_conditions", condition)} />
+          ) : null}
         </section>
         <section className={styles.card} aria-labelledby="m-home">
           <h2 id="m-home">내 집</h2>
@@ -84,8 +99,13 @@ export default async function AdminUserDetailPage({ params }: PageProps<"/admin/
               <li>최근 측정: {measurement ? `${measurement.temperature_c}°C · ${measurement.humidity_pct}% (${kst(measurement.measured_at)})` : "없음"}</li>
             </ul>
           ) : <p className={styles.muted}>내 집을 아직 넣지 않았습니다.</p>}
+          {home ? (
+            <EditDialog table="homes" targetId={home.id} memberId={id} title="내 집"
+              values={pick("homes", { ...home, exclusive_area_m2: Number(home.exclusive_area_m2) })} />
+          ) : null}
         </section>
       </div>
+      <AuditLogList targetIds={[id, ...(home ? [home.id] : [])]} />
       <h2 className={styles.section}>위험·기회 알림 (최근 30건)</h2>
       {incidents.length === 0 ? <p className={styles.muted}>알림이 없습니다.</p> : (
         <div className={styles.tableWrap}>

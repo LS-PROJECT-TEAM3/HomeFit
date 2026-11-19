@@ -17,7 +17,7 @@ export function sourceLabel(kind: ChatSourceKind): string {
 }
 
 /** 질문 낱말. 두 글자 이상만, 끝의 조사 한 글자를 뗀 꼴도 함께(예: "마감이" → "마감") */
-function questionWords(question: string): string[] {
+export function questionWords(question: string): string[] {
   const words = question.split(/[^0-9A-Za-z가-힣]+/).filter((word) => word.length >= 2);
   return [...new Set(words.flatMap((word) => (word.length >= 3 ? [word, word.slice(0, -1)] : [word])))];
 }

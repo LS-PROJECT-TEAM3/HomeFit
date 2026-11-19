@@ -2,7 +2,8 @@
 import { assessCondensationRisk } from "@/incident/condensation";
 import { planChangeIncidents } from "@/incident/detect";
 import { findNoticeChanges } from "@/incident/notice-change";
-import { EVAL_NOW, EVAL_TODAY, type EvalCase, type HumidityCase, type NoticeCase } from "./cases";
+import { planRentIncidents } from "@/incident/rent-detect";
+import { EVAL_NOW, EVAL_TODAY, type EvalCase, type HumidityCase, type NoticeCase, type RentCase } from "./cases";
 
 export type Tally = { total: number; hit: number; missed: number; falseAlarm: number; quietCorrect: number };
 export type CaseResult = { id: string; kind: EvalCase["kind"]; title: string; basis: string; expected: boolean; predicted: boolean };
@@ -36,14 +37,25 @@ function predictHumidity(c: HumidityCase): boolean {
   return assessCondensationRisk({ measurement: c.measurement, windowType: c.windowType, forecast: c.forecast, now: new Date(EVAL_NOW) }).status === "risk";
 }
 
+// spec 010 FR-001: 실거래가 수집 뒤와 같은 판단 함수에 넣어 알림이 하나라도 생기면 울린 것
+function predictRent(c: RentCase): boolean {
+  return planRentIncidents({ homes: c.homes, areas: c.areas, trades: c.trades, runYm: "2026-11", months: ["2026-08", "2026-10"] }).create.length > 0;
+}
+
+function predict(c: EvalCase): boolean {
+  if (c.kind === "notice") return predictNotice(c);
+  if (c.kind === "humidity") return predictHumidity(c);
+  return predictRent(c);
+}
+
 export function scoreCases(cases: readonly EvalCase[]): EvalReport {
   const results = cases.map((c): CaseResult => ({
     id: c.id, kind: c.kind, title: c.title, basis: c.basis, expected: c.expected,
-    predicted: c.kind === "notice" ? predictNotice(c) : predictHumidity(c),
+    predicted: predict(c),
   }));
   return {
     summary: tally(results),
-    byKind: { notice: tally(results.filter((r) => r.kind === "notice")), humidity: tally(results.filter((r) => r.kind === "humidity")) },
+    byKind: { notice: tally(results.filter((r) => r.kind === "notice")), humidity: tally(results.filter((r) => r.kind === "humidity")), rent: tally(results.filter((r) => r.kind === "rent")) },
     results,
   };
 }
