@@ -24,6 +24,7 @@
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card); /* 카드 그림자를 화면마다 같게 */
 }
 
 .sectionTitle {
@@ -40,7 +41,7 @@
 .deadlineBadge {
   margin-left: var(--space-half);
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--color-accent);
   color: var(--color-danger-text);
   font-size: var(--font-size-sm);
@@ -119,6 +120,17 @@
   background: var(--color-card);
   color: var(--color-text);
 }
+
+/* 다른 버튼처럼 마우스를 올리면 바뀐다(200ms 안팎, CLAUDE.md 디자인) */
+.approve,
+.reject,
+.cancel {
+  transition: background var(--transition-hover), border-color var(--transition-hover);
+}
+
+.approve:hover:not(:disabled) { background: var(--color-primary-hover); }
+.reject:hover:not(:disabled) { background: var(--color-danger-bg); }
+.cancel:hover { background: var(--color-muted-bg); }
 
 .approve:disabled,
 .reject:disabled {

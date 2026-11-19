@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { LoadError } from "@/app/_components/states";
+import { Empty, LoadError } from "@/app/_components/states";
 import { summarizeMembers } from "@/incident/member-summary";
 import { createClient } from "@/lib/supabase/server";
 import { parseVirtualUserIds } from "@/watch/simulation";
@@ -37,9 +37,10 @@ export default async function AdminUsersPage() {
   } catch {
     return <LoadError>회원 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
+  if (rows.length === 0) return <Empty>아직 가입한 회원이 없습니다.</Empty>;
   return (
     <>
-      <p className={styles.muted}>회원 {rows.length}명. 이름을 누르면 조건·내 집·알림을 봅니다. 관리자 수정(담당자·시각·사유 기록)은 수정 기록 표가 필요해 아직 없습니다(spec 005 Q1). 관리자도 회원 대신 승인하지 못합니다.</p>
+      <p className={styles.muted}>회원 {rows.length}명. 이름을 누르면 조건·내 집·알림을 봅니다. 회원 상세에서 공고 조건·내 집의 숫자·날짜를 고칠 수 있고, 고치면 담당자·시각·사유가 수정 기록에 남습니다(spec 010 FR-003). 관리자도 회원 대신 승인하지 못합니다.</p>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>

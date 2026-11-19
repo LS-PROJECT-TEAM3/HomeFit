@@ -4,10 +4,12 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { LoadError, Loading } from "@/app/_components/states";
 import { costInput } from "@/app/_components/cost-fields";
+import { withEstimate } from "@/incident/energy-estimate";
+import { loadEstimateBasis } from "@/incident/energy-estimate.server";
 import { getMyInterestHome, type InterestHome } from "@/incident/interest-homes.server";
 import { realCost } from "@/incident/real-cost";
 import { currentUserId } from "@/lib/supabase/server";
-import { CostCell, kstMonth, TotalText } from "../cost-view";
+import { CostCell, EstimateNote, kstMonth, TotalText } from "../cost-view";
 import { DeleteInterestHome, InterestHomeForm } from "../interest-home-form";
 import styles from "@/app/_components/hub.module.css";
 
@@ -27,7 +29,8 @@ async function Detail({ params }: { params: PageProps<"/compare/[id]">["params"]
     return <LoadError>관심 주택을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
   if (!home) return <LoadError>볼 수 없는 관심 주택입니다. <Link href="/compare">목록으로</Link></LoadError>;
-  const cost = realCost(home, kstMonth(new Date()));
+  const basis = await loadEstimateBasis([home], new Date()); // spec 011 FR-002
+  const cost = realCost(withEstimate(home, basis.averages), kstMonth(new Date()));
   return (
     <>
       <section className={styles.card} aria-labelledby="cost-title">
@@ -39,6 +42,7 @@ async function Detail({ params }: { params: PageProps<"/compare/[id]">["params"]
           <dt>교통비</dt><dd><CostCell item={cost.transit} /></dd>
           <dt>합계</dt><dd><TotalText cost={cost} /></dd>
         </dl>
+        <EstimateNote basis={basis} />
         <p className={styles.muted}>전기요금 계산값은 한전 주택용 저압 요금표(기본요금 + 전력량요금)이고 부가세·기금·기후환경·연료비조정 요금은 빠져 있습니다.</p>
       </section>
       <section className={styles.card} aria-labelledby="edit-title">

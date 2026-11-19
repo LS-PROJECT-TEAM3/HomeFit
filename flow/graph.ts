@@ -9,10 +9,10 @@ const STEP_LABEL: Record<StepName, string> = {
   collect: "수집", compare: "비교", detect: "감지", draft_plan: "계획 초안", notify: "슬랙 알림", await_approval: "승인 대기", record: "기록",
 };
 
-export type BoxState = "succeeded" | "failed" | "waiting" | "skipped" | "not_reached" | "off";
+export type BoxState = "succeeded" | "failed" | "waiting" | "running" | "skipped" | "not_reached" | "off";
 // CLAUDE.md 디자인: 색과 함께 글자 라벨
 export const STATE_LABEL: Record<BoxState, string> = {
-  succeeded: "성공", failed: "실패", waiting: "승인 대기", skipped: "건너뜀", not_reached: "도달 못 함", off: "아직 안 켜짐",
+  succeeded: "성공", failed: "실패", waiting: "승인 대기", running: "실행 중", skipped: "건너뜀", not_reached: "도달 못 함", off: "아직 안 켜짐",
 };
 
 export type StepRow = { step_name: string; status: string; items_in: number | null; items_out: number | null; detail: unknown };
@@ -26,21 +26,37 @@ const DETAIL_LABEL: Record<string, string> = {
   safe: "위험 없음", created: "새 알림", updated: "바뀐 알림", no_forecast: "예보 없음", same_window: "같은 48시간 창(중복 막음)",
   no_measurement: "측정값 없음", stale_measurement: "측정값 오래됨", ai_failed: "AI 실패", ai_drafted: "AI 초안", ai_provider: "AI 공급자",
   ai_failure_reasons: "AI 실패 이유", ai_skipped_by_limit: "상한으로 건너뜀", sent: "보냄", failed: "실패", retried: "다시 시도",
+  // PR #13 캡처·리뷰: 수집기(watch/*.server.ts)가 쓰는데 라벨이 없던 이름
+  skipped: "읽지 못해 건너뜀", duplicates: "중복", new: "새로 보임", changed: "바뀜", reason: "이유",
+  changes: "바뀐 공고 종류", correction: "정정공고", relaxed: "완화·재공고",
+  months: "계약 년월", ok: "읽은 대상", enough: "거래 충분", too_few: "거래 부족", planned: "만들 알림", area_updates: "관심 지역 갱신",
+  key: "대상",
 };
 
 // 이름이 키처럼 생긴 항목은 값을 통째로 가린다
 const SECRET_FIELD = /key|token|secret|password|authorization/i;
 
+const KNOWN_STATES = new Set<string>(["succeeded", "failed", "waiting", "running", "skipped"]);
+
 function toState(status: string): BoxState {
-  return status === "succeeded" || status === "failed" || status === "waiting" || status === "skipped" ? status : "skipped";
+  return KNOWN_STATES.has(status) ? (status as BoxState) : "skipped";
+}
+
+/** 값을 화면 글자로: 목록은 쉼표, 묶음은 "라벨 값 · 라벨 값"(JSON 그대로 보이지 않게, PR #13) */
+function formatValue(raw: unknown): string {
+  if (typeof raw === "string") return raw;
+  if (Array.isArray(raw)) return raw.length ? raw.map(formatValue).join(", ") : "없음";
+  if (raw !== null && typeof raw === "object") {
+    return Object.entries(raw as Record<string, unknown>).map(([k, v]) => `${DETAIL_LABEL[k] ?? k} ${formatValue(v)}`).join(" · ");
+  }
+  return String(raw);
 }
 
 function detailRows(detail: unknown, secrets: readonly string[]): DetailRow[] {
   if (detail === null || typeof detail !== "object" || Array.isArray(detail)) return [];
-  return Object.entries(detail as Record<string, unknown>).map(([label, raw]) => {
-    const text = typeof raw === "string" ? raw : JSON.stringify(raw);
-    return { label: DETAIL_LABEL[label] ?? label, value: SECRET_FIELD.test(label) ? "***" : maskSecrets(text, secrets) };
-  });
+  return Object.entries(detail as Record<string, unknown>).map(([label, raw]) => ({
+    label: DETAIL_LABEL[label] ?? label, value: SECRET_FIELD.test(label) ? "***" : maskSecrets(formatValue(raw), secrets),
+  }));
 }
 
 /** 기록에 없는 단계는 앞에서 실패했으면 "도달 못 함", 아니면 건너뜀 */

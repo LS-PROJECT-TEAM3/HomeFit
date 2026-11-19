@@ -29,7 +29,7 @@ describe("realCost", () => {
     expect(realCost(base, 11)).toEqual({
       rent: { value: 500_000, kind: "input" }, fee: { value: 100_000, kind: "input" },
       energy: { value: null, kind: "missing" }, transit: { value: null, kind: "missing" },
-      total: 600_000, missing: ["에너지비", "교통비"],
+      total: 600_000, missing: ["에너지비", "교통비"], estimated: [],
     });
   });
   it("E4: 직접 입력이 kWh보다 먼저", () => {

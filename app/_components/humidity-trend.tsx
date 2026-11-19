@@ -20,7 +20,7 @@ export function HumidityTrend({ measurements, compact = false }: { measurements:
   const min = Math.min(...values);
   const max = Math.max(...values);
   return (
-    <figure style={{ margin: 0 }}>
+    <figure className={styles.figure}>
       {/* 점이 하나면 선이 아니라 빈 상자로 보여 그리지 않는다 */}
       {values.length < 2 ? null : <svg viewBox={`-4 -4 ${BOX.width + 8} ${BOX.height + 8}`} width="100%" height={BOX.height + 8} role="img"
         aria-label={`최근 ${values.length}번 잰 실내 습도: 가장 낮음 ${min}%, 가장 높음 ${max}%, 마지막 ${latest.humidityPct}%`}>

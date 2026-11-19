@@ -31,6 +31,13 @@
   border-radius: var(--radius-card);
   color: var(--color-text);
   text-decoration: none;
+  box-shadow: var(--shadow-card); /* 카드 그림자를 화면마다 같게 */
+}
+
+a.card,
+.tab,
+.primaryButton {
+  transition: border-color var(--transition-hover), background var(--transition-hover), color var(--transition-hover);
 }
 
 a.card:hover {
@@ -61,7 +68,7 @@ a.card:hover {
 .badge {
   align-self: flex-start;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid currentColor;
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -71,8 +78,10 @@ a.card:hover {
   color: var(--color-status-success);
 }
 
+/* 주황 글자는 흰 바탕에서 3.56:1이라 글자는 진한 색, 주황은 테두리로 (디자인 기본선 3) */
 .skeleton {
-  color: var(--color-status-waiting);
+  color: var(--color-danger-text);
+  border-bottom: 2px solid var(--color-status-waiting);
 }
 
 .out {
@@ -135,7 +144,34 @@ a.card:hover {
   margin-top: var(--space-1);
   padding: var(--space-1);
   border-radius: var(--radius-card);
-  border: 2px solid currentColor;
+  border: 2px solid var(--color-border);
+}
+
+/* 결과 테두리 색. 글자("결로 위험" 등)와 함께 쓴다(디자인 기본선 5) */
+.resultRisk { border-color: var(--color-danger); }
+.resultSafe { border-color: var(--color-status-success); }
+
+/* 점 없는 목록, 한 줄짜리 이름·값 (인라인 style 대신, 디자인 기본선 1) */
+.plainList {
+  list-style: none;
+  padding-left: 0;
+}
+
+.inlineFacts dt,
+.inlineFacts dd {
+  display: inline;
+  margin: 0;
+}
+
+.figure { margin: 0; }
+
+.chartPlaceholder {
+  height: 160px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-muted-text);
 }
 
 /* spec 004 v0.2 화면별 하위 탭. 부모가 grid·flex여도 탭 줄이 화면을 넘지 않고 안에서 옆으로 밀린다 */
