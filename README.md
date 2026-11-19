@@ -70,24 +70,24 @@
 | qa.md | [docs/specs/001-공고정책-사건/qa.md](docs/specs/001-공고정책-사건/qa.md) |
 | 평가 항목 점검표 | [docs/프로젝트3-평가항목.md](docs/프로젝트3-평가항목.md) |
 | 조각 표(분배·작업 순서) | [docs/plan.md](docs/plan.md) |
-| 데이터 출처 | `docs/data-sources.md` (조각 C1 작업 중, main에 합쳐지면 링크 연결) |
-| 커넥터, 서브에이전트 | `docs/connectors.md`, `docs/agents.md` (조각 C1 작업 중) |
-| 디버그 기록, 전체 QA 모음 | `docs/debug-note.md`, `docs/qa.md` (조각 C1 작업 중) |
+| 데이터 출처 | [docs/data-sources.md](docs/data-sources.md) |
+| 커넥터, 서브에이전트 | [docs/connectors.md](docs/connectors.md), [docs/agents.md](docs/agents.md) |
+| 디버그 기록, 전체 QA 모음 | [docs/debug-note.md](docs/debug-note.md), [docs/qa.md](docs/qa.md) |
 | 시연 순서 | [docs/demo-order.md](docs/demo-order.md) (초안, 팀 확인 전) |
 | 발표 슬라이드 | `slides/index.html` (조각 C2 작업 중) |
 
 ## 팀과 작업 방식
 - 팀 하네스(규칙·스킬): [CLAUDE.md](CLAUDE.md), [.claude/rules/](.claude/rules/), [.claude/skills/](.claude/skills/)
 - 서비스 주소: https://homefit-lac.vercel.app (Vercel 무료 플랜, 로그인해야 화면이 보임). 발표 주소: (slides 배포 뒤 채움)
-- QA: 기능별 확인 결과는 위 "기능 목록" 표의 qa 링크, 전체 모음은 `docs/qa.md`(조각 C1 작업 중)
+- QA: 기능별 확인 결과는 위 "기능 목록" 표의 qa 링크, 전체 모음은 [docs/qa.md](docs/qa.md)
 - 조각 표와 브랜치·PR 순서: [docs/plan.md](docs/plan.md)
 
 ### 팀원
-병합된 PR #1~#4 기준(2026-11-18)입니다. PR과 리뷰가 새로 생기면 이 표를 고칩니다.
+병합된 PR #1~#10 기준(2026-11-18)입니다. 열린 PR은 #11(예림, 조각 B)과 이 표를 고치는 PR들입니다. PR과 리뷰가 새로 생기면 이 표를 고칩니다.
 
 | 이름 | GitHub | 맡은 조각 | 대표 PR | 리뷰 |
 |---|---|---|---|---|
-| 예림 | dbdpfla98 | B, E, 기획 문서와 기능 001~008 | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1) 팀 하네스·문제정의, [#2](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/2) IA, [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4) 기능 001~008 | 아직 |
-| (이름 확인 필요) | gaangstar | A, D | 아직 | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1), [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4) 승인 |
-| 선우 | sunwood0803 | C1 | [#3](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/3) 하네스 규칙을 팀 스택에 맞춤 | 아직 |
-| 서윤 | lilyoon333 | C2 | 아직 (조각 C2 PR 예정) | 아직 |
+| 예림 | dbdpfla98 | B, E, 기획 문서와 기능 001~008 | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1) 팀 하네스·문제정의, [#2](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/2) IA, [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4) 기능 001~008, [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8) 집 비교 실질 주거비(조각 E) | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9), [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10) 승인 |
+| 현경 | gaangstar | A, D | 아직 (조각 A·D PR 예정) | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1), [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4), [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8) 승인 |
+| 선우 | sunwood0803 | C1 | [#3](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/3) 하네스 규칙을 팀 스택에 맞춤, [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 제출 문서(data-sources·debug-note·qa), [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10) 커넥터·서브에이전트 문서 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 승인 |
+| 서윤 | lilyoon333 | C2 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6) README·.env.example 보강, [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7) 시연 순서, [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 시연 순서 정정 | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 승인과 코멘트 |

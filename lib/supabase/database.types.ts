@@ -118,6 +118,9 @@ type NoticeFollowRow = {
 
 type NoticeSummaryRow = { source_code: string; announcement_id: string; summary: string; model: string; created_at: string };
 
+// spec 010 FR-003, 마이그레이션 0019: 쓰기는 admin_update_member_input 함수로만
+export type AuditLogRow = { id: string; actor_id: string; target_table: string; target_id: string; before: Json; after: Json; reason: string; created_at: string };
+
 // 0018: 위키 챗봇 질문 기록 (ERD chat_logs, spec 012)
 type ChatLogRow = { id: string; user_id: string; question: string; answer: string; cited_pages: Json; created_at: string };
 
@@ -179,6 +182,7 @@ export type Database = {
         NotificationSettingRow,
         Optional<NotificationSettingRow, "slack_email" | "slack_user_id" | "enabled" | "enabled_at" | "updated_at">
       >;
+      audit_logs: Table<AuditLogRow, Optional<AuditLogRow, "id" | "created_at">>;
       notice_follows: Table<NoticeFollowRow, Optional<NoticeFollowRow, "reason" | "decided_at">>;
       notice_summaries: Table<NoticeSummaryRow, Optional<NoticeSummaryRow, "created_at">>;
       chat_logs: Table<ChatLogRow, Optional<ChatLogRow, "id" | "cited_pages" | "created_at">>;
@@ -194,6 +198,7 @@ export type Database = {
     Views: Record<never, never>;
     Functions: {
       add_notice_to_schedule: { Args: { p_announcement_id: string; p_checklist: Json }; Returns: string };
+      admin_update_member_input: { Args: { p_table: string; p_target_id: string; p_changes: Json; p_reason: string }; Returns: string };
       approve_incident: { Args: { p_incident_id: string }; Returns: string };
       collection_status: {
         Args: { p_source: string };
