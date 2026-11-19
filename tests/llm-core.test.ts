@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CALLS_PER_RUN, createCallBudget } from "@/lib/llm/budget";
 import { decideRetry } from "@/lib/llm/retry";
-import { selectProvider } from "@/lib/llm/select";
+import { providerNotice, selectProvider } from "@/lib/llm/select";
 
 // FR-005 (spec 002): 한도 초과만, 최대 2번, 대기 예산 안에서
 describe("decideRetry", () => {
@@ -71,5 +71,19 @@ describe("selectProvider", () => {
 
   it("모르는 값은 실패", () => {
     expect(selectProvider({ value: "gpt", isProduction: false })).toEqual({ ok: false, message: "모르는 AI 공급자: gpt" });
+  });
+});
+
+// 선우 PR #32 리뷰(2026-11-20): 출처 탭 안내가 공급자 이름을 글자로 박지 않고 지금 설정을 따른다
+describe("providerNotice", () => {
+  it("고른 공급자의 회사·이름을 돌려준다", () => {
+    expect(providerNotice({ ok: true, name: "claude" })).toBe("Anthropic Claude");
+    expect(providerNotice({ ok: true, name: "gemini" })).toBe("Google Gemini");
+  });
+  it("mock이면 밖으로 보내지 않는다고 밝힌다", () => {
+    expect(providerNotice({ ok: true, name: "mock" })).toBe("시험용 가짜 공급자, 밖으로 보내지 않음");
+  });
+  it("설정이 없거나 틀리면 확인 필요로 둔다", () => {
+    expect(providerNotice({ ok: false, message: "AI 설정 없음" })).toBe("설정 확인 필요");
   });
 });

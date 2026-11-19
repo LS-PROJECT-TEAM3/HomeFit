@@ -1,4 +1,5 @@
 import styles from "@/app/_components/hub.module.css";
+import { providerNotice, selectProvider } from "@/lib/llm/select";
 
 export const metadata = { title: "공공데이터 출처 | AI 도우미 | HomeFit AI" };
 
@@ -22,6 +23,7 @@ const SOURCES: Source[] = [
 ];
 
 export default function KnowledgeSourcesPage() {
+  const provider = providerNotice(selectProvider({ value: process.env.AI_PROVIDER, isProduction: process.env.VERCEL_ENV === "production" }));
   return (
     <section className={styles.card} aria-labelledby="src-title">
       <h2 id="src-title">이 앱이 쓰는 자료</h2>
@@ -33,7 +35,7 @@ export default function KnowledgeSourcesPage() {
       </div>
       <p className={styles.muted}>AI 글은 요약·대응안 초안·답변에만 쓰고, 숫자 비교·판단은 코드로 합니다. 공고 신청 자격은 판정하지 않고 공고문에서 확인하도록 안내합니다.</p>
       {/* 서윤 PR #19 리뷰(2026-11-19): 챗봇이 내 정보를 AI 공급자로 보내므로 "본인만 봄"만으로는 사실과 다르다 */}
-      <p className={styles.muted}>AI 도우미에 질문하면, 질문과 관련된 내 정보(내 집·관심 주택·점검 메모·하자 메모 등)가 답을 만들기 위해 AI 공급자(지금은 Google Gemini)로 전달됩니다. 사진은 보내지 않습니다. 메모에는 이름·연락처·상세 주소 같은 개인 정보를 적지 마세요.</p>
+      <p className={styles.muted}>AI 도우미에 질문하면, 질문과 관련된 내 정보(내 집·관심 주택·점검 메모·하자 메모 등)가 답을 만들기 위해 AI 공급자(지금은 {provider})로 전달됩니다. 사진은 보내지 않습니다. 메모에는 이름·연락처·상세 주소 같은 개인 정보를 적지 마세요.</p>
     </section>
   );
 }
