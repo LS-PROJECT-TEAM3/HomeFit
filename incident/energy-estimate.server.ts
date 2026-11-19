@@ -3,8 +3,8 @@ import { fetchHouseholdAverage } from "@/watch/kepco-household.server";
 import type { HouseholdAverage } from "@/watch/kepco-household";
 import { sigungusNeedingEstimate } from "./energy-estimate";
 
-/** 근거 표시용: 시군구별 한전 값과 불러오지 못한 시군구 수 */
-export type EstimateBasis = { averages: Map<string, HouseholdAverage>; failed: number };
+/** 근거 표시용: 시군구별 한전 값, 불러오지 못한 시군구 수, 추정이 필요했던 시군구 수(spec 017: 0이 아니면 패널 보정 문구를 보인다) */
+export type EstimateBasis = { averages: Map<string, HouseholdAverage>; failed: number; requested: number };
 
 type NeedsEstimate = { sigunguCode: string; energyCost: number | null; electricityKwh: number | null };
 
@@ -21,5 +21,5 @@ export async function loadEstimateBasis(homes: readonly NeedsEstimate[], now: Da
       console.error("한전 가구평균 불러오기 실패", codes[i], result.reason instanceof Error ? result.reason.message : "알 수 없음");
     } else if (result.value) averages.set(codes[i], result.value);
   });
-  return { averages, failed };
+  return { averages, failed, requested: codes.length };
 }

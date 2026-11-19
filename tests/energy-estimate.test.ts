@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { barHeights, homeUsage, householdAverageKwh, sigungusNeedingEstimate, usageTier, withEstimate, yearlyBills } from "@/incident/energy-estimate";
+import { panelFactor, panelMonthlyKwh } from "@/incident/energy-panel";
 import { electricityBill, realCost, type CostInput } from "@/incident/real-cost";
 
 // spec 011 FR-001~003, 경계 E1~E4
@@ -64,11 +65,23 @@ describe("sigungusNeedingEstimate (E1)", () => {
   });
 });
 
-describe("withEstimate", () => {
-  it("그 시군구 평균이 있으면 추정 kWh, 없으면 null", () => {
-    const averages = new Map([["11680", { kwh: 326.76 }]]);
-    expect(withEstimate({ sigunguCode: "11680" }, averages).estimatedKwh).toBe(326.76);
-    expect(withEstimate({ sigunguCode: "41135" }, averages).estimatedKwh).toBeNull();
+describe("withEstimate (spec 017 FR-002)", () => {
+  const averages = new Map([["11680", { kwh: 326.76 }]]);
+  it("한전 시군구 평균 × 주택 종류·면적 비율, 소수 첫째 자리(E5)", () => {
+    const home = { sigunguCode: "11680", housingType: "officetel" as const, exclusiveAreaM2: 20 };
+    const result = withEstimate(home, averages);
+    expect(result.estimatedKwh).toBe(Math.round(326.76 * panelFactor("officetel", 20) * 10) / 10);
+    expect(result.estimateBasis).toBe("kepco");
+  });
+  it("E4: 한전 값이 없으면 패널 전국 평균 × 비율(미입력으로 두지 않음)", () => {
+    const result = withEstimate({ sigunguCode: "41135", housingType: "apartment" as const, exclusiveAreaM2: 84 }, averages);
+    expect(result.estimatedKwh).toBe(Math.round(panelMonthlyKwh() * panelFactor("apartment", 84) * 10) / 10);
+    expect(result.estimateBasis).toBe("national");
+  });
+  it("SC-001: 같은 시군구에서 작은 집이 덜 나온다", () => {
+    const small = withEstimate({ sigunguCode: "11680", housingType: "officetel" as const, exclusiveAreaM2: 20 }, averages).estimatedKwh ?? 0;
+    const large = withEstimate({ sigunguCode: "11680", housingType: "apartment" as const, exclusiveAreaM2: 110 }, averages).estimatedKwh ?? 0;
+    expect(small).toBeLessThan(large);
   });
 });
 

@@ -1,4 +1,6 @@
 // spec 011 FR-001·FR-003: 시군구 가구 평균 전력사용량으로 추정, 12개월 예상 요금. 순수 함수
+import { panelFactor, panelMonthlyKwh } from "./energy-panel";
+import type { HousingType } from "./home-form";
 import { electricityBill, RATE_TABLE } from "./real-cost";
 
 /** spec 011 E2: 한전 시군구 가구 평균(kWh/월)이 없거나 0 이하·숫자가 아니면 추정하지 않는다 */
@@ -21,9 +23,19 @@ export function sigungusNeedingEstimate(homes: readonly NeedsEstimate[]): string
   return [...new Set(homes.filter((h) => h.energyCost === null && h.electricityKwh === null).map((h) => h.sigunguCode))];
 }
 
-/** spec 011 FR-002: 시군구 평균이 있으면 그 집에 추정 kWh를 붙인다(쓸지는 realCost가 E1 순서로 정한다) */
-export function withEstimate<T extends { sigunguCode: string }>(home: T, averages: ReadonlyMap<string, { kwh: number }>): T & { estimatedKwh: number | null } {
-  return { ...home, estimatedKwh: averages.get(home.sigunguCode)?.kwh ?? null };
+/** 추정 기준: 한전 시군구 평균 × 보정, 또는 패널 전국 평균 × 보정(spec 017 FR-002) */
+export type EstimateBasisKind = "kepco" | "national";
+type EstimateTarget = { sigunguCode: string; housingType: HousingType; exclusiveAreaM2: number | null };
+
+/**
+ * spec 011 FR-002 → spec 017 FR-002: 그 집에 추정 kWh를 붙인다(쓸지는 realCost가 E1 순서로 정한다).
+ * 한전 시군구 평균이 있으면 그 값, 없으면 패널 전국 평균에 주택 종류·면적 비율을 곱한다(E4)
+ */
+export function withEstimate<T extends EstimateTarget>(home: T, averages: ReadonlyMap<string, { kwh: number }>): T & { estimatedKwh: number; estimateBasis: EstimateBasisKind } {
+  const kepco = householdAverageKwh(averages.get(home.sigunguCode)?.kwh);
+  const base = kepco ?? panelMonthlyKwh();
+  const kwh = Math.round(base * panelFactor(home.housingType, home.exclusiveAreaM2) * 10) / 10; // E5
+  return { ...home, estimatedKwh: kwh, estimateBasis: kepco === null ? "national" : "kepco" };
 }
 
 export type HomeUsage = { kwh: number; kind: "input" | "estimated" };
