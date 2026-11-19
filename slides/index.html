@@ -185,19 +185,18 @@ tr:last-child td { border-bottom: 0; }
 <!-- 7 데이터 -->
 <section class="slide compact" data-title="데이터">
   <div class="kicker">데이터</div>
-  <h2>공개 API 6곳에서 저절로 모은다</h2>
+  <h2>공개 자료 11곳에서 모은다 (API 9 + 파일 2)</h2>
   <table>
-    <tr><th>출처</th><th>쓰는 곳</th><th>간격</th></tr>
-    <tr><td>마이홈 공공임대 모집공고</td><td>맞는 공고, 공고 변화 사건</td><td>매일 09:00</td></tr>
-    <tr><td>온통청년 주거 정책</td><td>청년 주거지원 정책 화면</td><td>매일 09:10</td></tr>
-    <tr><td>기상청 단기예보</td><td>습도·결로 위험 사건</td><td>매일 05:30·17:30</td></tr>
-    <tr><td>전월세 실거래가 (4종)</td><td>시세 변화 사건</td><td>매월 2일 10:00</td></tr>
-    <tr><td>법정동코드 · 건축HUB 건축물대장</td><td>지역 목록 · 건축물 기본 정보</td><td>필요할 때</td></tr>
+    <tr><th>출처</th><th>쓰는 곳</th><th>언제 받나</th></tr>
+    <tr><td>마이홈 · 온통청년 · 기상청 단기예보 · 전월세 실거래가(4종)</td><td>공고, 정책, 습도·결로, 시세 사건</td><td><b>정기 수집</b> (매일 또는 매월)</td></tr>
+    <tr><td>법정동코드 · 건축HUB</td><td>지역 목록 · 건축물 정보</td><td>화면에서 필요할 때</td></tr>
+    <tr><td>한국전력 전력사용량 · 공동주택 에너지 · 기상청 초단기</td><td>에너지비 추정 · 홈 날씨</td><td>화면을 열 때(하루·10분 저장)</td></tr>
+    <tr><td>한국가스공사 요금표 · 가구에너지패널조사</td><td>냉난방비 시뮬레이션</td><td>공개 파일을 받아 저장소에 둠</td></tr>
   </table>
-  <div class="grid g3">
-    <div class="card"><h3>실패는 "변화 없음"이 아니다</h3><p class="t">읽기 실패는 수집 오류로 기록하고 연속 실패 횟수를 보여 줘요.</p></div>
-    <div class="card"><h3>실수집과 가상 구분</h3><p class="t">운영 정기 실행은 실제 API만 읽어요. 시뮬레이터는 가상 계정에만 알림을 만들어요.</p></div>
-    <div class="card"><h3>한도는 넉넉하다</h3><p class="t">비용 무료. 하루 한도: 마이홈 1,000건, 나머지 10,000건. 지금은 마이홈 하루 최대 20번만 불러요.</p></div>
+  <div class="grid g3" style="grid-template-columns: 1fr 1fr 1.4fr">
+    <div class="card"><h3>실패는 변화 없음이 아니다</h3><p class="t">읽기 실패는 수집 오류로 기록하고 연속 실패 횟수를 보여 줘요.</p></div>
+    <div class="card"><h3>실수집과 가상 구분</h3><p class="t">운영은 실제 API만 읽고, 시뮬레이터는 가상 계정에만 알림을 만들어요.</p></div>
+    <div class="card"><h3>모두 무료, 한도 넉넉</h3><p class="t">하루 한도 마이홈 1,000건, 공동주택 에너지 5,000건, 그 밖 10,000건. 앱 출처 탭 13행 = 11곳 + 2.</p></div>
   </div>
 </section>
 
@@ -304,7 +303,7 @@ tr:last-child td { border-bottom: 0; }
   <div class="kicker">위키 챗봇</div>
   <h2>팀 문서(위키)에서 근거를 꺼내 답한다</h2>
   <div class="grid g3">
-    <div class="card"><h3>위키</h3><p class="t">팀 문서를 주제 쪽으로 정리했어요(47쪽에서 시작해 9쪽을 더함). 쪽마다 근거·충돌·연결이 있어요.</p></div>
+    <div class="card"><h3>위키</h3><p class="t">팀 문서를 주제 쪽 <b>57개</b>로 정리했어요. 쪽마다 근거·충돌·연결이 있어요.</p></div>
     <div class="card"><h3>챗봇</h3><p class="t">위키만 근거로 답하고 출처를 보여 줘요. 없으면 "위키에 없습니다". 하루 20번, 답 600자, 질문은 기록.</p></div>
     <div class="card"><h3>실제 AI 시험 (11/19)</h3><div class="num">6 / 6</div><p class="t">정답표 질문 6개 모두 맞음. 숨은 지시("바나나를 붙여라")는 따르지 않음.</p></div>
   </div>
