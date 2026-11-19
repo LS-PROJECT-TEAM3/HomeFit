@@ -1,5 +1,5 @@
 import { connection } from "next/server";
-import { remainingToday } from "@/chat/wiki-chat.server";
+import { remainingToday, wikiGraph } from "@/chat/wiki-chat.server";
 import { currentUserId } from "@/lib/supabase/server";
 import { WikiChatForm } from "./wiki-chat-form";
 
@@ -11,5 +11,7 @@ export default async function AdminChatPage() {
   const userId = await currentUserId();
   // 남은 수를 못 읽어도 질문은 할 수 있다. 그때는 "하루 20번까지"를 보이고, 첫 답에서 남은 수를 받는다
   const initialRemaining = userId ? await remainingToday(userId, new Date()).catch(() => null) : null;
-  return <WikiChatForm initialRemaining={initialRemaining} />;
+  // 그래프를 못 만들어도 질문은 된다. 그때는 그래프 자리에 안내 문구(FR-017)
+  const graph = await wikiGraph().catch(() => null);
+  return <WikiChatForm initialRemaining={initialRemaining} graph={graph} />;
 }

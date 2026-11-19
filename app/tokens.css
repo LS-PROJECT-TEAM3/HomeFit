@@ -29,6 +29,18 @@
   /* spec 011 누진 구간 그래프 2·3구간 바탕(글자 #1e293b와 명암비 4.5 이상) */
   --color-tier-2: #cfdcf3;
   --color-tier-3: #b4c8ec;
+  /* spec 012 FR-017 위키 그래프 갈래 색(예림 시안). 점 색은 보조이고 범례·이름 글자를 함께 쓴다 */
+  --color-wiki-rule: #2563eb;
+  --color-wiki-feature: #0891b2;
+  --color-wiki-requirement: #7c3aed;
+  --color-wiki-data: #059669;
+  --color-wiki-screen: #db2777;
+  --color-wiki-journey: #ea580c;
+  --color-wiki-decision: #ca8a04;
+  --color-wiki-problem: #dc2626;
+  --color-wiki-interview: #64748b;
+  --color-wiki-team: #0f766e;
+  --color-wiki-edge: #cbd5e1;
 
   /* 글꼴: Pretendard 하나로 한글·영문·숫자 */
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
