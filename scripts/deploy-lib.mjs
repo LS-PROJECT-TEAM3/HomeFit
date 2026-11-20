@@ -27,11 +27,14 @@ export function collectUrl({ productionUrl }) {
 
 /**
  * vercel deploy 출력 → 새 배포 주소의 호스트. 출력에 주소가 없으면 null.
+ * CLI가 끝에 "Aliased 운영 주소"를 찍으므로 운영 별칭은 뺀다(2026-11-20 배포에서 2분 헛돎).
  * @param {string} output
+ * @param {string} [productionUrl]
  * @returns {string | null}
  */
-export function deployedHost(output) {
-  const hosts = [...output.matchAll(/https:\/\/([a-z0-9-]+\.vercel\.app)/gi)].map((m) => m[1]);
+export function deployedHost(output, productionUrl = "") {
+  const aliasHost = productionUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "").toLowerCase();
+  const hosts = [...output.matchAll(/https:\/\/([a-z0-9-]+\.vercel\.app)/gi)].map((m) => m[1]).filter((host) => host.toLowerCase() !== aliasHost);
   return hosts.at(-1) ?? null;
 }
 

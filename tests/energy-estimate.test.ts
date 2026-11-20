@@ -144,7 +144,7 @@ describe("아파트 시군구 평균 사용금액 (spec 018)", () => {
 describe("realCost 에너지비 순서에 아파트 금액 추정 (spec 018 FR-003)", () => {
   it("입력 > kWh 계산 > 아파트 금액 추정 > kWh 추정", () => {
     expect(realCost({ ...base, electricityKwh: 200, estimatedEnergyCost: 150_000, estimatedKwh: 300 }, 1).energy.kind).toBe("calculated");
-    expect(realCost({ ...base, estimatedEnergyCost: 150_000, estimatedKwh: 300 }, 1).energy).toEqual({ value: 150_000, kind: "estimated" });
+    expect(realCost({ ...base, estimatedEnergyCost: 150_000, estimatedKwh: 300 }, 1).energy).toEqual({ value: 150_000, kind: "estimated", basis: "apt" });
     expect(realCost({ ...base, estimatedEnergyCost: null, estimatedKwh: 300 }, 1).energy).toEqual({ value: electricityBill(300, 1), kind: "estimated" });
   });
 });
