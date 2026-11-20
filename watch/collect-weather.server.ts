@@ -1,7 +1,8 @@
 import { planHumidityIncidents } from "@/incident/humidity-detect";
 import type { HumidityFacts } from "@/incident/humidity-detect";
 import { draftHumidityPlan } from "@/incident/humidity-plan.server";
-import { notifyIncidents } from "@/incident/notify.server";
+import { notifyStepStatus } from "@/incident/notify";
+import { notifyAllChannels } from "@/incident/notify.server";
 import type { CreatedIncident } from "@/incident/plans.server";
 import type { DraftResult } from "@/incident/plan-draft.server";
 import { newCallContext } from "@/lib/llm/call.server";
@@ -68,8 +69,8 @@ async function saveObservations(db: AdminClient, runId: string, collected: Colle
 async function runNotifyStep(db: AdminClient, runId: string, created: CreatedIncident[]) {
   try {
     const candidates = created.map((c) => ({ incidentId: c.id, userId: c.user_id, detectedAt: c.detected_at, facts: c.facts as unknown as HumidityFacts }));
-    const stats = await notifyIncidents(db, candidates);
-    const status = stats.sent + stats.failed === 0 ? "skipped" : "succeeded";
+    const stats = await notifyAllChannels(db, candidates);
+    const status = notifyStepStatus(stats);
     await recordStep(db, runId, { name: "notify", status, itemsIn: created.length, itemsOut: stats.sent, detail: stats });
   } catch (cause) {
     const message = maskSecrets(cause instanceof Error ? cause.message : String(cause), secretsToMask());

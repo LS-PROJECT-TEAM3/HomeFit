@@ -6,7 +6,11 @@ export const MIN_PASSWORD = 8;
 // IA MB_010000_PG, MB_010100_PG, MB_010300_PG: 로그인 안 해도 열고, 로그인했으면 홈으로
 const PUBLIC_PATHS = new Set(["/login", "/signup", "/reset-password"]);
 // 메일 링크 확인 주소는 로그인 여부와 상관없이 연다 (spec 014 FR-002)
-const OPEN_PATHS = new Set(["/auth/confirm"]);
+// spec 021: 브라우저가 쿠키 없이 가져가는 서비스 워커·앱 정보·아이콘도 연다(로그인 화면으로 돌리면 웹 푸시·홈 화면 추가가 깨짐)
+const OPEN_PATHS = new Set([
+  "/auth/confirm",
+  "/sw.js", "/manifest.webmanifest", "/apple-icon.png", "/icons/icon-192.png", "/icons/icon-512.png",
+]);
 
 export type RouteAccess = "public" | "open" | "private";
 

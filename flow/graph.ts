@@ -6,7 +6,7 @@ export const STEP_NAMES = ["collect", "compare", "detect", "draft_plan", "notify
 type StepName = (typeof STEP_NAMES)[number];
 
 const STEP_LABEL: Record<StepName, string> = {
-  collect: "수집", compare: "비교", detect: "감지", draft_plan: "계획 초안", notify: "슬랙 알림", await_approval: "승인 대기", record: "기록",
+  collect: "수집", compare: "비교", detect: "감지", draft_plan: "계획 초안", notify: "알림(슬랙·웹 푸시)", await_approval: "승인 대기", record: "기록",
 };
 
 export type BoxState = "succeeded" | "failed" | "waiting" | "running" | "skipped" | "not_reached" | "off";
@@ -31,6 +31,8 @@ const DETAIL_LABEL: Record<string, string> = {
   changes: "바뀐 공고 종류", correction: "정정공고", relaxed: "완화·재공고",
   months: "계약 년월", ok: "읽은 대상", enough: "거래 충분", too_few: "거래 부족", planned: "만들 알림", area_updates: "관심 지역 갱신",
   key: "대상",
+  // spec 021(선우 PR #44 리뷰): 알림 단계가 슬랙·웹 푸시를 함께 기록한다
+  slack: "슬랙", webPush: "웹 푸시", removed: "지운 기기", errors: "오류",
 };
 
 // 이름이 키처럼 생긴 항목은 값을 통째로 가린다

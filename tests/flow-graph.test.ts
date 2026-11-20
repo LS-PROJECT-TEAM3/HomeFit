@@ -67,3 +67,17 @@ describe("도는 중인 실행 (PR #13)", () => {
     expect(myhome).toMatchObject({ state: "running", stateLabel: "실행 중" });
   });
 });
+
+// spec 021, 선우 PR #44 리뷰(2026-11-20): 알림 단계는 슬랙·웹 푸시를 함께 보내므로 이름과 상세가 둘 다 보이게
+describe("알림 단계 (spec 021)", () => {
+  const notify = (detail: unknown) => buildFlow([{ step_name: "notify", status: "succeeded", items_in: 2, items_out: 2, detail }], []).boxes.find((b) => b.name === "notify");
+  it("상자 이름은 슬랙·웹 푸시를 함께 가리킨다", () => {
+    expect(notify({})?.label).toBe("알림(슬랙·웹 푸시)");
+  });
+  it("슬랙·웹 푸시·지운 기기·오류가 한국어로", () => {
+    const rows = notify({ sent: 2, failed: 0, retried: 0, slack: { sent: 1, failed: 0, retried: 0 }, webPush: { sent: 1, failed: 0, retried: 0, removed: 1 }, errors: [] })?.details ?? [];
+    expect(rows.map((r) => r.label)).toEqual(["보냄", "실패", "다시 시도", "슬랙", "웹 푸시", "오류"]);
+    expect(rows[4].value).toBe("보냄 1 · 실패 0 · 다시 시도 0 · 지운 기기 1");
+    expect(rows[5].value).toBe("없음");
+  });
+});

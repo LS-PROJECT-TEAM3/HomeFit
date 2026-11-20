@@ -3,6 +3,8 @@ import { maskSecrets } from "@/watch/mask";
 import {
   BUNDLE_THRESHOLD,
   buildMessages,
+  combineChannels,
+  notifyStepStatus,
   normalizeSlackEmail,
   readLookupResult,
   selectToNotify,
@@ -138,5 +140,34 @@ describe("buildMessages 습도·결로", () => {
       "https://homefit.test/incidents/h-1",
     ].join("\n"));
     expect(message.text).not.toContain("26350");
+  });
+});
+
+// spec 021, ponytail-review 2026-11-20 3번: 한쪽이 실패해도 다른 쪽 결과가 실행 기록에 남는다
+describe("combineChannels", () => {
+  const empty = { slack: { sent: 0, failed: 0, retried: 0 }, webPush: { sent: 0, failed: 0, retried: 0, removed: 0 } };
+  type Slack = typeof empty.slack;
+  type Push = typeof empty.webPush;
+  const combine = (a: PromiseSettledResult<Slack>, b: PromiseSettledResult<Push>) => combineChannels(a, b, empty);
+  const ok = <T,>(value: T): PromiseSettledResult<T> => ({ status: "fulfilled", value });
+  const bad = (message: string): PromiseSettledResult<never> => ({ status: "rejected", reason: new Error(message) });
+  const slack = { sent: 1, failed: 0, retried: 0 };
+  const push = { sent: 2, failed: 1, retried: 0, removed: 1 };
+
+  it("둘 다 되면 합계와 쪽마다 결과, 오류 없음", () => {
+    expect(combine(ok(slack), ok(push))).toEqual({ sent: 3, failed: 1, retried: 0, slack, webPush: push, errors: [] });
+  });
+
+  it("슬랙이 실패해도 웹 푸시 결과는 남고 오류에 슬랙이 적힌다", () => {
+    const result = combine(bad("DB 읽기 실패"), ok(push));
+    expect(result.webPush).toEqual(push);
+    expect(result.sent).toBe(2);
+    expect(result.errors).toEqual(["슬랙: DB 읽기 실패"]);
+  });
+
+  it("실행 기록 상태: 오류가 있으면 failed, 보낸 게 없으면 skipped", () => {
+    expect(notifyStepStatus(combine(bad("x"), ok(push)))).toBe("failed");
+    expect(notifyStepStatus(combine(ok({ sent: 0, failed: 0, retried: 0 }), ok({ sent: 0, failed: 0, retried: 0, removed: 0 })))).toBe("skipped");
+    expect(notifyStepStatus(combine(ok(slack), ok(push)))).toBe("succeeded");
   });
 });

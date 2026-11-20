@@ -1,13 +1,15 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { signOut } from "@/app/(auth)/actions";
 import { LoadError, Loading } from "@/app/_components/states";
 import { UNAVAILABLE } from "@/incident/notify";
 import { slackConfigured } from "@/incident/notify.server";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 import { NotifyForm } from "../notifications/notify-form";
+import { PUSH_UNAVAILABLE } from "@/incident/web-push";
+import { webPushConfigured } from "@/incident/web-push.server";
+import { PushSettings } from "../push/push-settings";
+import { SignOutButton } from "../push/sign-out-button";
 import styles from "../my.module.css";
-import formStyles from "@/app/_components/form.module.css";
 
 export const metadata = { title: "계정·알림 | HomeFit AI" };
 
@@ -35,6 +37,14 @@ async function SlackSettings() {
   return <NotifyForm initialEmail={data?.slack_email ?? loginEmail} found={Boolean(data?.slack_user_id)} enabled={data?.enabled ?? false} />;
 }
 
+// spec 021 FR-001 E6: 키가 없으면 켜기 버튼 대신 안내
+async function PushSection() {
+  await connection();
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!webPushConfigured() || !publicKey) return <p role="status">{PUSH_UNAVAILABLE}</p>;
+  return <PushSettings publicKey={publicKey} />;
+}
+
 // IA MY_030400_TB 계정·알림 (FR-001, FR-018). 사용자 요청(2026-11-18)으로 슬랙 알림 탭(MY_030500_TB)을 합침
 export default function AccountPage() {
   return (
@@ -44,15 +54,21 @@ export default function AccountPage() {
         <Suspense fallback={<p role="status">불러오는 중…</p>}>
           <AccountEmail />
         </Suspense>
-        <form action={signOut}>
-          <button type="submit" className={formStyles.primary}>로그아웃</button>
-        </form>
+        {/* spec 021 FR-007: 이 기기 웹 푸시를 끈 뒤 로그아웃 */}
+        <SignOutButton />
       </section>
       <section id="slack" className={styles.section} aria-labelledby="notify-title">
         <h2 id="notify-title">슬랙 알림</h2>
         <p>내 집에 결로 위험이 생기거나 팔로우한 공고가 바뀌어 위험·기회 알림이 만들어지면 팀 슬랙의 HomeFit 봇이 개인 메시지로 알려 드립니다. 슬랙 알림을 켜는 것이 알림을 받겠다는 승인입니다. 대응 계획은 지금처럼 하나씩 승인합니다.</p>
         <Suspense fallback={<Loading />}>
           <SlackSettings />
+        </Suspense>
+      </section>
+      <section id="push" className={styles.section} aria-labelledby="push-title">
+        <h2 id="push-title">웹 푸시 알림</h2>
+        <p>슬랙 알림과 같은 위험·기회 알림을 이 휴대폰·컴퓨터의 브라우저 알림으로 받습니다. 기기마다 따로 켜고, 켜는 것이 알림을 받겠다는 승인입니다. 대응 계획은 지금처럼 하나씩 승인합니다.</p>
+        <Suspense fallback={<Loading />}>
+          <PushSection />
         </Suspense>
       </section>
     </>
