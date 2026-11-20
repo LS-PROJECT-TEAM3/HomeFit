@@ -1,4 +1,5 @@
-import { notifyIncidents } from "@/incident/notify.server";
+import { notifyStepStatus } from "@/incident/notify";
+import { notifyAllChannels } from "@/incident/notify.server";
 import type { DraftResult } from "@/incident/plan-draft.server";
 import { planRentIncidents, rentTargetKeys, type AreaTarget, type HomeTarget, type RentFacts, type RentPlan } from "@/incident/rent-detect";
 import { draftRentPlan } from "@/incident/rent-plan.server";
@@ -50,8 +51,8 @@ async function saveObservations(db: AdminClient, runId: string, plan: RentPlan, 
 
 async function runNotify(db: AdminClient, runId: string, created: CreatedRentIncident[]) {
   try {
-    const stats = await notifyIncidents(db, created.map((c) => ({ incidentId: c.id, userId: c.user_id, detectedAt: c.detected_at, facts: c.facts as unknown as RentFacts })));
-    await recordStep(db, runId, { name: "notify", status: stats.sent + stats.failed === 0 ? "skipped" : "succeeded", itemsIn: created.length, itemsOut: stats.sent, detail: stats });
+    const stats = await notifyAllChannels(db, created.map((c) => ({ incidentId: c.id, userId: c.user_id, detectedAt: c.detected_at, facts: c.facts as unknown as RentFacts })));
+    await recordStep(db, runId, { name: "notify", status: notifyStepStatus(stats), itemsIn: created.length, itemsOut: stats.sent, detail: stats });
   } catch (cause) {
     await recordStep(db, runId, { name: "notify", status: "failed", detail: { error: mask(cause instanceof Error ? cause.message : String(cause)) } });
   }

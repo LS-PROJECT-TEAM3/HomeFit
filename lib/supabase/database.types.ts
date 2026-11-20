@@ -38,6 +38,9 @@ type InterestHomeRow = {
 // 0021: 하자 기록 (ERD defect_records, spec 019)
 type DefectRecordRow = { id: string; home_id: string; occurred_on: string; kind: string; memo: string; photo_path: string | null; created_by: string; created_at: string };
 
+// 0022: 웹 푸시 기기 (ERD push_subscriptions, spec 021)
+type PushSubscriptionRow = { id: string; user_id: string; endpoint: string; p256dh: string; auth: string; created_at: string };
+
 type IndoorMeasurementRow = {
   id: string; home_id: string; temperature_c: number; humidity_pct: number; measured_at: string;
   created_by: string; created_at: string;
@@ -192,6 +195,7 @@ export type Database = {
       notice_summaries: Table<NoticeSummaryRow, Optional<NoticeSummaryRow, "created_at">>;
       chat_logs: Table<ChatLogRow, Optional<ChatLogRow, "id" | "cited_pages" | "created_at">>;
       defect_records: Table<DefectRecordRow, Optional<DefectRecordRow, "id" | "photo_path" | "created_at">>;
+      push_subscriptions: Table<PushSubscriptionRow, Optional<PushSubscriptionRow, "id" | "created_at">>;
       llm_calls: Table<
         LlmCallRow,
         Optional<LlmCallRow, "id" | "run_id" | "model" | "error_kind" | "input_tokens" | "output_tokens" | "created_at">

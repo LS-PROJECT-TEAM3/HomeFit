@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-19 (v1.11, spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
+- 최종 갱신: 2026-11-20 (v1.12, spec 021: push_subscriptions 웹 푸시 기기, notifications.channel `web_push`. v1.11 spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -14,6 +14,7 @@ erDiagram
     HOMES ||--o{ INDOOR_MEASUREMENTS : "측정값"
     HOMES ||--o{ DEFECT_RECORDS : "하자 기록 (v1.11)"
     PROFILES ||--o{ INTEREST_AREAS : "관심 지역"
+    PROFILES ||--o{ PUSH_SUBSCRIPTIONS : "웹 푸시 기기"
     PROFILES ||--o| NOTIFICATION_SETTINGS : "슬랙 알림 설정"
 
     SOURCES ||--o{ RUNS : "수집 실행"
@@ -152,6 +153,16 @@ erDiagram
 | enabled | boolean | ✔ | 기본 false. 켜는 것이 알림 승인. 슬랙 사람 ID가 없으면 켤 수 없다 | [PRD FR-37, 8절] |
 | enabled_at | timestamptz | | 마지막으로 켠 시각(알림 승인 시각) | [PRD 8절] |
 | updated_at | timestamptz | ✔ | | [PRD FR-37] |
+
+#### push_subscriptions — 웹 푸시 기기 (v1.12, spec 021)
+| 필드 | 타입 | 필수 | 설명 | 출처 |
+|---|---|---|---|---|
+| id | uuid (PK) | ✔ | | [PRD FR-35] |
+| user_id | uuid (FK profiles) | ✔ | 이 기기로 알림을 받는 사람. 한 사람이 여러 기기 | [spec 021 E1] |
+| endpoint | text (유일) | ✔ | 브라우저가 준 받을 주소. 브라우저마다 하나라 다른 계정이 켜면 그 계정 것이 된다. 개인 정보라 본인만 읽음 | [spec 021 FR-001, E3] |
+| p256dh | text | ✔ | 브라우저가 준 암호화 열쇠 | [spec 021 FR-001] |
+| auth | text | ✔ | 브라우저가 준 인증 값 | [spec 021 FR-001] |
+| created_at | timestamptz | ✔ | 켠 시각(알림 승인 시각). 이보다 먼저 생긴 사건은 이 기기로 보내지 않는다 | [PRD 8절] [spec 021 FR-003] |
 
 ### 수집
 
@@ -368,7 +379,7 @@ erDiagram
 | id | uuid (PK) | ✔ | | [PRD FR-37] |
 | incident_id | uuid (FK incidents) | ✔ | (incident_id, channel) 유일 → 같은 사건은 한 번만 보냄 | [PRD FR-37] |
 | user_id | uuid (FK profiles) | ✔ | | [PRD FR-37] |
-| channel | text: `slack` | ✔ | | [PRD FR-37] |
+| channel | text: `slack` / `web_push` | ✔ | 웹 푸시는 사람마다 한 번 기록(기기 여러 개 중 하나라도 보내면 `sent`, spec 021 Q1) | [PRD FR-37] [PRD FR-35] |
 | status | text: `sent` / `failed` | ✔ | | [PRD FR-37] |
 | attempts | integer | ✔ | 보낸 횟수. 실패는 다음 수집에 한 번 더(최대 2) | [PRD FR-37] |
 | last_error | text | | 실패 이유. 봇 토큰·이메일은 가린 뒤 저장 | [PRD FR-37, FR-27] |
@@ -441,6 +452,7 @@ erDiagram
 | source_items | 로그인하면 읽기(공개 공고라서, 맞는 공고 목록) | 읽기 | 읽기·쓰기 |
 | notification_settings | 내 행만 읽기, 알림 켜기·끄기(enabled·enabled_at·updated_at)만 수정. 이메일·슬랙 사람 ID는 서버만 씀(0008) | **볼 수 없음**(슬랙 이메일은 개인 정보) | 읽기·쓰기 |
 | notifications | 내 행 읽기 | 읽기(주소 없음) | 쓰기 |
+| push_subscriptions | 내 행만 읽기·지우기. 넣기·바꾸기는 서버만(같은 브라우저 다른 계정, 0022) | **볼 수 없음**(받을 주소는 개인 정보) | 읽기·쓰기 |
 | notice_follows | 내 행 읽기·쓰기 | 읽기 | 읽기 |
 | notice_summaries | 로그인하면 읽기 | 읽기 | 쓰기 |
 | incidents, response_plans | 내 행만 읽기 | 전체 읽기 | 쓰기 |
@@ -486,6 +498,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-18 | v1.10 | spec 012(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-20 | v1.12 (승인 2026-11-20 "모두 승인", 마이그레이션 0022) | push_subscriptions 표와 접근 규칙, notifications.channel에 `web_push`. PRD v1.20 FR-35, spec 021 |
 | 2026-11-19 | v1.11 (승인 2026-11-19 "추천대로 진행", 마이그레이션 0021) | interest_homes에 move_in_checklist(jsonb)·move_in_note, defect_records 표, 사진 저장소 defect-photos와 접근 규칙. PRD v1.17 FR-29·FR-30 1차, spec 019 |
 | 2026-11-18 | v1.9 (승인 2026-11-18, 마이그레이션 0020) | interest_homes 표 추가, homes에 energy_cost·electricity_kwh·transit_fare·trips_per_day·commute_days. 실질 주거비 알파(PRD v1.10 FR-28, spec 009) |
 | 2026-11-18 | v1.8 | notice_summaries에 정책 요약도 저장(source_code `youth_policy`, announcement_id = 정책 ID). 칸 변경 없음 (spec 006 v0.3 FR-007) |
