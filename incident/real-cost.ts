@@ -28,7 +28,9 @@ export function electricityBill(kwh: number, month: number): number {
 }
 
 /** 값의 종류: 입력값 / 계산값 / 추정값(spec 011 FR-002) / 미입력 (spec 009 FR-005 칸마다 글자로) */
-export type CostItem = { value: number | null; kind: "input" | "calculated" | "estimated" | "missing" };
+/** 추정값이 어느 계산에서 나왔나: 국토부 아파트 금액(spec 018) / 한전 시군구 kWh(spec 011) / 패널 전국 kWh(spec 017) */
+export type EstimateSource = "apt" | "kepco" | "national";
+export type CostItem = { value: number | null; kind: "input" | "calculated" | "estimated" | "missing"; basis?: EstimateSource };
 export type CostInput = {
   monthlyRent: number; maintenanceFee: number | null;
   energyCost: number | null; electricityKwh: number | null;
@@ -37,6 +39,8 @@ export type CostInput = {
   estimatedKwh?: number | null;
   /** spec 018 FR-001: 아파트 시군구 평균 에너지 사용금액(원/㎡) × 면적(원/월). kWh 추정보다 먼저 */
   estimatedEnergyCost?: number | null;
+  /** spec 017 FR-002: estimatedKwh가 한전 시군구 평균인지 패널 전국 평균인지(withEstimate가 붙임) */
+  estimateBasis?: "kepco" | "national";
 };
 export type RealCost = { rent: CostItem; fee: CostItem; energy: CostItem; transit: CostItem; total: number; missing: string[]; estimated: string[] };
 
@@ -50,8 +54,11 @@ const input = (value: number | null): CostItem => (value === null ? { value: nul
 function energyItem(home: CostInput, month: number): CostItem {
   if (home.energyCost !== null) return { value: home.energyCost, kind: "input" };
   if (home.electricityKwh !== null) return { value: electricityBill(home.electricityKwh, month), kind: "calculated" };
-  if (home.estimatedEnergyCost && home.estimatedEnergyCost > 0) return { value: home.estimatedEnergyCost, kind: "estimated" };
-  if (home.estimatedKwh && home.estimatedKwh > 0) return { value: electricityBill(home.estimatedKwh, month), kind: "estimated" };
+  if (home.estimatedEnergyCost && home.estimatedEnergyCost > 0) return { value: home.estimatedEnergyCost, kind: "estimated", basis: "apt" };
+  if (home.estimatedKwh && home.estimatedKwh > 0) {
+    const kwhItem: CostItem = { value: electricityBill(home.estimatedKwh, month), kind: "estimated" };
+    return home.estimateBasis ? { ...kwhItem, basis: home.estimateBasis } : kwhItem;
+  }
   return { value: null, kind: "missing" };
 }
 

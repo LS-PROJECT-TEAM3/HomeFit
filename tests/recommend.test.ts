@@ -5,10 +5,10 @@ import type { CompareRow, CostItem, RealCost } from "@/incident/real-cost";
 // spec 015 FR-001~003, 경계 E2~E5
 const item = (value: number | null, kind: CostItem["kind"] = "input"): CostItem => (value === null ? { value: null, kind: "missing" } : { value, kind });
 
-function row(id: string, parts: { rent: number; fee: number | null; energy: number | null; transit: number | null; energyKind?: CostItem["kind"] }, isMine = false): CompareRow {
+function row(id: string, parts: { rent: number; fee: number | null; energy: number | null; transit: number | null; energyKind?: CostItem["kind"]; energyBasis?: CostItem["basis"] }, isMine = false): CompareRow {
   const missing = [["관리비", parts.fee], ["에너지비", parts.energy], ["교통비", parts.transit]].filter(([, v]) => v === null).map(([k]) => k as string);
   const cost: RealCost = {
-    rent: item(parts.rent), fee: item(parts.fee), energy: item(parts.energy, parts.energyKind ?? "input"), transit: item(parts.transit),
+    rent: item(parts.rent), fee: item(parts.fee), energy: { ...item(parts.energy, parts.energyKind ?? "input"), ...(parts.energyBasis ? { basis: parts.energyBasis } : {}) }, transit: item(parts.transit),
     total: parts.rent + (parts.fee ?? 0) + (parts.energy ?? 0) + (parts.transit ?? 0),
     missing, estimated: parts.energyKind === "estimated" ? ["에너지비"] : [],
   };
@@ -44,12 +44,20 @@ describe("recommendHomes", () => {
   });
   it("FR-003: 내 집이 있으면 내 집 대비, 추정값이 섞였으면 어느 칸인지", () => {
     const mine = row("mine", { rent: 520_000, fee: 50_000, energy: 30_000, transit: 60_000 }, true);
-    const cheaper = full("a", 500_000, { energyKind: "estimated" });
+    const cheaper = full("a", 500_000, { energyKind: "estimated", energyBasis: "kepco" });
     const pricier = full("b", 530_000);
     const [a, b] = recommendHomes([cheaper, pricier, mine]).ranked;
     expect(a.reasons).toContain("내 집보다 한 달 20,000원 덜 듭니다.");
-    expect(a.reasons).toContain("에너지비는 추정값입니다(한전 시군구 평균).");
+    expect(a.reasons).toContain("에너지비는 추정값입니다(한전 시군구 평균 전력사용량).");
     expect(b.reasons).toContain("내 집보다 한 달 10,000원 더 듭니다.");
+  });
+  // 선우 qa 015 #1(2026-11-20): 아파트는 국토부 금액으로 계산되는데 늘 "한전 시군구 평균"으로 나왔다
+  it("추정 근거 문구는 실제 계산 방법을 따른다", () => {
+    const note = (basis?: CostItem["basis"]) => recommendHomes([full("a", 500_000, { energyKind: "estimated", energyBasis: basis })]).ranked[0].reasons.at(-1);
+    expect(note("apt")).toBe("에너지비는 추정값입니다(국토부 시군구 아파트 평균 금액 × 전용면적).");
+    expect(note("kepco")).toBe("에너지비는 추정값입니다(한전 시군구 평균 전력사용량).");
+    expect(note("national")).toBe("에너지비는 추정값입니다(가구에너지패널 전국 평균 전력사용량).");
+    expect(note(undefined)).toBe("에너지비는 추정값입니다.");
   });
   it("E4: 내 집이 없으면 내 집 대비 문장이 없다", () => {
     const [a] = recommendHomes([full("a", 500_000)]).ranked;
