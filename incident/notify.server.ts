@@ -1,11 +1,14 @@
 import {
   buildMessages,
+  combineChannels,
+  type AllChannelStats,
   type NotifyIncident,
   readLookupResult,
   selectToNotify,
   type NotifyRecord,
   type NotifySetting,
 } from "@/incident/notify";
+import { runWebPush, supabaseWebPushDeps, webPushConfigured, type WebPushStats } from "@/incident/web-push.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import { maskSecrets } from "@/watch/mask";
 
@@ -115,4 +118,17 @@ export async function notifyIncidents(db: AdminClient, created: NotifyCandidate[
     }
   }
   return stats;
+}
+
+/**
+ * spec 021: 슬랙(FR-019 spec 001)과 웹 푸시(FR-003 spec 021)를 함께(동시에) 돌린다. 한쪽이 실패해도 다른 쪽은 보내고,
+ * 실패는 errors에 담아 돌려준다(던지지 않음). 수집은 errors가 있으면 실행 기록에 "알림 실패"로 남긴다
+ */
+export async function notifyAllChannels(db: AdminClient, created: NotifyCandidate[]): Promise<AllChannelStats<NotifyStats, WebPushStats>> {
+  const noPush: WebPushStats = { sent: 0, failed: 0, retried: 0, removed: 0 };
+  const [slack, webPush] = await Promise.allSettled([
+    notifyIncidents(db, created),
+    webPushConfigured() ? runWebPush(supabaseWebPushDeps(db, appBaseUrl()), created) : Promise.resolve(noPush),
+  ]);
+  return combineChannels(slack, webPush, { slack: { sent: 0, failed: 0, retried: 0 }, webPush: noPush });
 }

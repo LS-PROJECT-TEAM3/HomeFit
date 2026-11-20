@@ -89,6 +89,30 @@ export function buildMessages(incidents: readonly NotifyIncident[], baseUrl: str
   return incidents.map((incident) => ({ incidentIds: [incident.incidentId], text: incidentText(incident, baseUrl) }));
 }
 
+type ChannelStats = { sent: number; failed: number; retried: number };
+export type AllChannelStats<S extends ChannelStats, W extends ChannelStats> = ChannelStats & { slack: S; webPush: W; errors: string[] };
+
+const reasonText = (reason: unknown) => (reason instanceof Error ? reason.message : String(reason));
+
+/** spec 021: 슬랙·웹 푸시 결과를 합친다. 한쪽이 실패해도 다른 쪽 결과는 남긴다(ponytail-review 3번). 실패한 쪽은 0건 */
+export function combineChannels<S extends ChannelStats, W extends ChannelStats>(
+  slack: PromiseSettledResult<S>, webPush: PromiseSettledResult<W>, empty: { slack: S; webPush: W },
+): AllChannelStats<S, W> {
+  const s = slack.status === "fulfilled" ? slack.value : empty.slack;
+  const w = webPush.status === "fulfilled" ? webPush.value : empty.webPush;
+  const errors = [
+    ...(slack.status === "rejected" ? [`슬랙: ${reasonText(slack.reason)}`] : []),
+    ...(webPush.status === "rejected" ? [`웹 푸시: ${reasonText(webPush.reason)}`] : []),
+  ];
+  return { sent: s.sent + w.sent, failed: s.failed + w.failed, retried: s.retried + w.retried, slack: s, webPush: w, errors };
+}
+
+/** 실행 기록 notify 단계 상태: 오류가 있으면 실패, 보낸 것이 없으면 건너뜀 */
+export function notifyStepStatus(stats: { sent: number; failed: number; errors: string[] }): "failed" | "skipped" | "succeeded" {
+  if (stats.errors.length > 0) return "failed";
+  return stats.sent + stats.failed === 0 ? "skipped" : "succeeded";
+}
+
 export type NotifySetting = { enabled: boolean; slackUserId: string | null; enabledAt: string | null };
 export type NotifyRecord = { status: string; attempts: number };
 type Candidate = NotifyIncident & { userId: string; detectedAt: string };

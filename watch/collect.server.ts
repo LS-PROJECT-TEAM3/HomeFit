@@ -5,7 +5,8 @@ import { draftPlans, insertPlans } from "@/incident/plans.server";
 import { newCallContext } from "@/lib/llm/call.server";
 import type { IncidentFacts } from "@/incident/detect";
 import { loadFollows } from "@/incident/follows.server";
-import { notifyIncidents } from "@/incident/notify.server";
+import { notifyStepStatus } from "@/incident/notify";
+import { notifyAllChannels } from "@/incident/notify.server";
 import type { CreatedIncident } from "@/incident/plans.server";
 import type { AdminClient } from "@/lib/supabase/admin";
 import { toKstDate } from "@/watch/kst";
@@ -54,12 +55,12 @@ async function saveObservations(db: AdminClient, runId: string, notices: Notice[
   if (error) throw new Error(`모은 값을 저장하지 못했습니다: ${error.message}`);
 }
 
-/** FR-019 (spec 001 v0.3): 슬랙 알림. 실패해도 수집은 성공으로 끝내고 실행 기록에만 남긴다 */
+/** FR-019 (spec 001 v0.3) + spec 021: 슬랙·웹 푸시 알림. 실패해도 수집은 성공으로 끝내고 실행 기록에만 남긴다 */
 async function runNotifyStep(db: AdminClient, runId: string, created: CreatedIncident[]) {
   try {
     const candidates = created.map((c) => ({ incidentId: c.id, userId: c.user_id, detectedAt: c.detected_at, facts: c.facts as unknown as IncidentFacts }));
-    const stats = await notifyIncidents(db, candidates);
-    const status = stats.sent + stats.failed === 0 ? "skipped" : "succeeded";
+    const stats = await notifyAllChannels(db, candidates);
+    const status = notifyStepStatus(stats);
     await recordStep(db, runId, { name: "notify", status, itemsIn: created.length, itemsOut: stats.sent, detail: stats });
   } catch (cause) {
     const message = maskSecrets(cause instanceof Error ? cause.message : String(cause), secretsToMask());
