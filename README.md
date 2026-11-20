@@ -37,18 +37,30 @@
 - 기능 003~008(습도·결로, 화면 뼈대, 관리자 시연·기록 찾기, 청년 정책, 팔로우 공고 일정, 시세 변화)은 아래 "기능 목록" 표에서 상태와 확인 결과(qa)로 이어집니다
 
 ## 기능 목록
-상태는 각 spec 머리글 기준(2026-11-18)입니다. 실제로 확인한 결과(Pass/Fail/No Run, 수행자, 날짜, 증거)는 같은 폴더의 qa.md에 있습니다.
+상태는 각 spec 머리글 기준입니다(004와 009~020은 2026-11-19에 맞췄고, 나머지는 2026-11-18 기준 그대로입니다). 실제로 확인한 결과(Pass/Fail/No Run, 수행자, 날짜, 증거)는 같은 폴더의 qa.md에 있습니다.
 
 | 번호 | 기능 | spec 상태 | spec | 확인 결과 |
 |---|---|---|---|---|
 | 001 | 공고·정책 사건 | 승인됨 v0.5 | [spec](docs/specs/001-공고정책-사건/spec.md) | [qa](docs/specs/001-공고정책-사건/qa.md) |
 | 002 | LLM 공급자 | 승인됨 | [spec](docs/specs/002-LLM-공급자/spec.md) | [qa](docs/specs/002-LLM-공급자/qa.md) |
 | 003 | 습도·결로 위험 사건 | 승인됨 v0.2 | [spec](docs/specs/003-습도결로-사건/spec.md) | [qa](docs/specs/003-습도결로-사건/qa.md) |
-| 004 | 화면 뼈대 | 초안 v0.3 | [spec](docs/specs/004-화면-뼈대/spec.md) | [qa](docs/specs/004-화면-뼈대/qa.md) |
+| 004 | 화면 뼈대 | 초안 v0.6 | [spec](docs/specs/004-화면-뼈대/spec.md) | [qa](docs/specs/004-화면-뼈대/qa.md) |
 | 005 | 관리자 시연·기록 찾기 | 초안 v0.1 (승인 전) | [spec](docs/specs/005-관리자-시연-기록찾기/spec.md) | [qa](docs/specs/005-관리자-시연-기록찾기/qa.md) |
 | 006 | 온통청년 정책 수집 | v0.3 | [spec](docs/specs/006-청년정책-수집/spec.md) | [qa](docs/specs/006-청년정책-수집/qa.md) |
 | 007 | 팔로우 공고 일정 | v0.1 | [spec](docs/specs/007-팔로우공고-일정/spec.md) | [qa](docs/specs/007-팔로우공고-일정/qa.md) |
 | 008 | 시세 변화 사건 | v0.1 | [spec](docs/specs/008-시세-변화-사건/spec.md) | [qa](docs/specs/008-시세-변화-사건/qa.md) |
+| 009 | 실질 주거비 비교 | v0.1 | [spec](docs/specs/009-실질주거비-비교/spec.md) | [qa](docs/specs/009-실질주거비-비교/qa.md) |
+| 010 | 관리자 수정 기록·비슷한 지난 알림·시세 채점 | 승인됨 v0.2 | [spec](docs/specs/010-관리자수정-비슷한알림-시세채점/spec.md) | [qa](docs/specs/010-관리자수정-비슷한알림-시세채점/qa.md) |
+| 011 | 에너지비 추정·에너지 분석 화면 | 초안 v0.2 (승인 전) | [spec](docs/specs/011-에너지-추정/spec.md) | [qa](docs/specs/011-에너지-추정/qa.md) |
+| 012 | 위키·위키 챗봇 | 승인됨 v0.2 | [spec](docs/specs/012-위키-챗봇/spec.md) | [qa](docs/specs/012-위키-챗봇/qa.md) |
+| 013 | 계약 만료 일정 | 초안 v0.1 (승인 전) | [spec](docs/specs/013-계약만료-일정/spec.md) | [qa](docs/specs/013-계약만료-일정/qa.md) |
+| 014 | 비밀번호 재설정 | 초안 v0.1 (승인 전) | [spec](docs/specs/014-비밀번호-재설정/spec.md) | [qa](docs/specs/014-비밀번호-재설정/qa.md) |
+| 015 | 추천 결과 | 초안 v0.1 (승인 전) | [spec](docs/specs/015-추천-결과/spec.md) | [qa](docs/specs/015-추천-결과/qa.md) |
+| 016 | 냉난방비 계산 | 초안 v0.1 (승인 전) | [spec](docs/specs/016-냉난방비-계산/spec.md) | [qa](docs/specs/016-냉난방비-계산/qa.md) |
+| 017 | 주택 종류·면적 에너지 추정 | 초안 v0.1 (승인 전) | [spec](docs/specs/017-주택종류-면적-에너지-추정/spec.md) | [qa](docs/specs/017-주택종류-면적-에너지-추정/qa.md) |
+| 018 | 아파트 에너지 사용금액 | 초안 v0.1 (승인 전) | [spec](docs/specs/018-아파트-에너지-사용금액/spec.md) | [qa](docs/specs/018-아파트-에너지-사용금액/qa.md) |
+| 019 | 입주 전 점검·하자 기록 | 초안 v0.1 (승인 전) | [spec](docs/specs/019-입주전점검-하자기록/spec.md) | [qa](docs/specs/019-입주전점검-하자기록/qa.md) |
+| 020 | 홈 바깥 날씨 | 초안 v0.1 (승인 전) | [spec](docs/specs/020-홈-바깥-날씨/spec.md) | [qa](docs/specs/020-홈-바깥-날씨/qa.md) |
 
 ## 배포
 - `npm run deploy`: Vercel 운영 배포가 끝나면 배포된 주소(https://homefit-lac.vercel.app)로 수집을 한 번 바로 부릅니다. 팀이 "배포해줘"라고 할 때만 씁니다
@@ -60,7 +72,7 @@
 | 안내서 이름 | 이 저장소 |
 |---|---|
 | 문제 정의 | [docs/문제정의.md](docs/문제정의.md), [GLOSSARY.md](GLOSSARY.md), [docs/adr/](docs/adr/) |
-| 인터뷰 | [interviews/](interviews/) (사람·AI 구분 표시) |
+| 인터뷰, 팀 밖 설문 | [interviews/](interviews/) (사람·AI 구분 표시). 종합: [interviews/종합.md](interviews/종합.md) (구글폼 팀 밖 설문 12명은 8절, 1:1 인터뷰와 따로 셈) |
 | IA | [docs/IA.md](docs/IA.md), [docs/IA.xlsx](docs/IA.xlsx) |
 | uj.md | [docs/journeys/](docs/journeys/README.md) |
 | prd.md | [docs/PRD.md](docs/PRD.md) |
@@ -84,11 +96,11 @@
 - 조각 표와 브랜치·PR 순서: [docs/plan.md](docs/plan.md)
 
 ### 팀원
-병합된 PR #1~#22, #24(#23은 병합 없이 닫힘) 기준(2026-11-19)입니다. 열린 PR은 이 표를 고치는 PR입니다. PR과 리뷰가 새로 생기면 이 표를 고칩니다.
+병합된 PR #1~#22, #24, #25, #27, #29, #30(#23은 병합 없이 닫힘, #31은 #30과 같은 일이라 닫힘) 기준(2026-11-19)입니다. 열린 PR은 #26(선우), #28(현경), #32(예림)와 이 표를 고치는 PR입니다. PR과 리뷰가 새로 생기면 이 표를 고칩니다.
 
 | 이름 | GitHub | 맡은 조각 | 대표 PR | 리뷰 |
 |---|---|---|---|---|
 | 예림 | dbdpfla98 | B, E, 기획 문서와 기능 001~011, 013~020 | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1) 팀 하네스·문제정의, [#2](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/2) IA, [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4) 기능 001~008, [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8) 집 비교 실질 주거비(조각 E), [#11](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/11) 시세 채점·비슷한 지난 알림·관리자 수정 기록(조각 B), [#16](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/16) 에너지비 추정·에너지 분석 화면, [#19](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/19) 기능 013~020(계약 만료·비밀번호 재설정·추천 결과·냉난방비·입주 전 점검·하자 기록·홈 날씨) | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9), [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10), [#15](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/15), [#17](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/17) 승인, [#11](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/11), [#13](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/13), [#14](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/14), [#15](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/15), [#17](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/17), [#20](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/20) 코멘트 |
 | 현경 | gaangstar | A, D | [#15](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/15) 조각 A 위키·위키 챗봇, [#24](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/24) 위키 묶음 5~7·챗봇 실제 Gemini 확인 (조각 D는 예정) | [#1](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/1), [#4](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/4), [#8](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/8), [#13](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/13), [#14](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/14), [#19](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/19) 승인, [#11](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/11) 코멘트 |
-| 선우 | sunwood0803 | C1 | [#3](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/3) 하네스 규칙을 팀 스택에 맞춤, [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 제출 문서(data-sources·debug-note·qa), [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10) 커넥터·서브에이전트 문서, [#13](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/13) 흐름 화면 문서와 캡처, [#17](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/17) qa·flow·debug-note 갱신 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9), [#12](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/12), [#16](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/16), [#18](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/18), [#19](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/19), [#20](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/20), [#21](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/21), [#22](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/22), [#24](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/24) 승인 |
-| 서윤 | lilyoon333 | C2 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6) README·.env.example 보강, [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7) 시연 순서, [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 시연 순서 정정, [#12](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/12) README 팀원 표·자료 링크, [#14](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/14) 시연 순서에 운영 확인 결과와 PR #11 병합 반영, [#18](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/18) README flow.md 링크·팀원 표 갱신, [#20](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/20) README 팀원 표를 #15·#16 병합 기준으로 갱신, [#21](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/21) 시연 순서에 장면 9 위키 챗봇, [#22](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/22) 인터뷰 종합에 팀 밖 설문 12명 반영 | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 승인과 코멘트, [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10), [#11](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/11), [#15](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/15), [#19](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/19) 코멘트 |
+| 선우 | sunwood0803 | C1 | [#3](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/3) 하네스 규칙을 팀 스택에 맞춤, [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 제출 문서(data-sources·debug-note·qa), [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10) 커넥터·서브에이전트 문서, [#13](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/13) 흐름 화면 문서와 캡처, [#17](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/17) qa·flow·debug-note 갱신 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6), [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7), [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9), [#12](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/12), [#16](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/16), [#18](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/18), [#19](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/19), [#20](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/20), [#21](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/21), [#22](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/22), [#24](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/24), [#25](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/25), [#27](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/27), [#29](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/29), [#30](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/30) 승인 |
+| 서윤 | lilyoon333 | C2 | [#6](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/6) README·.env.example 보강, [#7](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/7) 시연 순서, [#9](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/9) 시연 순서 정정, [#12](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/12) README 팀원 표·자료 링크, [#14](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/14) 시연 순서에 운영 확인 결과와 PR #11 병합 반영, [#18](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/18) README flow.md 링크·팀원 표 갱신, [#20](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/20) README 팀원 표를 #15·#16 병합 기준으로 갱신, [#21](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/21) 시연 순서에 장면 9 위키 챗봇, [#22](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/22) 인터뷰 종합에 팀 밖 설문 12명 반영, [#25](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/25) README 팀원 표를 병합된 PR #1~#22 기준으로 갱신, [#27](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/27) 발표 슬라이드 초안, [#29](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/29) 시연 순서 장면 9 주의 3을 실제 Gemini 확인 결과에 맞춤, [#30](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/30) README 기능 목록에 기능 009~020 추가 | [#5](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/5) 승인과 코멘트, [#10](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/10), [#11](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/11), [#15](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/15), [#19](https://github.com/LS-PROJECT-TEAM3/HomeFit/pull/19) 코멘트 |

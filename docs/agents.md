@@ -1,7 +1,7 @@
 # 서브에이전트·스킬 활용 기록
 
 출처: 안내서 7절(서브에이전트), 8절·하네스 절(스킬), 평가항목 P3-24·P3-25.
-기준일: 2026-11-18 (main `65ed611`).
+기준일: 2026-11-18 (main `65ed611`). 1.4절·2절의 현경님 부분과 스킬 수는 2026-11-19(main `32444a4`)에 고쳤다.
 
 **서브에이전트**는 메인 Claude가 일을 나눠 맡기는 별도의 도우미로, 자기 작업창에서 따로 일하고 결과만 돌려준다. 이 문서는 팀이 **실제로 쓴 것만** 적는다. 쓰지 않은 것을 채우지 않았고, 확인하지 못한 곳은 `확인 필요`로 둔다.
 
@@ -43,11 +43,11 @@
 | 근거 | 예림님 답. 코드 리뷰는 qa 001 실패와 조치 #14~#17 |
 
 ### 1.4 쓰지 않은 것
-- **현경님(`gaangstar`) PC**: Claude 세션 기록에 서브에이전트 호출이 없고, `.claude/agents/`도 없다. "쓰지 않음".
+- **현경님(`gaangstar`) PC**: Claude 세션 기록에 서브에이전트 호출이 없고, `.claude/agents/`도 없다. "쓰지 않음"(2026-11-18 답 기준). 그 뒤 조각 A(spec 012)에서 **랄프 루프**(시험이 통과할 때까지 같은 일을 되풀이시키는 방식)로 위키 찾기를 다듬은 기록이 `docs/specs/012-위키-챗봇/ralph-progress.md`에 있다. 기준선(바퀴 0, 12/13)에서 두 번(1-a, 1-b) 고쳐 13/13이 됐다(qa 012 변경 기록은 이것을 "랄프 루프 1바퀴"로 적는다). 랄프 루프는 `/ralph-loop` 플러그인으로 돌렸고, 현경님 PC 기록에 서브에이전트 호출은 0건이다(현경님 답, 2026-11-19 슬랙).
 - **서윤님(`lilyoon333`) PC**: 작업 기록에서 서브에이전트를 맡긴 기록을 찾지 못함(기억 안 남).
 
 ## 2. 스킬 (P3-24)
-저장소 `.claude/skills/`에 스킬 10개가 들어 있다. **harness-* 7개**(erd, ia, intent, journeys, prd, qa, spec-plan)와 **그 밖 3개**(domain-modeling, grill-with-docs, grilling)다.
+저장소 `.claude/skills/`에 스킬 13개가 들어 있다. **harness-* 7개**(erd, ia, intent, journeys, prd, qa, spec-plan), **인터뷰·용어 3개**(domain-modeling, grill-with-docs, grilling), **위키 3개**(wiki-ingest, wiki-query, wiki-lint)다. 위키 3개는 조각 A(PR #15)에서 더해졌다.
 
 "쓴 흔적"은 저장소에 남은 산출물이다. 산출물이 있다고 해서 누가 어떤 입력으로 스킬을 불렀는지가 확인된 것은 아니라서 그 칸은 `확인 필요`로 둔다.
 
@@ -61,11 +61,14 @@
 | harness-intent | `docs/Intent.md` | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
 | harness-spec-plan | `docs/specs/NNN-기능/spec.md`, `plan.md` 8묶음 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
 | harness-qa | `docs/specs/NNN-기능/qa.md` 8묶음. plan 001의 단계표에 "`harness-qa` B·C"가 적혀 있음 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
+| wiki-ingest (넣기), wiki-query (묻기), wiki-lint (점검) | `wiki/`의 주제 쪽 56개(목차·기록·연결지도·규칙 파일 제외)와 `wiki/log.md`(넣기 기록), 점검 스크립트 `scripts/wiki-lint.mjs`. 수업 참고본의 스킬 3개를 우리 경로에 맞게 옮긴 것이라고 plan 012에 적혀 있음 | 현경 (조각 A, plan 012 1단계). 건별 입력은 확인 필요 |
+
+위 표의 "8묶음"은 2026-11-18 기준이다. 지금 `docs/specs/`에는 001~020이 있고, 009~020을 어느 스킬로 만들었는지는 확인하지 않았다.
 
 ### 2.1 저장소 밖 스킬
 - **ponytail-review** (코드 검토 스킬): qa 001에 7곳, qa 003에 1곳 언급. 이 스킬은 저장소 `.claude/skills/`에 **없다**(전역 스킬). 어떤 입력으로 어떤 결과를 얻었는지는 qa 표에 남아 있다(qa 001 실패와 조치 #1, #11~#13의 "ponytail-review 지적"). 예림님이 단계 끝 리뷰로 7번 썼다고 답했다(2026-11-18).
 - 예림님은 그 밖에 `ui-ux-pro-max`, `react-best-practices`, `composition-patterns`, `claude-api`를 썼다고 답했다(2026-11-18). 모두 저장소 `.claude/skills/`에 없는 스킬이라 다른 팀원 PC에서는 불리지 않는다. 어떤 입력으로 어떤 결과를 얻었는지는 확인 필요. `.claude/rules/`가 부르는 `humanize-korean`, `web-design-guidelines`, `code-review`, `simplify`는 썼다는 답이 없다.
-- 현경님(`gaangstar`) PC 기록에는 Skill 도구로 스킬을 부른 기록이 없다.
+- 현경님(`gaangstar`) PC 기록에는 Skill 도구로 스킬을 부른 기록이 없다(2026-11-18 답 기준). 그 뒤 만든 위키 스킬 3개는 위 표에 있다.
 - 서윤님(`lilyoon333`) PC에서는 harness-* 스킬을 직접 부른 기록을 확인하지 못했다(기억 안 남). `ponytail-review`는 서윤님 PC에 개인 플러그인으로 있고 프로젝트 2 작업 기록에는 있으나, HomeFit에서 직접 썼는지는 기억 안 남.
 
 ## 3. 아직 비어 있는 것 (확인 필요)

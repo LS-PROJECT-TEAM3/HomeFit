@@ -5,7 +5,7 @@ export type WikiChunk = { id: string; page: string; heading: string; text: strin
 export type WikiPageText = { page: string; markdown: string };
 
 // 목차·작업 기록·연결지도·위키 규칙 파일은 근거 조각으로 쓰지 않는다(plan 012 파일별 역할)
-const SKIPPED_PAGES = new Set(["index", "log", "연결지도", "CLAUDE"]);
+export const SKIPPED_PAGES = new Set(["index", "log", "연결지도", "CLAUDE"]);
 const SUMMARY_HEADING = "요약";
 
 function stripFrontMatter(markdown: string): string {

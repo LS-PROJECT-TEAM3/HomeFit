@@ -4,6 +4,8 @@ import { useState } from "react";
 import { WIKI_DAILY_LIMIT, WIKI_QUESTION_MAX, checkQuestion, readWikiReply, type WikiChatView } from "@/chat/wiki-answer";
 import styles from "@/app/_components/hub.module.css";
 import own from "./wiki-chat.module.css";
+import type { WikiGraph } from "@/chat/wiki-graph";
+import { WikiGraphView, type GraphFocus } from "./wiki-graph";
 
 type Asked = { view: WikiChatView; remaining: number | null };
 
@@ -18,13 +20,14 @@ async function askWiki(question: string): Promise<Asked> {
   }
 }
 
-// spec 012 FR-010·011·014·016: 위키에 묻고, 답·출처(펼쳐서 절 내용)·남은 질문 수를 보인다
-export function WikiChatForm({ initialRemaining }: { initialRemaining: number | null }) {
+// spec 012 FR-010·011·014·016: 위키에 묻고, 답·출처(펼쳐서 절 내용)·남은 질문 수를 보인다. FR-017: 답의 출처 쪽을 아래 그래프에서 켠다
+export function WikiChatForm({ initialRemaining, graph }: { initialRemaining: number | null; graph: WikiGraph | null }) {
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
   const [asked, setAsked] = useState("");
   const [view, setView] = useState<WikiChatView | null>(null);
   const [remaining, setRemaining] = useState(initialRemaining);
+  const [focus, setFocus] = useState<GraphFocus>({ pages: [], selected: null });
 
   const send = async () => {
     const checked = checkQuestion(text);
@@ -35,10 +38,12 @@ export function WikiChatForm({ initialRemaining }: { initialRemaining: number | 
     const result = await askWiki(checked.question);
     if (result.remaining !== null) setRemaining(result.remaining);
     setView(result.view);
+    if (result.view.ok) setFocus({ pages: [...new Set(result.view.sources.map((s) => s.page))], selected: null });
     setPending(false);
   };
 
   return (
+    <>
     <section className={styles.card} aria-labelledby="wiki-chat-title">
       <h2 id="wiki-chat-title">위키에 묻기</h2>
       <p className={styles.muted}>팀 위키(wiki/) 쪽만 근거로 답합니다. 위키에 없으면 &ldquo;위키에 없습니다&rdquo;라고 답합니다.</p>
@@ -58,6 +63,8 @@ export function WikiChatForm({ initialRemaining }: { initialRemaining: number | 
         {view && view.ok ? <WikiAnswer view={view} asked={asked} /> : null}
       </div>
     </section>
+    <WikiGraphView graph={graph} focus={focus} onFocus={setFocus} />
+    </>
   );
 }
 
