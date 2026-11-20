@@ -108,6 +108,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | 4 | 챗봇 서버와 DB(시험 먼저) | FR-009~014 | `chat/` 3개, API, 0018, types, ERD 수정, next.config | 순수 함수 시험 통과, `tsc`·`lint`·`build` 통과. mock으로 API에 물으면 답·출처가 오고 chat_logs에 1행 | 0018을 팀 Supabase에 적용해도 되나(먼저 묻기) |
 | 5 | 관리자 화면 | FR-009~011, 014, 016 | `/admin/chat` 화면 | 브라우저에서 관리자로 묻고 답·출처·펼침이 보임, 일반 사용자 차단, 375px 가로 넘침 없음(스크린샷) | 없음 |
 | 6 | 정답표·랄프 루프·결과 기록 | FR-015, FR-012 | `docs/wiki-chat.md`, `tests/wiki-chat-eval.test.ts` | 찾기 시험 5/5 통과(mock), 실제 Gemini로 5문항 결과와 숨은 지시 시험 결과가 문서에 있음 | 정답표 5문항은 사용자(팀)가 먼저 씀 |
+| 7 | 위키 그래프(시험 먼저, 예림 시안 기준) | FR-017, SC-015 | `chat/wiki-graph.ts`, `tests/wiki-graph.test.ts`, `admin/chat/wiki-graph.tsx`·CSS, 갈래 색 토큰 | 시험·tsc·lint·build 통과. 관리자로 질문하면 출처 쪽 점이 이름과 함께 강조·확대(스크린샷), 375px 가로 넘침 없음 | 없음(시안 `위키그래프-시안.html`, 사용자 승인 2026-11-19) |
 
 ### 1단계 작업
 - [x] `wiki/CLAUDE.md`: 참고본 CLAUDE.md를 우리 원본 위치·갈래·근거 모양 `(근거: docs/PRD.md · FR-26)`으로 옮기고 Q8(반영은 조각 A 담당) 한 줄
@@ -148,6 +149,16 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 - [x] Ralph Loop: `/ralph-loop "tests/wiki-chat-eval.test.ts가 통과할 때까지 chat/wiki-pages.ts의 찾기를 고쳐라. 바퀴마다 npm test -- wiki-chat-eval 결과를 docs/specs/012-위키-챗봇/ralph-progress.md에 한 줄. 시험·정답표·wiki/는 고치지 마라. 통과하면 <promise>DONE</promise>" --max-iterations 5 --completion-promise "DONE"` (AI_PROVIDER=mock)
 - [x] 실제 Gemini로 5문항과 숨은 지시 시험(시험용 쪽 사본으로)을 돌려 `docs/wiki-chat.md`에 결과·틀린 이유 기록
 
+### 7단계 작업 (FR-017, 승인 2026-11-19)
+예림 시안(`위키그래프-시안.html`)을 따르되 앱에 맞게 바꾼다: 데이터는 `wiki/` 파일에서 바로, 배치는 순수 함수(같은 입력 → 같은 자리), 점 설명은 답 대신 그래프 카드 아래, 색은 `app/tokens.css`. 질문 예시 버튼·점 끌어 옮기기·그래프 라이브러리는 넣지 않는다.
+- [x] `tests/wiki-graph.test.ts` 먼저: 목차·log·연결지도·CLAUDE.md 제외, 갈래·한 줄 요약 읽기, `[[링크]]` 선(양방향 하나로, 없는 쪽·자기 자신 제외), 배치가 같은 입력에 같은 자리·유한한 수, 확대 범위가 고른 점을 모두 담음
+- [x] `chat/wiki-graph.ts`: `buildWikiGraph`, `layoutWikiGraph`(시안의 힘 배치: 밀기·당기기·가운데로, 갈래별 원에서 시작), `graphBounds`
+- [x] `page.tsx`가 그래프를 만들어 넘기고, `wiki-chat-form.tsx`는 답의 출처 쪽 이름을 그래프에 넘긴다(상태를 한 단계 위로)
+- [x] `wiki-graph.tsx`: SVG 점·선, 갈래 색과 글자 범례, 출처 강조(이름 굵게)·이웃 반쯤·나머지 흐림, 0.7초 확대(움직임 줄이기면 바로), "전체 보기", 점 Tab·Enter로 고르면 이름·한 줄 요약·연결된 쪽(최대 8개)
+- [x] 브라우저로 관리자 질문 → 강조·확대 스크린샷, 375px, 키보드
+
+- [x] (사용자 요청 2026-11-19) 마우스로 빈 곳을 끌어 지도 옮기기, 휠로 마우스 자리 기준 확대·축소(전체 폭 1/8~3배), "전체 보기"로 되돌리기. 계산은 `panBox`·`zoomBox` 순수 함수와 시험 3개. 터치는 페이지 스크롤을 막지 않게 뺌
+
 ### 새 의존성 기록
 없음
 
@@ -172,6 +183,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | FR-014 | 함수 시험 + API | wiki-answer "한도 경계", "한국 날짜" / C-909 |
 | FR-015 | 문서 확인 | C-910 |
 | FR-016 | 화면 | H-903 |
+| FR-017 | 함수 시험 + 화면 | wiki-graph 전체 / C-913~916, H-907 |
 | SC-001 | 목차 쪽 수 세기 | C-901 |
 | SC-002 | 함수 시험 + 사본에 깨진 링크 | wiki-lint / C-911 |
 | SC-003 | `git diff --stat docs interviews` | C-902 |
@@ -186,6 +198,7 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | SC-012 | 375px 스크린샷 | C-912 |
 | SC-013 | 결과 표 | H-905 |
 | SC-014 | 팀원 1명 측정 | H-906 |
+| SC-015 | 화면(점 수, 출처 강조, 375px) | C-913, C-914, C-916 |
 
 ### 함수 시험
 - 도구 / 버전 / 실행 명령: Vitest 5.1.0 / `npm test`
@@ -275,3 +288,5 @@ RLS: `chat_logs`는 관리자만 내 행 쓰기(`user_id = auth.uid() and is_adm
 | 2026-11-18 | v0.1 | 기능 번호 009 → 010. main에 먼저 들어간 조각 E가 `docs/specs/009-실질주거비-비교`를 써서 번호가 겹침(사용자 결정). 요구 ID(FR-009 등)와 QA ID(C-9xx·H-9xx)는 그대로 |
 | 2026-11-18 | v0.1 | 기능 번호 010 → 012. 열린 PR #11(조각 B)이 먼저 spec 010을 쓰고, 그 Intent가 spec 011을 "에너지 면적 추정"용으로 남겨 둠(사용자 결정) |
 | 2026-11-19 | v0.1 | 5절 위험에 0018 마이그레이션 기록표 줄 더함: 그대로 두기(A안, 사용자 결정) |
+| 2026-11-19 | v0.1 | 7단계 위키 그래프(FR-017) 더함: 예림 시안 기준, 데이터는 wiki/ 파일에서, 배치는 순수 함수(사용자 승인) |
+| 2026-11-19 | v0.1 | 7단계에 지도 끌어 옮기기·휠 확대 더함(사용자 요청, 옵시디언 그래프 뷰처럼) |

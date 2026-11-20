@@ -5,6 +5,7 @@ import {
   buildMockAnswer, buildWikiPrompt, canAskToday, kstDayStart, parseWikiAnswer, type WikiAnswer, type WikiSource,
 } from "@/chat/wiki-answer";
 import { chunkWiki, pickChunks, type WikiChunk, type WikiPageText } from "@/chat/wiki-pages";
+import { buildWikiGraph, layoutWikiGraph, type WikiGraph } from "@/chat/wiki-graph";
 import { callLlm, newCallContext } from "@/lib/llm/call.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +21,11 @@ async function readWikiPages(): Promise<WikiPageText[]> {
   const dir = join(process.cwd(), "wiki");
   const names = (await readdir(dir)).filter((name) => name.endsWith(".md"));
   return Promise.all(names.map(async (name) => ({ page: name.replace(/\.md$/, ""), markdown: await readFile(join(dir, name), "utf8") })));
+}
+
+/** FR-017 위키 그래프: 챗봇과 같은 wiki/ 파일로 점·선과 자리를 만든다(AC1) */
+export async function wikiGraph(): Promise<WikiGraph> {
+  return layoutWikiGraph(buildWikiGraph(await readWikiPages()));
 }
 
 async function askedToday(userId: string, now: Date): Promise<number> {
