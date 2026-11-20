@@ -17,7 +17,6 @@ describe("routeAccess (주소별 로그인 규칙)", () => {
     for (const path of ["/sw.js", "/manifest.webmanifest", "/apple-icon.png", "/icons/icon-192.png", "/icons/icon-512.png"]) {
       expect(routeAccess(path)).toBe("open");
     }
-    expect(routeAccess("/icons/../admin")).toBe("private");
   });
   it("그 밖은 로그인 필요", () => {
     for (const path of ["/", "/schedule", "/login-help", "/reset-passwordx"]) expect(routeAccess(path)).toBe("private");

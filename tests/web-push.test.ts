@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BUNDLE_THRESHOLD } from "@/incident/notify";
-import { bundleDevices, pushOutcome, pushPayloads, selectToPush, settleIncident, type PushDevice } from "@/incident/web-push";
+import { bundleDevices, parseSubscription, pushOutcome, pushPayloads, selectToPush, settleIncident, type PushDevice } from "@/incident/web-push";
 import { makeNotice } from "./fixtures";
 
 // spec 021 FR-003~005: 웹 푸시는 슬랙 알림과 같은 조건·같은 내용
@@ -95,5 +95,38 @@ describe("bundleDevices", () => {
     expect(bundleDevices([["phone", "pc"], ["phone"]])).toEqual(["phone"]);
     expect(bundleDevices([["phone", "pc"]])).toEqual(["phone", "pc"]);
     expect(bundleDevices([])).toEqual([]);
+  });
+});
+
+// spec 021 FR-001: 브라우저가 준 구독 값 검사(입력 경계)
+describe("parseSubscription", () => {
+  const good = { endpoint: "https://fcm.googleapis.com/fcm/send/abc", keys: { p256dh: "BNcR_x-1", auth: "tBHI-2_x" } };
+  it("https 주소와 열쇠 둘이 있으면 받는다", () => {
+    expect(parseSubscription(good)).toEqual({ ok: true, value: { endpoint: good.endpoint, p256dh: "BNcR_x-1", auth: "tBHI-2_x" } });
+  });
+  it("모양이 다르면 거절(http 주소, 열쇠 없음, 이상한 글자, 너무 김)", () => {
+    for (const bad of [
+      null, "x", { ...good, endpoint: "http://push.test/a" }, { endpoint: good.endpoint }, { ...good, keys: { p256dh: "a b", auth: "c" } },
+      { ...good, endpoint: `https://fcm.googleapis.com/${"a".repeat(2100)}` },
+    ]) {
+      expect(parseSubscription(bad)).toEqual({ ok: false, message: "이 브라우저의 알림 정보를 읽지 못했습니다. 페이지를 새로 고친 뒤 다시 켜 주세요." });
+    }
+  });
+});
+
+// 3·4단계 리뷰 1번(2026-11-20): 서버가 아무 주소로나 요청을 보내지 않게 실제 브라우저 푸시 서비스만 받는다
+describe("parseSubscription 받을 주소 호스트", () => {
+  const keys = { p256dh: "BNcR_x-1", auth: "tBHI-2_x" };
+  it("크롬·파이어폭스·엣지·사파리 푸시 서비스는 받는다", () => {
+    for (const endpoint of [
+      "https://fcm.googleapis.com/fcm/send/abc", "https://updates.push.services.mozilla.com/wpush/v2/abc",
+      "https://wns2-bn3p.notify.windows.com/w/?token=abc", "https://web.push.apple.com/QGx",
+    ]) expect(parseSubscription({ endpoint, keys }).ok).toBe(true);
+  });
+  it("그 밖의 호스트는 거절(내부 주소, 비슷한 이름)", () => {
+    for (const endpoint of [
+      "https://10.0.0.5/push", "https://evil.example.com/fcm.googleapis.com", "https://fcm.googleapis.com.evil.com/x",
+      "https://notpush.apple.com.evil/x", "https://localhost/x",
+    ]) expect(parseSubscription({ endpoint, keys }).ok).toBe(false);
   });
 });

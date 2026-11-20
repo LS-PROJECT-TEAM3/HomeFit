@@ -64,3 +64,38 @@ export function pushOutcome(statusCode: number | null): PushOutcome {
 export function settleIncident(outcomes: readonly PushOutcome[]): "sent" | "failed" {
   return outcomes.includes("sent") ? "sent" : "failed";
 }
+
+// spec 021 FR-001·E6: 화면 문구("무엇이 안 됐는지 + 할 일")
+export const PUSH_UNAVAILABLE = "웹 푸시를 아직 쓸 수 없습니다. 관리자에게 문의해 주세요.";
+export const PUSH_DENIED = "브라우저에서 알림을 막았습니다. 브라우저 설정에서 이 사이트 알림을 허용한 뒤 다시 눌러 주세요.";
+const BAD_SUBSCRIPTION = "이 브라우저의 알림 정보를 읽지 못했습니다. 페이지를 새로 고친 뒤 다시 켜 주세요.";
+
+export type SubscriptionValue = { endpoint: string; p256dh: string; auth: string };
+const BASE64URL = /^[A-Za-z0-9_-]+={0,2}$/;
+
+// 실제 브라우저 푸시 서비스만(크롬·안드로이드, 파이어폭스, 엣지, 사파리·아이폰). 서버가 아무 주소로나 요청을 보내지 않게(3·4단계 리뷰 1번)
+const PUSH_HOSTS = ["fcm.googleapis.com", "android.googleapis.com"];
+const PUSH_HOST_SUFFIXES = [".push.services.mozilla.com", ".notify.windows.com", ".push.apple.com"];
+
+function isPushServiceUrl(endpoint: string): boolean {
+  try {
+    const url = new URL(endpoint);
+    const host = url.hostname.toLowerCase();
+    return url.protocol === "https:" && url.port === "" && (PUSH_HOSTS.includes(host) || PUSH_HOST_SUFFIXES.some((suffix) => host.endsWith(suffix)));
+  } catch {
+    return false;
+  }
+}
+
+/** FR-001: 브라우저가 준 구독 값(PushSubscription.toJSON) 검사. DB 제약(0022)과 같은 기준 */
+export function parseSubscription(input: unknown): { ok: true; value: SubscriptionValue } | { ok: false; message: string } {
+  const record = typeof input === "object" && input !== null ? (input as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } }) : {};
+  const { endpoint } = record;
+  const p256dh = record.keys?.p256dh;
+  const auth = record.keys?.auth;
+  const ok =
+    typeof endpoint === "string" && endpoint.length <= 2048 && isPushServiceUrl(endpoint) &&
+    typeof p256dh === "string" && p256dh.length <= 256 && BASE64URL.test(p256dh) &&
+    typeof auth === "string" && auth.length <= 128 && BASE64URL.test(auth);
+  return ok ? { ok: true, value: { endpoint, p256dh, auth } } : { ok: false, message: BAD_SUBSCRIPTION };
+}
