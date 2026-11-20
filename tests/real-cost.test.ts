@@ -70,3 +70,18 @@ describe("noticeRentDelta", () => {
     expect(noticeRentDelta(350_000, null)).toBeNull();
   });
 });
+
+// 선우 qa 015 #1(2026-11-20): 추정 에너지비가 어느 계산으로 나왔는지 칸에 남긴다
+describe("realCost 추정 근거", () => {
+  const base = { monthlyRent: 500_000, maintenanceFee: 0, energyCost: null, electricityKwh: null, transitFare: 0, tripsPerDay: null, commuteDays: null };
+  it("아파트 금액 추정이면 apt", () => {
+    expect(realCost({ ...base, estimatedEnergyCost: 80_000, estimatedKwh: 250, estimateBasis: "kepco" }, 11).energy.basis).toBe("apt");
+  });
+  it("kWh 추정이면 그 집의 추정 기준(한전·전국)", () => {
+    expect(realCost({ ...base, estimatedKwh: 250, estimateBasis: "national" }, 11).energy.basis).toBe("national");
+    expect(realCost({ ...base, estimatedKwh: 250, estimateBasis: "kepco" }, 11).energy.basis).toBe("kepco");
+  });
+  it("입력값이면 근거 없음", () => {
+    expect(realCost({ ...base, energyCost: 30_000, estimatedKwh: 250, estimateBasis: "kepco" }, 11).energy.basis).toBeUndefined();
+  });
+});

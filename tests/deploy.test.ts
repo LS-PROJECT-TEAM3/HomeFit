@@ -35,6 +35,16 @@ describe("deploy.deployedHost", () => {
   it("주소가 없으면 null", () => {
     expect(deployedHost("Error: build failed")).toBeNull();
   });
+
+  // 2026-11-20 배포: CLI가 끝에 "Aliased 운영 주소"를 찍어 운영 주소를 새 배포로 잘못 읽고 2분을 헛돌았다
+  it("운영 별칭 주소는 새 배포 주소로 고르지 않는다", () => {
+    const out = "Production: https://homefit-2zbvgtwql-team.vercel.app [40s]\nAliased https://homefit-lac.vercel.app [40s]\n";
+    expect(deployedHost(out, "https://homefit-lac.vercel.app")).toBe("homefit-2zbvgtwql-team.vercel.app");
+  });
+
+  it("운영 별칭 주소만 있으면 null", () => {
+    expect(deployedHost("Aliased https://homefit-lac.vercel.app\n", "https://homefit-lac.vercel.app/")).toBeNull();
+  });
 });
 
 describe("deploy.aliasServes", () => {
