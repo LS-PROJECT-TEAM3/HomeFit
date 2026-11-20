@@ -37,6 +37,7 @@
 | 7 | C-2107 | 3단계 중 발견: 로그인 검사가 모든 주소를 로그인 화면으로 돌려, 쿠키 없이 가져가는 앱 정보·아이콘이 깨질 수 있었음 | `lib/supabase/auth-rules.ts` OPEN_PATHS에 서비스 워커·앱 정보·아이콘 5개(정확한 주소만) | 통과(curl 200, 시험) |
 | 8 | C-2108 | 3·4단계 ponytail-review 1번(꼭 고칠 것): 받을 주소에 아무 https 주소나 들어가 서버가 그 주소로 요청을 보내고, 응답 없는 주소 하나가 그 수집의 다른 사람 웹 푸시를 모두 멈출 수 있었음 | `parseSubscription`이 실제 푸시 서비스 호스트만 받음(fcm.googleapis.com, android.googleapis.com, *.push.services.mozilla.com, *.notify.windows.com, *.push.apple.com, 포트 지정 거절) | 통과(시험 2개 먼저 실패 확인, 703개 통과) |
 | 9 | — | 3번(있으면 좋은 것): 아무것도 막지 않는 시험 줄(`/icons/../admin`) | 지움 | — |
+| 10 | C-2106 | 선우 PR #44 리뷰(막지 않음): 흐름 화면 알림 상자 이름이 "슬랙 알림", 알림 상세의 slack·webPush·removed·errors가 영어로 보임 | `flow/graph.ts` 상자 이름 "알림(슬랙·웹 푸시)", 라벨 4개 | 통과(시험 2개 먼저 실패 확인, 718개 통과) |
 
 ## 4. 변경 기록
 | 날짜 | 바뀐 내용 |
