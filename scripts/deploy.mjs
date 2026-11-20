@@ -38,7 +38,7 @@ async function waitForAlias(host) {
 }
 
 console.log("1) 운영 배포를 시작합니다(몇 분 걸립니다)…");
-const host = deployedHost(vercel(["deploy", "--prod", "--yes"]));
+const host = deployedHost(vercel(["deploy", "--prod", "--yes"]), productionUrl);
 if (!host) {
   console.log("   배포 주소를 찾지 못해 수집은 건너뜁니다. Vercel 화면에서 배포 상태를 확인해 주세요.");
   process.exit(1);
