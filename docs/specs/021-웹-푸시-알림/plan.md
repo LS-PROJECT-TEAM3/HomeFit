@@ -28,7 +28,8 @@
 | `incident/notify.server.ts` | 슬랙과 웹 푸시를 함께(동시에) 부르는 함수 하나. 슬랙 키가 없어도 웹 푸시는 가고, 한쪽 실패는 오류로 담아 돌려줌 | 2 |
 | `watch/collect.server.ts`, `collect-weather.server.ts`, `collect-rent.server.ts` | 위 함수로 바꿈. 실행 기록 `notify` 단계 detail에 슬랙·웹 푸시 따로(단계 이름은 그대로라 흐름 화면 변경 없음) | 2 |
 | `public/sw.js` | 서비스 워커: 알림 받으면 띄우고, 누르면 그 주소 열기 | 3 |
-| `app/manifest.ts`, `app/apple-icon.png`, `app/icon.png` | 앱 이름·아이콘(홈 화면에 추가, spec Q2) | 3 |
+| `app/manifest.ts`, `app/apple-icon.png`, `public/icons/icon-192.png`·`icon-512.png` | 앱 이름·아이콘(홈 화면에 추가, spec Q2) | 3 |
+| `lib/supabase/auth-rules.ts` | 서비스 워커·앱 정보·아이콘을 로그인 없이 열기(브라우저가 쿠키 없이 가져감) | 3 |
 | `app/(main)/my/push/` | 켜기·끄기·시험 알림 서버 함수와 화면 조각(client) | 4 |
 | `app/(main)/my/account/page.tsx` | "웹 푸시 알림" 칸 추가(MY_030400_TB) | 4 |
 | `tests/web-push.test.ts`, `tests/notify.test.ts` | 순수 함수 시험(먼저 씀) | 1·2 |
@@ -84,4 +85,5 @@
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-20 | v0.1 | 처음 만듦 |
+| 2026-11-20 | v0.1 | 3단계: 로그인 검사 예외(auth-rules) 추가, 아이콘은 public/icons + app/apple-icon.png(app/icon.png는 안 만듦, 기존 favicon 그대로) |
 | 2026-11-20 | v0.1 | 1단계: 슬랙 글(`buildMessages`)을 그대로 나눠 써서 `incident/notify.ts` 꺼내기는 하지 않음(줄어든 변경, 같은 결과) |

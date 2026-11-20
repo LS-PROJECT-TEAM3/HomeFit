@@ -2,7 +2,7 @@
 
 - 근거: spec v0.2, plan v0.1, UJ CUJ-01 2단계(알림 받기)
 - 상태: Claude QA 진행 중
-- 요약: C 6/8, H 0/3
+- 요약: C 7/8, H 0/3
 - 최종 갱신: 2026-11-20
 
 ## 1. Claude QA
@@ -14,7 +14,7 @@
 | C-2104 | 회귀 | 1 | 함수 시험 | `npm test` | 슬랙 알림 글 시험이 그대로 통과 | 통과 | 슬랙 글을 그대로 나눠 써서 `incident/notify.ts`는 안 바꿈. `tests/notify.test.ts` 그대로 통과, 전체 74파일 686개 통과·tsc·lint | 2026-11-20 |
 | C-2105 | FR-001, FR-002, 권한 | 1 | DB 조회 | 0022 적용 뒤 표·권한 확인 | 본인만 읽기·지우기(넣기·바꾸기는 서버만, E3), 관리자 못 봄, `notifications.channel`에 web_push | 통과 | 2026-11-20 운영 DB 적용(apply_migration 0022_web_push). 조회: 칸 6개(id·user_id·endpoint·p256dh·auth·created_at), RLS 켜짐, 정책 select_own·delete_own만(user_id = auth.uid(), 관리자 예외 없음, insert·update 정책 없음 → 서버만), channel check `slack`·`web_push`. 보안 점검(advisors)에 새 경고 없음 | 2026-11-20 |
 | C-2106 | FR-005, SC-005, E7 | 2 | 함수 시험 | 시험 대역으로 보내기 | 보냄 기록, 실패 기록·한 번 다시, 410 기기 지움, 슬랙 키가 없어도 웹 푸시 보냄, 실패해도 예외 없이 끝남 | 통과 | 모듈이 없을 때 실패 확인 뒤 구현. `tests/web-push-server.test.ts` 5개(가짜 DB·가짜 보내기): 보냄 기록, 실패·지난 실패 횟수 2, 410 기기 지움+다른 기기 받으면 보냄, 응답 없으면 남은 알림 안 부르고 실패, 기기 없으면 기록 없음. 슬랙 키 없을 때 웹 푸시는 코드 검사로 확인(`notifyAllChannels`가 두 쪽을 Promise.allSettled로 따로 돌리고, 슬랙은 키가 없으면 0건으로 끝남). 전체 75파일 691개·tsc·lint·build 통과 | 2026-11-20 |
-| C-2107 | FR-001, Q2 | 3 | 미리보기 | `/sw.js`, `/manifest.webmanifest` 열기 | 둘 다 열리고 앱 이름·아이콘이 있음 | | | |
+| C-2107 | FR-001, Q2 | 3 | 미리보기 | `/sw.js`, `/manifest.webmanifest` 열기 | 둘 다 열리고 앱 이름·아이콘이 있음 | 통과 | 로컬 개발 서버에 쿠키 없이(로그아웃 상태) 요청: `/sw.js` 200 application/javascript, `/manifest.webmanifest` 200 application/manifest+json(이름 HomeFit AI·아이콘 192·512·theme #2563EB), `/icons/icon-192.png`·`icon-512.png`·`/apple-icon.png` 200 image/png, `/schedule`는 그대로 307 → /login. `/login` 머리에 `<link rel="manifest">`·`apple-touch-icon` 있음. 아이콘은 파랑 바탕 흰 집 도형(눈으로 확인). 시험 `routeAccess` 1개 추가(먼저 실패 확인), 전체 699개·tsc·lint·build 통과 | 2026-11-20 |
 | C-2108 | FR-001, FR-002, FR-006, SC-001, E2, E6 | 4 | 미리보기 | 계정·알림에서 켜기 → 시험 알림 → 끄기, 375px, 키보드 | 켜짐·시험 알림 뜸·꺼짐, 키 없을 때 문구, 가로 넘침 없음, 초점 보임 | | | |
 
 ## 2. 사람 QA
@@ -33,6 +33,7 @@
 | 4 | C-2102 | 4번: 6개 이상 묶음이 일부 사건보다 늦게 켠 기기에도 감(FR-004와 어긋남) | 묶음은 그 안 사건 모두보다 먼저 켠 기기에만(`bundleDevices`) | 통과(시험 bundleDevices) |
 | 5 | — | 5번: 주석·plan "차례로"가 실제(동시에)와 다름 | 주석·plan 고침 | 문서 |
 | 6 | C-2106 | 6번: 기기가 모두 사라진 실패가 매 수집 다시 읽힘 | 그 경우 횟수를 끝까지(2)로 기록 | 통과(시험 "기기가 모두 사라지면 …") |
+| 7 | C-2107 | 3단계 중 발견: 로그인 검사가 모든 주소를 로그인 화면으로 돌려, 쿠키 없이 가져가는 앱 정보·아이콘이 깨질 수 있었음 | `lib/supabase/auth-rules.ts` OPEN_PATHS에 서비스 워커·앱 정보·아이콘 5개(정확한 주소만) | 통과(curl 200, 시험) |
 
 ## 4. 변경 기록
 | 날짜 | 바뀐 내용 |
@@ -41,4 +42,5 @@
 | 2026-11-20 | 1단계 절차 B: C-2101~2104 통과, C-2105는 0022 운영 적용 뒤 |
 | 2026-11-20 | 0022 운영 DB 적용, C-2105 통과. DB 타입에 push_subscriptions |
 | 2026-11-20 | 2단계 절차 B: C-2106 통과, 수집 세 곳 `notifyAllChannels`로 교체 |
+| 2026-11-20 | 3단계 절차 B: C-2107 통과 |
 | 2026-11-20 | ponytail-review(1·2단계): 꼭 고칠 것 0, 고치면 좋은 것 3, 있으면 좋은 것 3 → 6개 모두 고침, 시험 7개 더함. 전체 75파일 698개·tsc·lint·build 통과 |

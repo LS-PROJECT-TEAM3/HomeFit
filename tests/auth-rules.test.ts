@@ -12,6 +12,13 @@ describe("routeAccess (주소별 로그인 규칙)", () => {
   it("메일 링크 확인 주소는 로그인 여부와 상관없이 연다", () => {
     expect(routeAccess("/auth/confirm")).toBe("open");
   });
+  // spec 021 3단계: 브라우저가 쿠키 없이 가져가는 앱 정보·아이콘·서비스 워커는 로그인 화면으로 돌리지 않는다
+  it("웹 푸시용 서비스 워커·앱 정보·아이콘은 연다", () => {
+    for (const path of ["/sw.js", "/manifest.webmanifest", "/apple-icon.png", "/icons/icon-192.png", "/icons/icon-512.png"]) {
+      expect(routeAccess(path)).toBe("open");
+    }
+    expect(routeAccess("/icons/../admin")).toBe("private");
+  });
   it("그 밖은 로그인 필요", () => {
     for (const path of ["/", "/schedule", "/login-help", "/reset-passwordx"]) expect(routeAccess(path)).toBe("private");
   });
