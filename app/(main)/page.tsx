@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { PosterBand } from "@/app/_components/poster-band";
+import { SnapTarget } from "@/app/_components/snap-target";
 import { LoadError, Loading } from "@/app/_components/states";
 import { currentUserId } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
@@ -24,8 +25,10 @@ async function Dashboard() {
   const today = toKstDate(now);
   return (
     <>
-      <PosterBand title="안녕하세요" subtitle={homeSummary(data)} numberLabel="오늘 확인할 일" bigNumber={data.newAlerts.length} unit="건"
-        numberNote={`알림 ${data.newAlerts.length}건 · 다가오는 일정 ${data.schedule.length}건`} />
+      {/* "알림 N건 · 다가오는 일정 N건" 줄은 뺐다(현경 결정 2026-11-21) */}
+      <PosterBand title="안녕하세요" subtitle={homeSummary(data)} numberLabel="오늘 확인할 일" bigNumber={data.newAlerts.length} unit="건" />
+      {/* PC: 띠에서 아래로 스크롤하면 "확인할 일"부터 한 화면에 맞게 부드럽게 옮긴다(사용자 요청 2026-11-21). 휴대폰은 띠가 없어 평소처럼 */}
+      <SnapTarget minWidth={960} className={styles.snapArea}>
       <main className={styles.content}>
         <PhoneHeader data={data} />
         <div className={styles.topRow}>
@@ -37,6 +40,7 @@ async function Dashboard() {
         </div>
         <StatusCard data={data} now={now} today={today} />
       </main>
+      </SnapTarget>
     </>
   );
 }

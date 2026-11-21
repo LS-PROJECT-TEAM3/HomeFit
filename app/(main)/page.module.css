@@ -192,6 +192,12 @@
 
 /* PC: 포스터 띠 아래 본문 (v2-home-pc) */
 @media (min-width: 960px) {
+  /* 카드 영역을 한 화면 높이 이상으로 잡아야 스크롤해 옮겼을 때 띠가 위에 남지 않는다 */
+  .snapArea {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
   .content {
     padding: 40px var(--spacing-screen-padding-pc) 48px;
     gap: var(--spacing-section-gap);

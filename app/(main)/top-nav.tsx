@@ -8,11 +8,11 @@ import { activeMenu, isActivePath, type MenuKey } from "@/app/_components/naviga
 import { SignOutButton } from "./my/push/sign-out-button";
 import styles from "./top-nav.module.css";
 
-// spec 022 FR-010, IA v1.17 네비게이션 모델: 위쪽 메뉴 홈·맞춤 공고·알림·내 일정·더보기, 오른쪽 이름 메뉴
+// spec 022 FR-010, IA v1.19 네비게이션 모델: 위쪽 메뉴 맞춤 공고·알림·내 일정·더보기(홈은 로고), 오른쪽 이름 메뉴
 // 모양은 디자인 시스템 TopNav와 캔버스 menu-* 보드 값 그대로
 type Item = { href: string; label: string };
+// "홈"은 메뉴에서 뺐다. 왼쪽 로고가 홈으로 간다(현경 결정 2026-11-21, IA v1.19)
 const MAIN: (Item & { key: MenuKey })[] = [
-  { key: "home", href: "/", label: "홈" },
   { key: "notices", href: "/notices", label: "맞춤 공고" },
   { key: "alerts", href: "/incidents", label: "알림" },
   { key: "schedule", href: "/schedule", label: "내 일정" },
@@ -53,9 +53,10 @@ function useDisclosure() {
   return { open, setOpen, buttonRef, boxRef };
 }
 
-function Logo({ phone }: { phone?: boolean }) {
+/** 홈으로 가는 로고. 홈에 있으면 화면 읽기 프로그램에 지금 위치로 알린다(메뉴에 "홈"이 없으므로) */
+function Logo({ phone, current }: { phone?: boolean; current?: boolean }) {
   return (
-    <Link href="/" className={`${styles.logo} ${phone ? styles.logoPhone : ""}`} aria-label="HomeFit 홈">
+    <Link href="/" className={`${styles.logo} ${phone ? styles.logoPhone : ""}`} aria-label="HomeFit 홈" aria-current={current ? "page" : undefined}>
       <svg width="38" height="24" viewBox="0 0 38 24" aria-hidden="true">
         <circle cx="12" cy="12" r="10" fill="none" stroke="var(--primary-normal)" strokeWidth="1.6" />
         <circle cx="19" cy="12" r="10" fill="none" stroke="var(--primary-normal)" strokeWidth="1.6" />
@@ -123,7 +124,7 @@ function AccountItems({ pathname, isAdmin, email, onPick, phone }: { pathname: s
 function PcNav({ pathname, active, newAlerts, isAdmin, email }: Props & { pathname: string; active: MenuKey | null }) {
   return (
     <header className={styles.bar72}>
-      <Logo />
+      <Logo current={active === "home"} />
       <nav aria-label="주 메뉴" className={styles.list}>
         {MAIN.map((m) => (
           <span key={m.key} className={styles.slot}>
@@ -150,7 +151,7 @@ function PhoneNav({ pathname, active, newAlerts, isAdmin, email }: Props & { pat
   const label = `메뉴 열기${newAlerts ? `, 새 알림 ${newAlerts}건` : ""}`;
   return (
     <header className={styles.bar60}>
-      <Logo phone />
+      <Logo phone current={active === "home"} />
       <span className={styles.right}>
         {newAlerts ? <span className={styles.count} aria-hidden="true">{newAlerts}</span> : null}
         <button type="button" className={styles.menuButton} aria-label={label} aria-haspopup="dialog" onClick={() => dialogRef.current?.showModal()}>

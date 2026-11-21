@@ -15,7 +15,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 56px;
-  align-items: end;
+  align-items: last baseline; /* "안녕하세요"와 큰 숫자의 글자 밑선을 맞춘다 */
 }
 
 .title {
@@ -29,7 +29,7 @@
 }
 
 .sub {
-  margin: 0; /* 캔버스 보드에서 실제로 그려진 값(보드 기본 스타일이 DS의 12px을 0으로 덮음) */
+  margin: 0 0 12px; /* 아래 제목과 띄움(사용자 요청 2026-11-21) */
   font-size: 18px;
   color: var(--inverse-label-alternative);
 }
@@ -46,7 +46,7 @@
 .number {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 132px;
+  font-size: 96px; /* DS 132px에서 줄임(사용자 요청 2026-11-21) */
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.02em;

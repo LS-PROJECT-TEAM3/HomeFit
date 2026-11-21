@@ -70,7 +70,7 @@
 - 흐름 화면 상태 색: 성공 `status-positive` 실선, 실패 `status-negative`, 승인 대기 `status-cautionary` 점선, 아직 안 켜짐 `label-alternative` 회색. 색과 함께 글자 라벨도 붙인다
 - 글꼴 세 가지: 본문·숫자 Pretendard(`--font-sans`), 제목(h1~h3)과 큰 숫자 Noto Serif KR 500(`--font-serif`), 로고 글자만 Cormorant Garamond(`--font-logo`). 금액·건수는 `font-variant-numeric: tabular-nums`
 - 모양: 모서리는 입력·버튼 4px(`--radius-control`), 카드 0px. 그림자는 쓰지 않고 선으로 나눈다(펼친 목록·대화 상자만 예외)
-- 위쪽 메뉴: 홈·맞춤 공고·알림·내 일정·더보기, 오른쪽 이름 메뉴(설정·관리자·로그아웃). PC 72px, 휴대폰 60px + 전체 화면 메뉴. `app/(main)/top-nav.tsx` (IA v1.17)
+- 위쪽 메뉴: 맞춤 공고·알림·내 일정·더보기(홈은 왼쪽 로고, IA v1.19), 오른쪽 이름 메뉴(설정·관리자·로그아웃). PC 72px, 휴대폰 60px + 전체 화면 메뉴. `app/(main)/top-nav.tsx` (IA v1.17)
 - 간격: 화면 좌우 여백 PC 56px·포스터 176px·휴대폰 16px(`--spacing-screen-padding-*`). 예전 화면의 16/24/32/48/64px 단계(`--space-1..5`)는 화면 PR에서 옮길 때까지 남겨 둔다
 - 토큰 위치: `app/tokens.css` 한곳. 위쪽은 디자인 시스템 토큰, 아래쪽은 예전 이름(`--color-*`)을 새 토큰에 잇는 별칭이다. 새 코드는 디자인 시스템 이름을 쓴다
 - 참고: 아이콘은 이모지 대신 SVG(Lucide 등)

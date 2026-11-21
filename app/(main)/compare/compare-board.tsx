@@ -7,7 +7,7 @@ import { completeTotal, lowestItems, MAX_COMPARE, toggleCompare } from "@/incide
 import { deleteInterestHome } from "./actions";
 import { homeMeta, ListCard, TrayCard } from "./compare-cards";
 import { CompareDrawer, type DrawerTarget } from "./compare-drawer";
-import { useSnapToTray } from "./use-snap-to-tray";
+import { useSnapTo } from "@/app/_components/use-snap-to";
 import type { RealCost } from "@/incident/real-cost";
 import type { CompareHome, LoadedCompare } from "./load-compare";
 
@@ -86,7 +86,7 @@ export function CompareBoard({ data, header }: { data: LoadedCompare; header: Re
   const [deleting, startDelete] = useTransition();
   const drawer = useDrawer();
   const trayRef = useRef<HTMLDivElement>(null);
-  useSnapToTray(trayRef);
+  useSnapTo(trayRef, { gap: 24 }); // 비교 현황 위 24px
   const homes = data.homes;
   const chosen = selected.map((id) => homes.find((h) => h.id === id)).filter((h): h is CompareHome => h !== undefined);
 

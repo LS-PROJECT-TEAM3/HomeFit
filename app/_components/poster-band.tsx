@@ -10,9 +10,10 @@ export function PosterBand({ title, subtitle, numberLabel, bigNumber, unit, numb
   return (
     <section className={styles.band} aria-labelledby="poster-title">
       <div className={styles.grid}>
+        {/* 요약을 위, 제목을 아래로: 오른쪽 "오늘 확인할 일"(위)·숫자(아래)와 짝을 맞춘다(사용자 요청 2026-11-21) */}
         <div>
-          <h1 id="poster-title" className={styles.title}>{title}</h1>
           {subtitle ? <p className={styles.sub}>{subtitle}</p> : null}
+          <h1 id="poster-title" className={styles.title}>{title}</h1>
         </div>
         <div className={styles.figure}>
           <p className={styles.label}>{numberLabel}</p>
