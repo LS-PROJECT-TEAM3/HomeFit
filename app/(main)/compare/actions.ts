@@ -40,12 +40,11 @@ export async function saveInterestHome(_prev: InterestHomeState, formData: FormD
     : await supabase.from("interest_homes").insert({ ...row, user_id: userId, created_by: userId });
   if (error) return { error: "관심 주택을 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.", values };
   revalidatePath("/compare");
-  revalidatePath("/compare/cost");
-  if (!id) redirect("/compare");
+  // spec 022: 등록도 옆 창에서 하므로 다른 화면으로 보내지 않고 저장됨을 돌려준다(창이 닫힌다)
   return { saved: true, values };
 }
 
-/** 관심 주택 지우기. 내 것만(RLS interest_homes_delete_own) */
+/** 관심 주택 지우기. 내 것만(RLS interest_homes_delete_own). 목록은 revalidate로 다시 그린다 */
 export async function deleteInterestHome(id: string): Promise<{ error?: string }> {
   const userId = await currentUserId();
   if (!userId) redirect("/login");
@@ -53,6 +52,5 @@ export async function deleteInterestHome(id: string): Promise<{ error?: string }
   const { error } = await supabase.from("interest_homes").delete().eq("id", id).eq("user_id", userId);
   if (error) return { error: "지우지 못했습니다. 잠시 뒤 다시 해 주세요." };
   revalidatePath("/compare");
-  revalidatePath("/compare/cost");
-  redirect("/compare");
+  return {};
 }

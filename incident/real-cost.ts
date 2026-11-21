@@ -62,9 +62,14 @@ function energyItem(home: CostInput, month: number): CostItem {
   return { value: null, kind: "missing" };
 }
 
+/** 한 달 교통비 = 편도 × 하루 횟수 × 출근 일수(E6 기본값). 편도 요금이 없으면 null. 등록 창 계산(spec 022)도 같이 쓴다 */
+export function monthlyTransit(fare: number | null, tripsPerDay: number | null, commuteDays: number | null): number | null {
+  return fare === null ? null : fare * (tripsPerDay ?? DEFAULT_TRIPS) * (commuteDays ?? DEFAULT_DAYS);
+}
+
 function transitItem(home: CostInput): CostItem {
-  if (home.transitFare === null) return { value: null, kind: "missing" };
-  return { value: home.transitFare * (home.tripsPerDay ?? DEFAULT_TRIPS) * (home.commuteDays ?? DEFAULT_DAYS), kind: "calculated" };
+  const value = monthlyTransit(home.transitFare, home.tripsPerDay, home.commuteDays);
+  return value === null ? { value: null, kind: "missing" } : { value, kind: "calculated" };
 }
 
 /** E5: 빈 칸은 0으로 넣지 않고 미입력으로 합계에서 뺀다 */

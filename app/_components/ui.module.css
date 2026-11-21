@@ -59,6 +59,9 @@
   cursor: pointer;
 }
 
+/* Type=Icon: 버튼 위아래만 겹치게(DS .hf-tip-btn 기본 margin) */
+.tipIcon { margin: -10px 0; }
+
 .tipLetter {
   display: inline-flex;
   align-items: center;
