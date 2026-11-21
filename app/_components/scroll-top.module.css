@@ -1,8 +1,8 @@
-/* 맨 위로 버튼: 챗봇 버튼(오른쪽 16px, 아래 16px, 높이 48px) 바로 위. 색은 app/tokens.css 변수만 */
+/* 맨 위로 버튼: 챗봇 버튼(휴대폰 오른쪽·아래 16px, PC 32px, 높이 60px) 바로 위 12px. 색은 app/tokens.css 변수만 */
 .button {
   position: fixed;
   right: 16px;
-  bottom: 76px;
+  bottom: 88px;
   z-index: 40; /* 챗봇 창(50)이 열리면 그 아래로 */
   display: inline-flex;
   align-items: center;
@@ -28,4 +28,8 @@
 .arrow {
   display: inline-flex;
   transform: rotate(180deg);
+}
+
+@media (min-width: 960px) {
+  .button { right: 32px; bottom: 104px; }
 }
