@@ -26,6 +26,8 @@
 .num { text-align: right !important; }
 .table td:first-child { white-space: nowrap; }
 .link { color: var(--label-normal); font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+/* 표 안 링크: 줄 높이는 그대로, 누르는 영역만 위아래로 넓힌다(24px 이상) */
+.table .link { display: inline-block; padding: 8px 0; margin: -8px 0; }
 
 /* 상태 글자(색 + 글자) */
 .ok { color: var(--primary-normal); font-weight: 700; }
