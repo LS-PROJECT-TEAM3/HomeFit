@@ -11,7 +11,7 @@
 - 시험·리뷰·문서화: @.claude/rules/quality.md
 - 디자인 기본선: @.claude/rules/design.md
 - Git·보안·병렬 작업: @.claude/rules/git-security.md
-- 스킬: `.claude/skills/` (harness-ia, harness-journeys, harness-prd, harness-erd, harness-intent, harness-spec-plan, harness-qa, grill-with-docs, grilling, domain-modeling, wiki-ingest, wiki-query, wiki-lint)
+- 스킬: `.claude/skills/` (harness-ia, harness-journeys, harness-prd, harness-erd, harness-intent, harness-spec-plan, harness-qa, grill-with-docs, grilling, domain-modeling, wiki-ingest, wiki-query, wiki-lint, ui-ux-pro-max, frontend-design). 외부에서 가져온 스킬(ui-ux-pro-max: MIT, nextlevelbuilder/ui-ux-pro-max-skill `2de1134`. frontend-design: Apache-2.0, Anthropic)은 각 폴더에 라이선스가 있다. 두 스킬이 권하는 색·글꼴·라이브러리보다 이 파일의 "디자인"·"스택" 절이 우선한다
 - 위 파일과 이 파일이 다르면 이 파일이 우선한다. 규칙을 바꾸면 PR로 바꾸고 이유를 적는다.
 - `harness.md` 6절의 "사용자"는 이 저장소에서 작업하는 팀원 누구나다.
 
