@@ -1,0 +1,142 @@
+/* spec 022 내 일정. PC 값은 캔버스 v2-s7-pc, 휴대폰은 v2-s7-phone. 색은 app/tokens.css 변수만 */
+
+.main {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 36px 20px 72px;
+  display: flex;
+  flex-direction: column;
+}
+
+.title { margin: 0; font-family: var(--font-serif); font-size: 32px; font-weight: 500; line-height: 1.25; text-align: center; }
+.titleLine { display: block; width: 1px; height: 40px; margin: 20px auto 0; background: var(--label-normal); }
+
+.layout { display: flex; flex-direction: column; gap: 20px; margin-top: 32px; }
+.side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+/* 달력 */
+.calendar { min-width: 0; padding: 20px 12px 16px; background: var(--background-elevated-normal); }
+
+.calHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.calNav { display: flex; align-items: center; gap: 8px; }
+
+.navButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-control);
+  color: var(--label-normal);
+}
+
+.navButton:hover { background: var(--background-normal-normal); }
+.flip { display: inline-flex; transform: rotate(180deg); }
+
+.calTitle { margin: 0; min-width: 140px; font-family: var(--font-serif); font-size: 22px; font-weight: 600; text-align: center; }
+
+.legend { display: flex; gap: 16px; font-size: 14px; color: var(--label-neutral); }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; }
+.swatchPrepare { background: var(--primary-normal); }
+.swatchRisk { background: var(--status-negative); }
+
+.grid { display: flex; flex-direction: column; }
+.weekRow { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.weekday { padding: 8px 0; font-size: 14px; font-weight: 600; text-align: center; color: var(--label-neutral); }
+.sunday { color: var(--status-negative); }
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 6px 3px;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.today { background: var(--primary-tint); }
+.dayNum { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.outside { color: var(--label-neutral); opacity: 0.5; }
+
+.event {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: var(--static-white);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.eventPrepare { background: var(--primary-normal); }
+.eventRisk { background: var(--status-negative); }
+.eventDone { opacity: 0.55; text-decoration: line-through; }
+
+/* 휴대폰(v2-s7-phone): 칸은 날짜 숫자 + 점. 할 일 글자는 아래 "다가오는 일정"에서 본다 */
+@media (max-width: 959px) {
+  .cell { align-items: center; min-height: 48px; gap: 3px; padding: 6px 0; border-top: 0; }
+  .today { background: transparent; }
+  .today .dayNum { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-normal); color: var(--static-white); }
+  .event { width: 6px; height: 6px; padding: 0; border-radius: 50%; font-size: 0; }
+  .eventDone { text-decoration: none; }
+}
+
+/* 다가오는 일정 */
+.upcomingCard { flex: 1; padding: 24px 20px; background: var(--background-elevated-normal); }
+.upTitleHead { margin: 0 0 8px; font-size: 20px; font-weight: 700; }
+.upcoming { margin: 0; padding: 0; list-style: none; }
+.upItem { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line-normal-normal); }
+
+.upCheck {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 2px 0 0;
+  accent-color: var(--primary-normal);
+  cursor: pointer;
+}
+
+.upText { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.upTitle { color: var(--label-normal); font-size: 17px; font-weight: 700; line-height: 1.4; text-decoration: none; word-break: keep-all; }
+.upTitle:hover { text-decoration: underline; text-underline-offset: 4px; }
+.upDone { color: var(--label-neutral); text-decoration: line-through; }
+.upMeta { font-size: 15px; color: var(--label-neutral); }
+.kindPrepare { color: var(--primary-normal); font-weight: 700; }
+.kindRisk { color: var(--status-negative); font-weight: 700; }
+
+.empty { margin: 0; padding-top: 8px; font-size: 16px; line-height: 1.6; color: var(--label-neutral); }
+.error { margin: 8px 0 0; font-size: 15px; color: var(--status-negative); }
+
+.srOnly { position: absolute; top: 0; left: 0; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.navButton:focus-visible,
+.event:focus-visible,
+.upCheck:focus-visible,
+.upTitle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (min-width: 960px) {
+  .main { padding: 80px var(--spacing-screen-padding-pc) 120px; }
+  .main > :not(.titleLine) { width: 100%; max-width: 1128px; margin-left: auto; margin-right: auto; }
+  .title { font-size: 44px; }
+  .titleLine { height: 56px; margin-top: 28px; }
+
+  .layout { flex-direction: row; align-items: stretch; gap: 24px; margin-top: 48px; }
+  .calendar { flex: 1; padding: 32px 32px 24px; }
+  .calTitle { font-size: 28px; }
+  .cell { min-height: 104px; gap: 6px; padding: 8px 6px; }
+  .dayNum { font-size: 15px; }
+  .event { padding: 2px 6px; font-size: 13px; }
+  .side { flex: none; width: 420px; }
+  .upcomingCard { padding: 32px; }
+}
