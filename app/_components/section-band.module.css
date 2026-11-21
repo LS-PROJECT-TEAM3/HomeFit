@@ -80,6 +80,7 @@
   }
 
   .band { padding-bottom: 28px; }
+  .bandFigure { padding-bottom: 48px; } /* 큰 숫자 칸과 탭 사이(DS .hf-band .hf-folder 48px) */
 
   .sentinelPc { display: block; }
 

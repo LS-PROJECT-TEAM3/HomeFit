@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barHeights, homeUsage, householdAverageKwh, sigungusNeedingAptEstimate, sigungusNeedingEstimate, usageTier, withEstimate, yearlyBills } from "@/incident/energy-estimate";
+import { barHeights, homeUsage, householdAverageKwh, sigungusNeedingAptEstimate, sigungusNeedingEstimate, usageTier, withEstimate, yearlyBills, electricityBreakdown } from "@/incident/energy-estimate";
 import { panelFactor, panelMonthlyKwh } from "@/incident/energy-panel";
 import { electricityBill, realCost, type CostInput } from "@/incident/real-cost";
 
@@ -146,5 +146,22 @@ describe("realCost 에너지비 순서에 아파트 금액 추정 (spec 018 FR-0
     expect(realCost({ ...base, electricityKwh: 200, estimatedEnergyCost: 150_000, estimatedKwh: 300 }, 1).energy.kind).toBe("calculated");
     expect(realCost({ ...base, estimatedEnergyCost: 150_000, estimatedKwh: 300 }, 1).energy).toEqual({ value: 150_000, kind: "estimated", basis: "apt" });
     expect(realCost({ ...base, estimatedEnergyCost: null, estimatedKwh: 300 }, 1).energy).toEqual({ value: electricityBill(300, 1), kind: "estimated" });
+  });
+});
+
+// spec 022 FR-012(에너지 분석 보드 v2-energy-pc): 띠 숫자·누진 구간·줄이면 덜 나오는 돈. 부가세 10% 포함, 부가 요금(기금 등)은 제외
+describe("electricityBreakdown", () => {
+  // 보드 숫자(43,875원)는 kWh당 215원 어림 예시. 코드는 한전 공식 214.6원이라 43,841원
+  it("285kWh·11월: 요금 43,841원 + 부가세 4,384원 = 48,225원, 2구간, 다음 구간까지 115kWh, 구간 요금 215원", () => {
+    const b = electricityBreakdown(285, 11);
+    expect(b).toMatchObject({ bill: 43841, vat: 4384, total: 48225, tier: 2, toNext: 115, pricePerKwh: 215 });
+  });
+  it("30kWh 줄이면 덜 나오는 돈(부가세 포함)", () => {
+    const bill255 = electricityBill(255, 11);
+    expect(electricityBreakdown(285, 11).save30).toBe(48225 - (bill255 + Math.round(bill255 * 0.1)));
+  });
+  it("3구간이면 다음 구간 없음, 7·8월은 하계 구간", () => {
+    expect(electricityBreakdown(500, 11)).toMatchObject({ tier: 3, toNext: null, pricePerKwh: 307 });
+    expect(electricityBreakdown(285, 8)).toMatchObject({ tier: 1, toNext: 15, limits: [300, 450] });
   });
 });

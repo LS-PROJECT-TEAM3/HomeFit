@@ -1,40 +1,52 @@
-import { usageTier } from "@/incident/energy-estimate";
-import styles from "@/app/_components/hub.module.css";
+import type { ElectricityBreakdown } from "@/incident/energy-estimate";
+import { RATE_TABLE } from "@/incident/real-cost";
+import styles from "./energy.module.css";
 
-const WIDTH = 300;
-const BAR_Y = 26;
-const BAR_H = 22;
-const SHADES = ["var(--color-muted-bg)", "var(--color-tier-2)", "var(--color-tier-3)"] as const;
+// spec 011 FR-003 → spec 022 FR-012(캔버스 v2-energy-pc, DS TierChart): 누진 구간 계단 그림. 지금 구간·다음 구간까지·구간 요금을 글자로도
+const STEP_HEIGHTS = [104, 152, 200];
 
-/**
- * spec 011 FR-003: 한 달 사용량이 누진 몇 구간에 있는지 가로 막대(SVG). 구간 이름과 경계를 글자로 함께 적는다(디자인 기본선 5).
- * 구간 경계는 spec 009 요금표(평소 200·400, 7·8월 300·450 kWh)
- */
-export function UsageTierChart({ kwh, month }: { kwh: number; month: number }) {
-  const { tier, limits: [first, second] } = usageTier(kwh, month);
-  const scaleMax = Math.max(second * 1.25, kwh * 1.1);
-  const x = (v: number) => (v / scaleMax) * WIDTH;
-  const segments = [[0, first], [first, second], [second, scaleMax]] as const;
-  const ranges = [`~${first}`, `${first + 1}~${second}`, `${second + 1}~`];
+export function UsageTierChart({ kwh, b }: { kwh: number; b: ElectricityBreakdown }) {
+  const [first, second] = b.limits;
+  const prices = RATE_TABLE.perKwh.map((p) => Math.round(p));
+  const tiers = [
+    { name: "1구간", range: `0~${first}kWh`, from: 0, to: first },
+    { name: "2구간", range: `${first + 1}~${second}kWh`, from: first, to: second },
+    { name: "3구간", range: `${second + 1}~kWh`, from: second, to: second + 200 },
+  ];
+  const label = `누진 구간 1구간 kWh당 ${prices[0]}원, 2구간 ${prices[1]}원, 3구간 ${prices[2]}원. 지금 ${b.tier}구간, ${kwh}kWh`;
   return (
-    <figure className={styles.figure}>
-      <svg viewBox={`0 0 ${WIDTH} 84`} width="100%" role="img" style={{ maxWidth: 480, display: "block" }}
-        aria-label={`한 달 ${kwh}kWh는 ${month}월 기준 누진 ${tier}구간(${ranges[tier - 1]}kWh)입니다`}>
-        {segments.map(([from, to], i) => (
-          <g key={i}>
-            <rect x={x(from)} y={BAR_Y} width={x(to) - x(from)} height={BAR_H} fill={SHADES[i]} />
-            <text x={(x(from) + x(to)) / 2} y={BAR_Y + 15} textAnchor="middle" fontSize={10} fill="var(--color-text)">{i + 1}구간</text>
-            {i < 2 ? <text x={x(to)} y={BAR_Y + BAR_H + 14} textAnchor="middle" fontSize={10} fill="var(--color-muted-text)">{to}</text> : null}
-          </g>
-        ))}
-        {/* 표시는 막대 위 삼각형으로만: 막대 안 구간 글자를 가리지 않게 */}
-        <path d={`M ${x(kwh) - 6} ${BAR_Y - 8} L ${x(kwh) + 6} ${BAR_Y - 8} L ${x(kwh)} ${BAR_Y} Z`} fill="var(--color-accent)" />
-        <text x={Math.min(Math.max(x(kwh), 40), WIDTH - 40)} y={BAR_Y - 12} textAnchor="middle" fontSize={11} fill="var(--color-text)">내 사용량 {kwh}</text>
-        <text x={WIDTH} y={82} textAnchor="end" fontSize={10} fill="var(--color-muted-text)">kWh</text>
-      </svg>
-      <figcaption className={styles.muted}>
-        {month}월 요금표 기준 <strong>누진 {tier}구간</strong>({ranges[tier - 1]}kWh)입니다. 구간이 오를수록 1kWh당 요금이 비싸집니다.
-      </figcaption>
-    </figure>
+    <div className={styles.tier}>
+      <div className={styles.tierLeft}>
+        <div className={styles.tierNow}><span className={styles.tierNowLabel}>지금</span><span className={styles.tierNowValue}>{b.tier}구간</span></div>
+        <dl className={styles.kvRows}>
+          <div><dt>다음 구간까지</dt><dd>{b.toNext === null ? "마지막 구간" : `${b.toNext.toLocaleString("ko-KR")}kWh`}</dd></div>
+          <div><dt>이번 구간 요금</dt><dd>kWh당 {b.pricePerKwh}원</dd></div>
+        </dl>
+      </div>
+      <div className={styles.tierSteps} role="img" aria-label={label}>
+        {tiers.map((t, i) => {
+          const current = i + 1 === b.tier;
+          // 표시(약 130px)가 옆 구간 이름 위로 넘어가지 않게 칸 안쪽 35~65%에만
+          const pos = Math.max(35, Math.min(65, ((kwh - t.from) / (t.to - t.from)) * 100));
+          return (
+            <div key={t.name} className={styles.tierCol}>
+              <div className={styles.tierArea}>
+                <div className={`${styles.tierStep} ${current ? styles.tierCurrent : ""}`} style={{ height: STEP_HEIGHTS[i] }}>
+                  <div className={styles.tierName}>{t.name}</div>
+                  <div className={styles.tierPrice}>kWh당 {prices[i]}원</div>
+                </div>
+                {current ? (
+                  <div className={styles.tierMark} style={{ left: `${pos}%`, bottom: STEP_HEIGHTS[i] }}>
+                    <span className={styles.tierPill}>내 위치 {kwh.toLocaleString("ko-KR")}kWh</span>
+                    <span className={styles.tierLine} aria-hidden="true" />
+                  </div>
+                ) : null}
+              </div>
+              <span className={styles.tierRange}>{t.range}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

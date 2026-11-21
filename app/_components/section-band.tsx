@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import { isActivePath } from "./navigation";
 import { useSnapTo } from "./use-snap-to";
 import styles from "./section-band.module.css";
@@ -17,7 +17,8 @@ function isCurrent(pathname: string, tab: BandTab, first: boolean): boolean {
   return first ? pathname === tab.href : isActivePath(pathname, tab.href);
 }
 
-export function SectionBand({ title, subtitle, tabs, label }: { title: string; subtitle: string; tabs: BandTab[]; label: string }) {
+/** figure: 띠 안 큰 숫자 칸(에너지 분석 등, PC만). 휴대폰은 화면이 카드로 따로 보인다 */
+export function SectionBand({ title, subtitle, tabs, label, figure }: { title: string; subtitle?: string; tabs: BandTab[]; label: string; figure?: ReactNode }) {
   const pathname = usePathname();
   // 사용자 요청(2026-11-21): 스크롤하면 제목이 올라가고 탭이 화면 맨 위에 딱 맞게(PC는 폴더 탭, 휴대폰은 밑줄 탭).
   // 탭은 위쪽 메뉴 아래에 붙어 메뉴와 같이 숨고 나타난다. 붙은 탭은 위치가 바뀌므로 기준은 탭 바로 뒤(내용 시작)의 빈 표시(sentinel)로 잰다
@@ -34,9 +35,10 @@ export function SectionBand({ title, subtitle, tabs, label }: { title: string; s
     });
   return (
     <>
-      <section className={styles.band} aria-labelledby="band-title">
+      <section className={`${styles.band} ${figure ? styles.bandFigure : ""}`} aria-labelledby="band-title">
         <h1 id="band-title" className={styles.title}>{title}</h1>
-        <p className={styles.sub}>{subtitle}</p>
+        {subtitle ? <p className={styles.sub}>{subtitle}</p> : null}
+        {figure}
       </section>
       <div className={styles.folderBar} data-sticky-bar>
         <nav className={styles.folder} aria-label={label}>{links(styles.folderTab, styles.folderOn)}</nav>

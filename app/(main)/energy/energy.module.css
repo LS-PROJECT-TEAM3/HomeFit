@@ -1,0 +1,681 @@
+/* spec 022 에너지 분석. 값은 캔버스 v2-energy-* 보드와 DS(PosterBand·TierChart·MonthBars). 색은 app/tokens.css 변수만 */
+
+.main {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 100vh;
+  min-height: 100dvh; /* 스크롤해 내용 시작을 맨 위에 맞출 때 아래가 비지 않게 */
+  margin: 0 auto;
+  padding: 20px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.phoneOnly { display: flex; }
+
+.cardHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+
+.cardTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.arrowLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--label-normal);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.arrowLink span {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.greyPill {
+  align-self: flex-start;
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  background: var(--fill-alternative);
+  color: var(--label-neutral);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.phoneNumRow,
+.heatNumRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.phonePrefix { font-size: 22px; font-weight: 600; color: var(--label-neutral); }
+.phoneUnit { font-size: 26px; font-weight: 600; color: var(--label-neutral); }
+
+.phoneNumber,
+.heatNumber,
+.tierNowValue {
+  font-family: var(--font-serif);
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--primary-heavy);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 이름-값 줄(KeyValueRow Large) */
+.kvRows { margin: 0; }
+
+.kvRows > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.kvRows dt {
+  font-size: 17px;
+  color: var(--label-neutral);
+}
+
+.kvRows dd {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--label-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.dash { color: var(--label-neutral) !important; }
+
+.callout {
+  padding: 16px 20px;
+  border-radius: var(--radius-control);
+  background: var(--accent-callout);
+  color: var(--primary-heavy);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* 띠 안 큰 숫자(DS .hf-band-*) — PC에서만 띠가 보인다 */
+.bandGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 56px;
+  align-items: end;
+  margin-top: 40px;
+}
+
+.bandLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bandLabel {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--inverse-label-alternative);
+}
+
+.bandPill {
+  padding: 3px 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent-callout);
+  color: var(--primary-heavy);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bandTip {
+  margin-left: -10px;
+  color: var(--inverse-label-alternative);
+}
+
+.bandTip button { color: var(--inverse-label-alternative); }
+
+.bandNumRow {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.bandPrefix,
+.bandUnit {
+  font-weight: 600;
+  color: var(--inverse-label-alternative);
+}
+
+.bandPrefix { font-size: 22px; }
+.bandUnit { font-size: 30px; }
+
+.bandNumber {
+  font-family: var(--font-serif);
+  font-size: 112px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--inverse-label);
+}
+
+.bandSide { padding-bottom: 24px; }
+
+.bandRows { margin: 0; }
+
+.bandRows > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 16px 0;
+  border-top: 1px solid var(--inverse-line);
+}
+
+.bandRows dt {
+  font-size: 17px;
+  color: var(--inverse-label-alternative);
+}
+
+.bandRows dd {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--inverse-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.bandSide .callout {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+/* 누진 구간(DS TierChart) */
+.tier {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.tierLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tierNow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.tierNowLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--label-neutral);
+}
+
+.tierSteps {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.tierCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tierArea {
+  position: relative;
+  height: 234px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.tierStep {
+  position: relative;
+  width: 100%;
+  padding: 14px 12px;
+  background: var(--chart-tier-low);
+  color: var(--label-normal);
+}
+
+.tierCurrent {
+  background: var(--primary-normal);
+  color: var(--static-white);
+}
+
+.tierName {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tierPrice {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tierMark {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.tierPill {
+  padding: 3px 10px;
+  border-radius: var(--radius-control);
+  background: var(--status-cautionary);
+  color: var(--static-white);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tierLine {
+  width: 2px;
+  height: 10px;
+  background: var(--status-cautionary);
+}
+
+.tierRange {
+  font-size: 14px;
+  color: var(--label-neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 12개월 막대(DS MonthBars). 휴대폰은 가로 막대 목록 */
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.barsHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.barsUnit {
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.barsList { display: none; }
+
+.hbars {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hbarRow {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 48px auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.hbarMonth,
+.hbarVal {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hbarVal { text-align: right; }
+
+.hbarTrack {
+  height: 14px;
+  background: var(--background-normal-alternative);
+}
+
+.hbarFill {
+  display: block;
+  height: 100%;
+  background: var(--chart-bar);
+}
+
+.hbarRow.isCurrent .hbarFill { background: var(--primary-normal); }
+.hbarRow.isMax .hbarFill { background: var(--status-cautionary); }
+.hbarRow.isCurrent .hbarMonth,
+.hbarRow.isCurrent .hbarVal,
+.hbarRow.isMax .hbarMonth,
+.hbarRow.isMax .hbarVal { font-weight: 700; }
+
+.barTag {
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.barTagMax { background: var(--status-cautionary); }
+
+.barsLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 15px;
+  color: var(--label-neutral);
+}
+
+.barsLegend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.barsSq {
+  width: 12px;
+  height: 12px;
+  background: var(--primary-normal);
+}
+
+.barsSqMax { background: var(--status-cautionary); }
+.legendCurrent { color: var(--primary-normal); }
+.legendMax { color: var(--status-cautionary); }
+
+/* 내 집 없음(v2-energy-empty) */
+.emptyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.emptyLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--primary-heavy);
+}
+
+.emptyBody {
+  margin: 0 0 8px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--label-neutral);
+  word-break: keep-all;
+}
+
+.buttonPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 28px;
+  border-radius: var(--radius-control);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* 난방비(v2-energy-merged-heat) */
+.heatInputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.heatGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.heatLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heatPrefix { font-size: 22px; font-weight: 600; color: var(--label-neutral); }
+.heatUnit { font-size: 26px; font-weight: 600; color: var(--label-neutral); }
+
+.field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.inputBox { position: relative; }
+
+.input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.inputBox .input { padding-right: 52px; }
+
+select.input {
+  appearance: none;
+  padding-right: 48px;
+  background-image: var(--icon-chevron-down);
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 20px;
+}
+
+.unitText {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--label-neutral);
+  pointer-events: none;
+}
+
+.help {
+  margin: 0;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.fieldError {
+  margin: 0;
+  font-size: 14px;
+  color: var(--status-negative);
+}
+
+.arrowLink:focus-visible,
+.buttonPrimary:focus-visible,
+.input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* PC (v2-energy-pc) */
+@media (min-width: 960px) {
+  .main {
+    padding: 40px var(--spacing-screen-padding-pc) 72px;
+    gap: var(--spacing-section-gap);
+  }
+
+  .card {
+    padding: 36px 40px;
+    gap: 20px;
+  }
+
+  .phoneOnly { display: none; }
+
+  .cardTitle { font-size: 21px; }
+
+  .tier {
+    grid-template-columns: 380px minmax(0, 1fr);
+    gap: 56px;
+    align-items: end;
+  }
+
+  .tierLeft { gap: 20px; }
+
+  .tierNowLabel { font-size: 15px; }
+
+  .tierNowValue,
+  .heatNumber { font-size: 88px; }
+
+  .tierStep { padding: 14px 16px; }
+  .tierName { font-size: 26px; }
+  .tierPrice { font-size: 17px; }
+  .tierPill { font-size: 15px; }
+
+  .barsList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .hbars { display: none; }
+
+  .barsCol {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0;
+  }
+
+  .barsCol.isCurrent { background: var(--primary-tint); }
+
+  .barsTagRow {
+    height: 26px;
+    display: flex;
+    align-items: center;
+  }
+
+  .barsArea {
+    height: 228px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+  }
+
+  .barsVal {
+    font-size: 16px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .barsBar {
+    width: 100%;
+    background: var(--chart-bar);
+  }
+
+  .barsCol.isCurrent .barsBar { background: var(--primary-normal); }
+  .barsCol.isMax .barsBar { background: var(--status-cautionary); }
+
+  .barsCol.isCurrent .barsVal,
+  .barsCol.isMax .barsVal,
+  .barsCol.isCurrent .barsMonth,
+  .barsCol.isMax .barsMonth { font-weight: 700; }
+
+  .barsMonth {
+    font-size: 15px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .emptyGrid,
+  .heatGrid { grid-template-columns: 1fr 1fr; gap: 56px; }
+
+  .emptyTitle { font-size: 48px; }
+
+  .heatInputs { grid-template-columns: 1fr 1fr; }
+
+  .heatPrefix { font-size: 28px; }
+  .heatUnit { font-size: 36px; }
+}
