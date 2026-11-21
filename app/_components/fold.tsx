@@ -1,3 +1,4 @@
+import { Icon } from "@/app/_components/icons";
 import styles from "@/app/_components/form.module.css";
 
 /**
@@ -11,6 +12,7 @@ export function Fold({ title, status, open, children }: { title: string; status?
       <summary className={styles.foldSummary}>
         <span className={styles.foldTitle}>{title}</span>
         {status ? <span className={styles.foldStatus}>{status}</span> : null}
+        <span className={styles.foldChevron} aria-hidden="true"><Icon name="chevron-down" size={20} /></span>
       </summary>
       <div className={styles.foldBody}>{children}</div>
     </details>

@@ -5,6 +5,7 @@ import { HOUSING_LABELS, WINDOW_LABELS, type HomeFormInput } from "@/incident/ho
 import { SIDO_OPTIONS } from "@/watch/sido";
 import { CostFields, costInput } from "@/app/_components/cost-fields";
 import { filledStatus, Fold } from "@/app/_components/fold";
+import { SavedNotice } from "@/app/_components/saved-notice";
 import { SigunguField } from "../conditions/sigungu-field";
 import { saveHome, type HomeState } from "./actions";
 import type { MyHome } from "./load";
@@ -110,10 +111,10 @@ function HomeFields({ values, costs, state, action, pending }: FieldsProps) {
   return (
     <form action={action} className={styles.form} noValidate>
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
-      {state.saved ? <p className={styles.notice} role="status">저장했습니다.</p> : null}
+      {state.saved ? <SavedNotice /> : null}
 
       {/* 사용자 요청(2026-11-18): 필수 묶음은 다 채울 때까지 펼치고, 선택 묶음은 접어 둔다 */}
-      <Fold title="기본 정보 (필수)" status={filledStatus(basic)} open={!basicDone || hasError(errors, BASIC_KEYS)}>
+      <Fold title="기본 정보" status={filledStatus(basic)} open={!basicDone || hasError(errors, BASIC_KEYS)}>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="sidoCode">시도 (필수)</label>
         <select id="sidoCode" name="sidoCode" value={sidoCode} onChange={(e) => setSidoCode(e.target.value)} className={styles.input}>
@@ -149,15 +150,18 @@ function HomeFields({ values, costs, state, action, pending }: FieldsProps) {
       </fieldset>
       </Fold>
 
-      <Fold title="계약 정보 (선택)" status={filledStatus(CONTRACT_KEYS.map((k) => values[k]))} open={hasError(errors, CONTRACT_KEYS)}>
+      <Fold title="계약 정보" status={filledStatus(CONTRACT_KEYS.map((k) => values[k]))} open={hasError(errors, CONTRACT_KEYS)}>
         <ContractFields values={values} errors={errors} />
       </Fold>
       {/* spec 009 FR-002: 집 비교의 내 집 줄 */}
-      <Fold title="실질 주거비 (선택)" status={filledStatus(COST_KEYS.map((k) => costs[k]))} open={hasError(errors, COST_KEYS)}>
+      <Fold title="관리비/에너지비/교통비" status={filledStatus(COST_KEYS.map((k) => costs[k]))} open={hasError(errors, COST_KEYS)}>
         <CostFields values={costs} errors={errors} />
       </Fold>
 
-      <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : "저장"}</button>
+      <div className={styles.actions}>
+        <button type="reset" className={styles.assistive}>취소</button>
+        <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : "저장"}</button>
+      </div>
     </form>
   );
 }

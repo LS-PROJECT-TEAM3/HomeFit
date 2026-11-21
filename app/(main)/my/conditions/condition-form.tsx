@@ -2,9 +2,10 @@
 
 import { useActionState, useState } from "react";
 import { SUPPLY_TYPES } from "@/incident/notice-list";
+import { SavedNotice } from "@/app/_components/saved-notice";
 import type { ConditionFormInput } from "@/incident/condition-form";
 import type { PolicyCondition } from "@/incident/match";
-import { Fold } from "@/app/_components/fold";
+import { filledStatus, Fold } from "@/app/_components/fold";
 import { SIDO_OPTIONS } from "@/watch/sido";
 import { saveConditions, type ConditionState } from "./actions";
 import { SigunguField } from "./sigungu-field";
@@ -58,8 +59,10 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
     <form action={action} className={styles.form} noValidate>
       <input type="hidden" name="next" value={next} />
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
-      {state.saved ? <p className={styles.notice} role="status">저장했습니다.</p> : null}
+      {state.saved ? <SavedNotice /> : null}
 
+      {/* spec 022(캔버스 v2-set-cond-pc): 지역과 공급 유형 / 기본 조건 / 대상 세 묶음, 모두 펼쳐 둔다 */}
+      <Fold title="지역과 공급 유형" status={filledStatus([sidoCode, values.sigunguCode, picked.includes("ALL") ? "" : picked.join()])} open>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="sidoCode">시도 (필수)</label>
         <select id="sidoCode" name="sidoCode" value={sidoCode} onChange={(e) => setSidoCode(e.target.value)} className={styles.input}
@@ -73,8 +76,6 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
       {/* Q18 해결(spec 001 v0.3): 법정동코드 API의 시군구 목록 */}
       <SigunguField sidoCode={sidoCode} initial={values.sigunguCode} error={errors.sigunguCode} />
 
-      {/* 사용자 요청(2026-11-18): 체크 상자가 많아 접고, 고른 것을 한 줄로 보인다 */}
-      <Fold title="공급 유형" status={picked.includes("ALL") ? "모두" : `${picked.length}개 고름`}>
       <fieldset className={styles.checks}>
         <legend className={styles.label}>공급 유형</legend>
         <label className={styles.check}>
@@ -88,19 +89,7 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
       </fieldset>
       </Fold>
 
-      {/* spec 001 v0.6 대상: 공고 제목으로 거른다. 자격 판정이 아니다 (GLOSSARY 대상) */}
-      <Fold title="대상 (선택)" status={values.targetGroups.length ? TARGET_OPTIONS.filter(([v]) => values.targetGroups.includes(v)).map(([, l]) => l).join("·") : "모두"}>
-      <fieldset className={styles.checks}>
-        <legend className={styles.label}>대상 (선택)</legend>
-        {TARGET_OPTIONS.map(([value, label]) => (
-          <label key={value} className={styles.check}>
-            <input type="checkbox" name="targetGroups" value={value} defaultChecked={values.targetGroups.includes(value)} /> {label}
-          </label>
-        ))}
-        <p className={styles.help}>고르면 다른 대상만 적힌 공고(예: 신혼·신생아 전세임대)를 숨깁니다. 비우면 모두 보입니다. 자격은 공고문에서 확인해 주세요.</p>
-      </fieldset>
-      </Fold>
-
+      <Fold title="기본 조건" status={filledStatus([values.maxMonthlyRent, values.age])} open>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="maxMonthlyRent">월 임대료 상한 (원, 선택)</label>
         <input id="maxMonthlyRent" name="maxMonthlyRent" inputMode="numeric" placeholder="예: 300000"
@@ -116,9 +105,27 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
         <FieldError id="age-error" message={errors.age} />
       </div>
 
-      <button type="submit" className={styles.primary} disabled={pending}>
-        {pending ? "저장 중…" : submitLabel}
-      </button>
+      </Fold>
+
+      {/* spec 001 v0.6 대상: 공고 제목으로 거른다. 자격 판정이 아니다 (GLOSSARY 대상) */}
+      <Fold title="대상" status={values.targetGroups.length ? `선택함 ${values.targetGroups.length}개` : "모두"} open>
+      <fieldset className={styles.checks}>
+        <legend className={styles.label}>대상 (선택)</legend>
+        {TARGET_OPTIONS.map(([value, label]) => (
+          <label key={value} className={styles.check}>
+            <input type="checkbox" name="targetGroups" value={value} defaultChecked={values.targetGroups.includes(value)} /> {label}
+          </label>
+        ))}
+        <p className={styles.help}>고르면 다른 대상만 적힌 공고(예: 신혼·신생아 전세임대)를 숨깁니다. 비우면 모두 보입니다. 자격은 공고문에서 확인해 주세요.</p>
+      </fieldset>
+      </Fold>
+
+      <div className={styles.actions}>
+        <button type="reset" className={styles.assistive}>취소</button>
+        <button type="submit" className={styles.primary} disabled={pending}>
+          {pending ? "저장 중…" : submitLabel}
+        </button>
+      </div>
     </form>
   );
 }

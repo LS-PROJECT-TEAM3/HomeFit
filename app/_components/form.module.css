@@ -22,88 +22,123 @@
   color: var(--color-muted-text);
 }
 
+/* spec 022 FR-014(캔버스 v2-set-home-pc·v2-s1-*: DS TextField·OptionButton·Fold): 설정·첫 설정 입력 칸. 색은 tokens 변수만 */
 .form {
   display: grid;
-  gap: var(--space-1);
+  gap: 12px;
 }
 
 .field {
-  display: grid;
-  gap: var(--space-half);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
 .label {
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
 }
 
 .hint {
-  color: var(--color-muted-text);
-  font-size: var(--font-size-sm);
+  color: var(--label-neutral);
+  font-size: 14px;
 }
 
 .input {
   width: 100%;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--color-input-border); /* 입력칸 경계 3:1 이상 (spec 022 FR-003) */
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line-solid-normal); /* 입력칸 경계 3:1 이상 (spec 022 FR-003) */
   border-radius: var(--radius-control);
-  background: var(--color-card);
-  color: var(--color-text);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
   font: inherit;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
 }
 
 .input[aria-invalid="true"] {
-  border-color: var(--color-danger);
+  border-color: var(--status-negative);
 }
 
 .fieldError {
   margin: 0;
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
+  color: var(--status-negative);
+  font-size: 14px;
 }
 
 /* 칸 아래 도움말 (spec 001 v0.3 시군구) */
 .help {
   margin: 0;
-  color: var(--color-muted-text);
-  font-size: var(--font-size-sm);
+  color: var(--label-neutral);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .help:empty {
   display: none;
 }
 
+/* 고르기(라디오·체크): 보드의 고르기 버튼(52px, 고르면 초록) 모양. 입력은 그대로 라디오·체크박스 */
 .checks {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-half) var(--space-1);
+  gap: 8px;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
+.checks > legend { margin-bottom: 8px; }
+
 .check {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 44px;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 18px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
+.check input { width: 18px; height: 18px; margin: 0; accent-color: var(--static-white); }
+
+.check:has(input:checked) {
+  border-color: var(--primary-normal);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font-weight: 700;
+}
+
+.check:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.checks > .help,
+.checks > .fieldError { flex-basis: 100%; }
+
 .primary {
-  min-height: 44px;
-  padding: 0 var(--space-2);
+  min-height: 52px;
+  padding: 0 28px;
   border: 0;
   border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--primary-normal);
+  color: var(--static-white);
   font: inherit;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background var(--transition-hover);
 }
 
 .primary:hover {
-  background: var(--color-primary-hover);
+  background: var(--primary-strong);
 }
 
 .primary:disabled {
@@ -111,81 +146,105 @@
   cursor: progress;
 }
 
-.alert {
-  margin: 0;
-  padding: 12px var(--space-1);
-  border-radius: var(--radius-control);
-  background: var(--color-danger-bg);
-  color: var(--color-danger-text);
+.primary:focus-visible,
+.input:focus-visible,
+.unit:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
+.alert {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-control);
+  background: var(--status-negative-tint);
+  color: var(--status-negative);
+}
+
+/* 저장 결과(v2-set-saved-pc "저장했습니다 | 다음 알림부터…") */
 .notice {
   margin: 0;
-  padding: 12px var(--space-1);
+  padding: 14px 16px;
   border-radius: var(--radius-control);
-  background: var(--color-muted-bg);
-  color: var(--color-text);
+  background: var(--primary-tint);
+  color: var(--label-normal);
+  font-weight: 600;
 }
 
 .links {
-  margin: var(--space-1) 0 0;
-  color: var(--color-muted-text);
+  margin: 16px 0 0;
+  color: var(--label-neutral);
 }
 
 /* 숫자 칸 옆 단위 고르기 (spec 003 내 집 전용면적 ㎡/평) */
 .inline {
   display: flex;
-  gap: var(--space-half);
+  gap: 8px;
   align-items: flex-end;
 }
 
 .unit {
-  min-height: 44px;
-  margin-top: 6px;
-  padding: 0 8px;
-  border: 1px solid var(--color-input-border);
+  min-height: 52px;
+  padding: 0 12px;
+  border: 1px solid var(--line-solid-normal);
   border-radius: var(--radius-control);
   font: inherit;
-  background: var(--color-card);
+  background: var(--background-elevated-normal);
 }
 
-/* 사용자 요청(2026-11-18): 접는 칸 묶음 (app/_components/fold.tsx) */
+/* 접는 칸 묶음(DS Fold: 머리 64px, 세리프 제목, "입력함 n/m", 꺾쇠) */
 .fold {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--line-normal-neutral);
   border-radius: var(--radius-control);
-  background: var(--color-card);
+  background: var(--background-elevated-normal);
 }
 
 .foldSummary {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-half) var(--space-1);
-  min-height: 44px;
-  padding: var(--space-half) var(--space-1);
+  gap: 10px;
+  min-height: 64px;
+  padding: 0 20px;
+  list-style: none;
   cursor: pointer;
 }
 
+.foldSummary::-webkit-details-marker { display: none; }
+
 .foldSummary:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .foldTitle {
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
 }
 
 .foldStatus {
-  color: var(--color-muted-text);
-  font-size: var(--font-size-sm);
+  margin-left: auto;
+  color: var(--label-alternative);
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
+.foldChevron { display: inline-flex; color: var(--label-alternative); transition: transform 0.15s ease; }
+.fold[open] .foldChevron { transform: rotate(180deg); }
+
 .foldBody {
   display: grid;
-  gap: var(--space-1);
-  padding: 0 var(--space-1) var(--space-1);
+  gap: 24px 28px;
+  padding: 24px 20px 28px;
+  border-top: 1px solid var(--fill-alternative);
+}
+
+@media (min-width: 960px) {
+  /* 칸은 두 줄로, 도움말·고르기 묶음 같은 나머지는 한 줄 전체 */
+  .foldBody { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .foldBody > :not(.field) { grid-column: 1 / -1; }
 }
 
 /* 저장된 내용 한눈에 보기 */
@@ -214,3 +273,35 @@ select.input {
   background-position: right 16px center;
   background-size: 20px;
 }
+
+/* 아래 버튼 줄(v2-set-home-pc "* 필수 입력 / 취소 / 저장") */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.actionsNote { margin-right: auto; font-size: 14px; color: var(--label-neutral); }
+
+.assistive {
+  min-height: 52px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--background-normal-alternative);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.assistive:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.noticeTime { margin-left: 10px; font-weight: 400; color: var(--label-neutral); }

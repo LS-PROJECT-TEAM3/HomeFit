@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
+import { SavedNotice } from "@/app/_components/saved-notice";
 import type { AreaFormInput } from "@/incident/area-form";
 import { HOUSING_LABELS } from "@/incident/home-form";
 import { SIDO_OPTIONS } from "@/watch/sido";
@@ -30,7 +31,7 @@ function AreaFields({ values, state, action, pending }: FieldsProps) {
   return (
     <form action={action} className={styles.form} noValidate>
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
-      {state.saved ? <p className={styles.notice} role="status">관심 지역 {state.saved}곳을 저장했습니다.</p> : null}
+      {state.saved ? <SavedNotice message={`관심 지역 ${state.saved}곳을 저장했습니다`} /> : null}
       <div className={styles.field}>
         <label className={styles.label} htmlFor="sidoCode">시도 (필수)</label>
         <select id="sidoCode" name="sidoCode" value={sidoCode} onChange={(e) => setSidoCode(e.target.value)} className={styles.input}>
