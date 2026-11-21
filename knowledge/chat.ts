@@ -27,7 +27,7 @@ export function questionWords(question: string): string[] {
 }
 
 /** 질문 낱말이 많이 겹치는 자료부터 limit개. 하나도 안 겹치는 자료는 뺀다 */
-export function rankSources(question: string, sources: readonly ChatSource[], limit: number): ChatSource[] {
+export function rankSources<T extends ChatSource>(question: string, sources: readonly T[], limit: number): T[] {
   const words = questionWords(question);
   return sources
     .map((source, order) => {

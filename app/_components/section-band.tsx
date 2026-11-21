@@ -50,7 +50,7 @@ export function SectionBand({ title, subtitle, tabs, label, figure }: { title: s
         <span aria-hidden="true" className={styles.phoneLine} />
       </div>
       <div className={styles.phoneTabsBar} data-sticky-bar>
-        <nav className={styles.phoneTabs} aria-label={label}>{links(styles.phoneTab, styles.phoneOn)}</nav>
+        <nav className={`${styles.phoneTabs} ${tabs.length === 3 ? styles.phoneTabs3 : ""}`} aria-label={label}>{links(styles.phoneTab, styles.phoneOn)}</nav>
       </div>
       <div ref={phoneRef} className={styles.sentinelPhone} aria-hidden="true" />
     </>

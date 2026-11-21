@@ -45,6 +45,10 @@
   gap: 0 8px;
 }
 
+/* 탭 3개(AI 도우미, v2-know-find-phone)는 한 줄 3칸, 글자 15px */
+.phoneTabs3 { grid-template-columns: repeat(3, 1fr); }
+.phoneTabs3 .phoneTab { padding: 0 4px; font-size: 15px; white-space: nowrap; }
+
 .phoneTab {
   display: flex;
   align-items: center;
