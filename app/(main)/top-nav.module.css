@@ -1,0 +1,321 @@
+/* spec 022 FR-010 위쪽 메뉴. 값은 디자인 시스템 TopNav·캔버스 menu-* 보드 그대로. 색은 app/tokens.css 변수만 */
+
+/* PC 메뉴줄 72px */
+.bar72 {
+  height: 72px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-screen-padding-pc);
+  background: var(--background-elevated-normal);
+  border-bottom: 1px solid var(--line-normal-neutral);
+  position: relative;
+  z-index: 10;
+}
+
+/* 휴대폰 메뉴줄 60px */
+.bar60 {
+  height: 60px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-screen-padding-phone);
+  background: var(--background-elevated-normal);
+  border-bottom: 1px solid var(--line-normal-neutral);
+}
+
+@media (min-width: 960px) {
+  .bar72 { display: flex; }
+  header.bar60 { display: none; }
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--label-normal);
+  text-decoration: none;
+}
+
+.logo svg { flex: none; }
+
+.logoWord {
+  font-family: var(--font-logo);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.logoPhone .logoWord { font-size: 22px; }
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  height: 72px;
+}
+
+.slot {
+  position: relative;
+  display: inline-flex;
+}
+
+.item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 72px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--label-alternative);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 지금 위치: 색 + 굵기 + 밑줄 (색만으로 구분하지 않는다) */
+.item[aria-current="page"] {
+  color: var(--primary-normal);
+  font-weight: 700;
+  border-bottom-color: var(--primary-normal);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  margin: 0 -8px;
+}
+
+.label svg { stroke-width: 1.8; flex: none; }
+
+.chevronUp { display: inline-flex; transform: rotate(180deg); }
+
+.sep {
+  width: 1px;
+  height: 16px;
+  background: var(--line-solid-normal);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-2);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.countPhone {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 12px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* 펼친 목록 */
+.panel {
+  position: absolute;
+  top: 72px;
+  left: -24px;
+  width: 232px;
+  padding: 8px 0;
+  background: var(--background-elevated-normal);
+  box-shadow: 0 12px 36px var(--shadow-ink-large);
+  z-index: 30;
+}
+
+.panelRight {
+  left: auto;
+  right: -8px;
+  width: 264px;
+}
+
+.menuList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 20px 0 18px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--label-normal);
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menuItem:hover { background: var(--background-normal-alternative); }
+
+.menuItem[aria-current="page"] {
+  color: var(--primary-normal);
+  font-weight: 700;
+}
+
+.menuLabel {
+  display: flex;
+  align-items: center;
+}
+
+.bar {
+  width: 2px;
+  height: 22px;
+  margin-right: 14px;
+  flex: none;
+  background: transparent;
+}
+
+[aria-current="page"] .bar { background: var(--primary-normal); }
+
+.note {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--label-neutral);
+}
+
+.account {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line-normal-normal);
+}
+
+.accountCaption {
+  margin: 0;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.accountEmail {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--label-normal);
+  overflow-wrap: anywhere;
+}
+
+.rule {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--line-normal-normal);
+}
+
+/* 휴대폰 */
+.right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menuButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--label-normal);
+  cursor: pointer;
+}
+
+.menuButton svg { stroke-width: 1.6; }
+
+.sheet {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+}
+
+.sheet::backdrop { background: var(--material-dimmer); }
+
+.sheetNav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px 32px;
+}
+
+.sheetMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  border-bottom: 1px solid var(--line-normal-neutral);
+  color: var(--label-normal);
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.sheetMain[aria-current="page"] { color: var(--primary-normal); }
+
+.sheetMain .bar,
+.sheetSub .bar { height: 20px; }
+
+.group {
+  margin: 20px 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--label-neutral);
+}
+
+/* 휴대폰 더보기·계정 줄은 52px, 좌우 여백 없이 밑줄 */
+.sheetSub .menuItem {
+  min-height: 52px;
+  padding: 0;
+  border-bottom: 1px solid var(--line-normal-neutral);
+}
+
+.sheetSub .menuItem[aria-current="page"] { font-weight: 600; }
+
+.phoneAccount {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-normal-neutral);
+}
+
+.phoneAccount .accountEmail { font-size: 16px; margin: 0; }
+
+/* 로그아웃은 버튼이라 막대 칸이 없다. 다른 줄과 글자 시작을 맞춘다(막대 2px + 14px) */
+.signOut { padding-left: 34px; }
+.sheetSub .signOut { padding-left: 16px; }

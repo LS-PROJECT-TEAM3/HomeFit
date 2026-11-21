@@ -1,35 +1,192 @@
-/* 디자인 토큰 한곳 (CLAUDE.md "디자인" 절, .claude/rules/design.md 1) */
+/* 디자인 토큰 한곳 (CLAUDE.md "디자인" 절, .claude/rules/design.md 1).
+   위 블록은 HomeFit Design System(Claude Design) tokens.json에서 만든 값이다(spec 022 FR-001). */
+:root, [data-theme="light"] {
+  --green-23: #2f3b2f;
+  --green-37: #4e5b4e;
+  --green-68: #9daa9d;
+  --green-82: #c5d0c2;
+  --green-83: #c9d3c6;
+  --green-89: #dce3da;
+  --green-92: #e1e9e1;
+  --green-95: #eef1ee;
+  --green-97: #f3f6f3;
+  --brown-28: #4a3f37;
+  --brown-31: #55463d;
+  --brown-33: #554d47;
+  --brown-41: #675f59;
+  --brown-49: #8a6f5a;
+  --brown-55: #8a8178;
+  --brown-73: #b9b1a8;
+  --brown-77: #cdbba8;
+  --neutral-59: #8a8e88;
+  --neutral-73: #b9b3ac;
+  --neutral-80: #c9c5bf;
+  --neutral-81: #cfc9c2;
+  --neutral-88: #e0ddd8;
+  --neutral-91: #e9e6e1;
+  --neutral-92: #ece9e4;
+  --neutral-93: #efebe6;
+  --neutral-96: #f6f4f2;
+  --yellow-87: #e9d8a6;
+  --orange-42: #8a5a12;
+  --red-37: #a12b2b;
+  --red-92: #f6e4e4;
+  --red-78: #d9b8b8;
+  --sand-91: #eae5df;
+  --sand-85: #d9d2cb;
+  --sage-90: #dce5dd;
+  --sage-50: #6a7a6a;
+  --sage-43: #5a695a;
+  --sage-30: #3e4a3e;
+  --wiki-61: #7c9a8e;
+  --wiki-43: #3f6f68;
+  --wiki-62: #c08a4e;
+  --wiki-51: #b4607a;
+  --wiki-51b: #8c6f9c;
+  --wiki-61b: #9a938c;
+  --wiki-85: #d9d4ce;
+  --common-100: #ffffff;
+  --common-0: #000000;
+  --primary-normal: var(--green-37);
+  --primary-strong: var(--green-23);
+  --primary-heavy: var(--green-23);
+  --primary-tint: var(--green-95);
+  --label-strong: var(--brown-31);
+  --label-normal: var(--brown-31);
+  --label-neutral: var(--brown-33);
+  --label-alternative: var(--brown-41);
+  --label-assistive: var(--brown-41);
+  --label-disable: var(--neutral-73);
+  --background-normal-normal: var(--neutral-96);
+  --background-normal-alternative: var(--neutral-92);
+  --background-elevated-normal: var(--common-100);
+  --background-transparent-normal: #ffffff00;
+  --interaction-inactive: var(--neutral-73);
+  --interaction-disable: var(--neutral-92);
+  --line-normal-normal: var(--neutral-91);
+  --line-normal-neutral: var(--neutral-88);
+  --line-normal-alternative: var(--neutral-81);
+  --line-normal-strong: var(--neutral-80);
+  --line-solid-normal: var(--neutral-59);
+  --status-positive: var(--green-37);
+  --status-positive-tint: var(--green-92);
+  --status-cautionary: var(--orange-42);
+  --status-negative: var(--red-37);
+  --status-negative-tint: var(--red-92);
+  --accent-callout: var(--yellow-87);
+  --accent-dark: var(--brown-28);
+  --inverse-background: var(--green-23);
+  --inverse-label: var(--neutral-96);
+  --inverse-label-alternative: var(--green-82);
+  --inverse-primary: var(--yellow-87);
+  --inverse-line: rgba(246,244,242,0.22);
+  --inverse-fill: rgba(246,244,242,0.14);
+  --static-white: var(--common-100);
+  --static-black: var(--common-0);
+  --icon-assistive: var(--brown-55);
+  --line-link: var(--brown-73);
+  --fill-alternative: var(--neutral-93);
+  --primary-tint-subtle: var(--green-97);
+  --background-accent-soft: var(--sand-91);
+  --status-negative-line: var(--red-78);
+  --inverse-label-warm: var(--sand-85);
+  --inverse-label-tint: var(--sage-90);
+  --inverse-fill-strong: rgba(255,255,255,0.16);
+  --gradient-cost-1: var(--sage-50);
+  --gradient-cost-2: var(--sage-43);
+  --gradient-cost-3: var(--sage-30);
+  --gradient-cost-fade: rgba(106,122,106,0);
+  --chart-wiki-1: var(--wiki-61);
+  --chart-wiki-2: var(--wiki-43);
+  --chart-wiki-3: var(--wiki-62);
+  --chart-wiki-4: var(--wiki-51);
+  --chart-wiki-5: var(--wiki-51b);
+  --chart-wiki-6: var(--wiki-61b);
+  --chart-wiki-edge: var(--wiki-85);
+  --shadow-ink-small: rgba(85,70,61,0.12);
+  --shadow-ink-medium: rgba(60,52,46,0.14);
+  --shadow-ink-large: rgba(60,52,46,0.16);
+  --shadow-ink-chat: rgba(47,59,47,0.28);
+  --shadow-ink-drawer: rgba(47,59,47,0.22);
+  --shadow-ink-soft: rgba(47,59,47,0.14);
+  --fill-normal: rgba(85,70,61,0.08);
+  --material-dimmer: rgba(40,32,27,0.55);
+  --focus-ring: var(--brown-31);
+  --chart-rent: var(--green-37);
+  --chart-fee: var(--green-68);
+  --chart-energy: var(--brown-49);
+  --chart-transport: var(--brown-77);
+  --chart-bar: var(--green-83);
+  --chart-tier-low: var(--green-89);
+  --shadow-none: none;
+  --shadow-floating-small: 0 0 0 1px #e9e6e1, 0 6px 20px rgba(85,70,61,0.12);
+  --shadow-floating-medium: 0 8px 24px rgba(60,52,46,0.14);
+  --shadow-floating-large: 0 12px 36px rgba(60,52,46,0.16);
+}
 :root {
-  /* 색 */
-  --color-primary: #2563eb;
-  --color-on-primary: #ffffff;
-  --color-secondary: #3b82f6;
-  --color-on-secondary: #000000;
-  --color-accent: #ea580c;
-  --color-on-accent: #000000;
-  --color-bg: #f8fafc;
-  --color-card: #ffffff;
-  --color-text: #1e293b;
-  --color-muted-bg: #e9eff8;
-  --color-muted-text: #475569;
-  --color-border: #e2e8f0;
-  --color-danger: #dc2626;
-  --color-on-danger: #ffffff;
-  --color-danger-bg: #fef2f2;
-  --color-danger-text: #991b1b;
-  --color-primary-hover: #1d4ed8;
-  --color-backdrop: rgba(15, 23, 42, 0.4);
-  --color-focus-ring: #2563eb;
+  /* 디자인 시스템의 숫자 간격(--space-2 = 2px 등)은 예전 이름(--space-2 = 24px)과 겹쳐 아직 넣지 않는다.
+     컴포넌트를 코드로 옮길 때 예전 이름을 정리하며 함께 넣는다(spec 022 plan 5절) */
+  --spacing-screen-padding-pc: 56px;
+  --spacing-screen-padding-poster: 176px;
+  --spacing-screen-padding-phone: 16px;
+  --spacing-section-gap: 24px;
+  --spacing-item-gap: 12px;
+  --size-touch-min: 44px;
+  --radius-0: 0px;
+  --radius-2: 2px;
+  --radius-4: 4px;
+  --radius-12: 12px;
+  --radius-14: 14px;
+  --radius-20: 20px;
+  --radius-full: 999px;
+  --radius-control: 4px;
+  --radius-card: 0px;
+  --radius-chip: 999px;
+  --radius-folder-tab: 12px;
+  --opacity-8: 0.08;
+  --opacity-14: 0.14;
+  --opacity-22: 0.22;
+  --opacity-55: 0.55;
+  /* 본문 Pretendard(CDN 이름은 "Pretendard Variable"). 세리프는 app/layout.tsx의 스타일시트, 로고는 next/font가 --font-logo-src를 채운다 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --font-serif: 'Noto Serif KR', 'Nanum Myeongjo', serif;
+  --font-logo: var(--font-logo-src, 'Cormorant Garamond'), var(--font-serif);
+}
 
-  /* 흐름 화면 상태 색 (색과 글자 라벨을 함께 쓴다) */
-  --color-status-success: #15803d;
-  --color-status-failed: #dc2626;
-  --color-status-waiting: #ea580c;
-  --color-status-off: #64748b;
-  /* spec 011 누진 구간 그래프 2·3구간 바탕(글자 #1e293b와 명암비 4.5 이상) */
-  --color-tier-2: #cfdcf3;
-  --color-tier-3: #b4c8ec;
-  /* spec 012 FR-017 위키 그래프 갈래 색(예림 시안). 점 색은 보조이고 범례·이름 글자를 함께 쓴다 */
+/* 예전 이름(화면 코드가 쓰는 이름). 값은 위 디자인 시스템 토큰을 가리킨다.
+   이름 정리는 화면 PR이 다 합쳐진 뒤 따로 한다(spec 022 경계 상황, plan 5절) */
+:root {
+  --color-primary: var(--primary-normal);
+  --color-on-primary: var(--static-white);
+  --color-secondary: var(--primary-strong);
+  --color-on-secondary: var(--static-white);
+  --color-accent: var(--status-cautionary);
+  --color-on-accent: var(--static-white);
+  --color-bg: var(--background-normal-normal);
+  --color-card: var(--background-elevated-normal);
+  --color-text: var(--label-normal);
+  --color-muted-bg: var(--background-normal-alternative);
+  --color-muted-text: var(--label-neutral);
+  --color-border: var(--line-normal-normal);
+  --color-input-border: var(--line-solid-normal);
+  --color-danger: var(--status-negative);
+  --color-on-danger: var(--static-white);
+  --color-danger-bg: var(--status-negative-tint);
+  --color-danger-text: var(--status-negative);
+  --color-primary-hover: var(--primary-strong);
+  --color-backdrop: var(--material-dimmer);
+  --color-focus-ring: var(--focus-ring);
+
+  /* 흐름 화면 상태 색 (색과 글자 라벨을 함께 쓴다). 새 팔레트(현경 결정 2026-11-21) */
+  --color-status-success: var(--status-positive);
+  --color-status-failed: var(--status-negative);
+  --color-status-waiting: var(--status-cautionary);
+  --color-status-off: var(--label-alternative);
+  /* spec 011 누진 구간 그래프 2·3구간 바탕(글자와 명암비 4.5 이상) */
+  --color-tier-2: var(--chart-tier-low);
+  --color-tier-3: var(--chart-bar);
+  /* spec 012 FR-017 위키 그래프 갈래 색(예림 시안). 점 색은 보조이고 범례·이름 글자를 함께 쓴다. 관리자 화면 PR에서 새 팔레트로 */
   --color-wiki-rule: #2563eb;
   --color-wiki-feature: #0891b2;
   --color-wiki-requirement: #7c3aed;
@@ -42,29 +199,20 @@
   --color-wiki-team: #0f766e;
   --color-wiki-edge: #cbd5e1;
 
-  /* 글꼴: Pretendard 하나로 한글·영문·숫자 */
-  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.25rem;
   --font-size-xl: 1.75rem;
   --font-size-number: 2.25rem;
   --line-height-base: 1.6;
-
-  /* 간격 16/24/32/48/64 */
   --space-1: 16px;
   --space-2: 24px;
   --space-3: 32px;
   --space-4: 48px;
   --space-5: 64px;
   --space-half: 8px;
-
-  /* 모양과 움직임 */
-  --radius-card: 12px;
-  --radius-control: 8px;
   --radius-pill: 999px;
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-card: var(--shadow-none);
   --transition-hover: 200ms ease;
   --focus-ring-width: 3px;
 }

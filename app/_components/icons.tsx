@@ -13,6 +13,8 @@ const PATHS = {
   user: <><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></>,
   shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />,
   menu: <><path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" /></>,
+  "chevron-down": <path d="m6 9 6 6 6-6" />,
+  close: <><path d="M18 6 6 18" /><path d="m6 6 12 12" /></>,
 } as const;
 
 export type IconName = keyof typeof PATHS;

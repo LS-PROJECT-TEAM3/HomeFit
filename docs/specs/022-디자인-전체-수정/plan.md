@@ -16,13 +16,13 @@
 |---|---|---|
 | `CLAUDE.md` "디자인" 절 | 새 분위기(포스터형/기본형), 기준 색, 세 글꼴, 흐름 화면 상태 색, 모서리 4px·그림자 없음. 이유 "팀 상의 후 디자인 변경(2026-11-21)" | 1 |
 | `app/tokens.css` | H 3절 값으로. **이름은 그대로 두고 값만** 바꾸고(`--color-primary` → 딥그린 등), 새 값(`--color-band`, `--color-callout`, `--font-serif` 등)은 새 이름으로 더한다. `--color-tier-*`, `--color-wiki-*`는 새 바탕에서 명암비를 다시 잰다 | 1 |
-| `app/layout.tsx` | `next/font`로 세리프·로고 글꼴을 CSS 변수로 연결 | 1 |
+| `app/layout.tsx` | 로고 글꼴은 `next/font`, 한글 세리프(Noto Serif KR)는 스타일시트 링크(조각 파일이 많아 Turbopack next/font가 실패, qa.md 4절 #1) | 1 |
 | `app/globals.css` | h1~h3에 세리프, 초점 링(3px `#55463D` + 2px 간격) | 1 |
-| `app/_components/top-nav.tsx`(+ `.module.css`) | 위쪽 메뉴줄: 주 메뉴 4 + 더보기 ▾, 오른쪽 이름 ▾(계정·설정·관리자·로그아웃), 휴대폰 메뉴. 지금 위치 판정은 `navigation.ts`의 `isActivePath`를 다시 씀 | 1 |
+| `app/(main)/top-nav.tsx`(+ `.module.css`) | 위쪽 메뉴줄: 주 메뉴 4 + 더보기 ▾, 오른쪽 이름 ▾(계정·설정·관리자·로그아웃), 휴대폰 메뉴(네이티브 dialog). 지금 위치 판정은 `navigation.ts`의 `activeMenu`. 사이드바와 같은 자리(`(main)`)에 둠: 로그인 뒤 틀에서만 쓰고 로그아웃 버튼(`my/push`)을 다시 씀 | 1 |
 | `app/_components/navigation.ts` | 메뉴 목록과 "더보기 묶음 안에 있는가" 순수 함수 추가 | 1 |
 | `app/(main)/layout.tsx`, `app/(main)/sidebar.tsx`, `main.module.css` | 사이드바를 위쪽 메뉴로 바꿈(사이드바 파일은 삭제 대신 비움 여부를 PR 전에 물음) | 1 |
-| `app/_components/poster-band.tsx`(+ css) | 포스터 띠: 제목, 한 줄 설명, 선택적 큰 숫자·항목 표·노란 박스, 폴더 탭(`role="tablist"` 대신 링크 탭은 `nav` + `aria-current`) | 1 |
-| `app/_components/side-tabs.tsx`(+ css) | 왼쪽 세로 탭(설정·관리자 공용). 휴대폰에서는 위쪽 가로 줄로 | 1 |
+| `app/_components/poster-band.tsx`(+ css) | **화면 PR ②로 미룸**(처음 쓰는 화면에서 만든다, YAGNI). 포스터 띠: 제목, 한 줄 설명, 선택적 큰 숫자·항목 표·노란 박스, 폴더 탭(`role="tablist"` 대신 링크 탭은 `nav` + `aria-current`) | 1 |
+| `app/_components/side-tabs.tsx`(+ css) | **화면 PR ⑧로 미룸**. 왼쪽 세로 탭(설정·관리자 공용). 휴대폰에서는 위쪽 가로 줄로 | 1 |
 | `app/_components/*.module.css` | 모서리·그림자·글자 크기 14px 미만 정리(FR-008) | 1 |
 | `app/(main)/page.tsx`, `home-cards.tsx`, `page.module.css` | 홈 포스터형(H 4-1) | 2 |
 | `app/(main)/compare/` | 집 비교 포스터형(H 4-2) | 3 |
@@ -82,5 +82,6 @@
 | **탭 이름·구성이 지금 코드·IA와 다름** — 집 점검(지금 "결로 위험 시뮬레이터 / 입주 전 품질 점검 / 주거환경·하자 기록 / 건축물 기본 정보" → 캔버스 "결로 위험 / 하자·환경 기록 / 입주 전 점검 / 건축물 정보", 순서도 다름), 에너지(지금 탭 3개 → 캔버스 "전기 / 난방비" 2개), 집 비교(지금 탭 3개 → 캔버스는 탭 없는 한 화면) | 0단계 IA 수정안에 함께 올려 확인받는다. 화면 주소는 바꾸지 않는 쪽을 먼저 제안 |
 | 사이드바 → 위쪽 메뉴는 모든 화면의 틀을 바꿈. 다른 팀원이 고치는 중인 화면과 부딪힐 수 있음 | PR ①을 작게, 먼저 합친다. 바꾼 파일 목록을 PR 설명에 |
 | 토큰 값만 바꾸면 이름과 뜻이 어긋남(`--color-primary`가 파랑이 아님) | 이름 정리는 화면 PR이 다 합쳐진 뒤 따로 |
+| 디자인 시스템의 숫자 간격 `--space-N`(N px, 예: `--space-2`=2px)이 예전 `--space-1..5`(16~64px)와 이름이 겹침 | PR ①에서는 디자인 시스템 숫자 간격을 코드 토큰에 넣지 않고 `--spacing-*`만 넣음. 예전 간격을 다 옮긴 뒤 이름 정리 때 넣는다 |
 | 화면에 필요한 숫자가 계산 함수에 없을 수 있음(예: 홈 "확인할 일 N건", 에너지 "다음 구간까지 N kWh") | 화면 단계 시작 때 확인. 없으면 순수 함수를 작게 더하고 시험을 붙이거나, 기능 변경이면 멈추고 묻는다 |
 | `next/font/google`은 빌드 때 구글 글꼴 서버에 접속 | 빌드 환경(Vercel)은 접속 가능. 안 되면 대체 글꼴로 보이게 `fallback` 지정 |
