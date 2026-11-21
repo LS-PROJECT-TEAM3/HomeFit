@@ -700,6 +700,9 @@ select.popInput {
   border-left: 1px solid var(--line-normal-normal);
 }
 
+/* 버튼이 없는 줄도 PC에서 마감 칸 위치를 맞춘다 */
+.rowActionsEmpty { display: none; }
+
 .iconButton {
   display: inline-flex;
   align-items: center;
@@ -714,10 +717,7 @@ select.popInput {
   cursor: pointer;
 }
 
-.iconButton:hover:not(:disabled) { background: var(--background-normal-normal); }
-.iconButton:disabled { cursor: default; }
-.iconOn { color: var(--primary-normal); }
-.iconOn svg { fill: var(--primary-tint); }
+.iconButton:hover { background: var(--background-normal-normal); }
 
 .emptyRow,
 .emptyText {
@@ -932,6 +932,8 @@ select.popInput {
   }
 
   .iconButton { width: 52px; height: 52px; }
+
+  .rowActionsEmpty { display: block; flex: none; width: 150px; }
 
   .emptyCard { padding: 48px 56px; }
 }

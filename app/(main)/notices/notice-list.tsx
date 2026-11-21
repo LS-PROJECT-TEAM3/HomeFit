@@ -34,7 +34,7 @@ function Row({ row, selecting, checked, onCheck, onDecide }: { row: NoticeRow; s
   const [badge, badgeClass] = BADGE[row.group];
   return (
     <li className={`${styles.row} ${checked ? styles.rowChecked : ""}`}>
-      {selecting ? (
+      {selecting && row.group === "new" ? (
         <button type="button" role="checkbox" aria-checked={checked} aria-label={`${row.title} 고르기`} className={`${styles.rowCheck} ${checked ? styles.checkOn : ""}`} onClick={onCheck}>
           <span className={styles.checkBox} aria-hidden="true">{checked ? <Icon name="tick" size={16} /> : null}</span>
         </button>
@@ -52,10 +52,12 @@ function Row({ row, selecting, checked, onCheck, onDecide }: { row: NoticeRow; s
         <span className={`${styles.rowDays} ${imminent(row) ? styles.rowDaysUrgent : ""}`}>{dday(row)}</span>
         <span className={styles.rowDate}>{row.deadline ? `${row.deadline.slice(5).replace("-", ".")} 마감` : "마감일 공고문 확인"}</span>
       </span>
-      {selecting ? null : (
+      {/* 사용자 요청(2026-11-22): 팔로우·관심 없음 버튼은 아직 정하지 않은 새 공고에만 */}
+      {!selecting && row.group !== "new" ? <span className={styles.rowActionsEmpty} aria-hidden="true" /> : null}
+      {selecting || row.group !== "new" ? null : (
         <span className={styles.rowActions}>
-          <button type="button" className={`${styles.iconButton} ${row.group === "follow" ? styles.iconOn : ""}`} aria-label={row.group === "follow" ? `${row.title} 팔로우 중` : `${row.title} 팔로우`} title={row.group === "follow" ? "팔로우 중" : "팔로우"} aria-pressed={row.group === "follow"} disabled={row.group === "follow"} onClick={() => onDecide("follow")}><Icon name="bookmark" size={22} /></button>
-          <button type="button" className={`${styles.iconButton} ${row.group === "ignore" ? styles.iconOn : ""}`} aria-label={row.group === "ignore" ? `${row.title} 관심 없음으로 표시함` : `${row.title} 관심 없음`} title={row.group === "ignore" ? "관심 없음으로 표시함" : "관심 없음"} aria-pressed={row.group === "ignore"} disabled={row.group === "ignore"} onClick={() => onDecide("ignore")}><Icon name="ban" size={22} /></button>
+          <button type="button" className={styles.iconButton} aria-label={`${row.title} 팔로우`} title="팔로우" onClick={() => onDecide("follow")}><Icon name="bookmark" size={22} /></button>
+          <button type="button" className={styles.iconButton} aria-label={`${row.title} 관심 없음`} title="관심 없음" onClick={() => onDecide("ignore")}><Icon name="ban" size={22} /></button>
         </span>
       )}
     </li>
@@ -79,6 +81,7 @@ export function NoticeList({ rows, counts }: { rows: NoticeRow[]; counts: Record
   const visible = rows.filter((r) => filter === "all" || r.group === filter);
   const ordered = sortNotices(visible, sort);
   const page = ordered.slice(0, shown);
+  const selectable = page.filter((r) => r.group === "new");
 
   const run = (ids: string[], decision: FollowDecision, why = "") => startTransition(async () => {
     const result = await decideNotices(ids, decision, why);
@@ -130,7 +133,7 @@ export function NoticeList({ rows, counts }: { rows: NoticeRow[]; counts: Record
           <b className={styles.selectCount}>{picked.length}개 선택됨</b>
           <button type="button" className={styles.selectAction} disabled={busy || picked.length === 0} onClick={() => decide(picked, "follow")}>팔로우로 바꾸기</button>
           <button type="button" className={styles.selectAction} disabled={busy || picked.length === 0} onClick={() => decide(picked, "ignore")}>관심 없음으로 바꾸기</button>
-          <button type="button" className={styles.textButton} onClick={() => setPicked(picked.length === page.length ? [] : page.map((r) => r.id))}>{picked.length === page.length && page.length > 0 ? "선택 해제" : "전체 선택"}</button>
+          <button type="button" className={styles.textButton} onClick={() => setPicked(picked.length === selectable.length ? [] : selectable.map((r) => r.id))}>{picked.length === selectable.length && selectable.length > 0 ? "선택 해제" : "전체 선택"}</button>
         </div>
       ) : null}
       {message ? <p role="status" className={styles.message}>{message}</p> : null}
