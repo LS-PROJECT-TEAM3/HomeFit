@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listMatchedPolicies, policyKinds } from "@/incident/policy-match";
+import { listMatchedPolicies, matchesPolicyTargets, policyKinds, policyTargetCounts } from "@/incident/policy-match";
 import type { Policy } from "@/watch/youth-policy";
 
 // spec 006 FR-003, 경계 E1·E3·E4·E5
@@ -64,5 +64,19 @@ describe("policyKinds와 종류 거르기", () => {
     const loan = { ...base, externalId: "L", title: "보증금 이자지원", supplyType: "전월세 및 주거급여 지원" };
     const house = { ...base, externalId: "H", title: "행복주택", supplyType: "주택 및 거주지" };
     expect(listMatchedPolicies({ policies: [loan, house], condition, today, kind: "loan" }).map((m) => m.policy.externalId)).toEqual(["L"]);
+  });
+});
+
+// spec 022(캔버스 v2-s3b-filter-pc): 정책 탭 대상 칩. 제목·키워드·추가 자격에 대상 낱말이 있으면 맞음(자격 판정이 아님)
+describe("matchesPolicyTargets·policyTargetCounts", () => {
+  const base = { externalId: "P", title: "청년 월세 지원", keywords: [], extraQualification: null } as unknown as Policy;
+  const newly = { ...base, externalId: "Q", title: "신혼부부 전세 대출" } as Policy;
+  it("대상을 고르지 않으면 모두 맞음", () => {
+    expect(matchesPolicyTargets(base, [])).toBe(true);
+    expect(matchesPolicyTargets(newly, ["youth"])).toBe(false);
+    expect(matchesPolicyTargets(newly, ["newlywed"])).toBe(true);
+  });
+  it("대상마다 정책 수", () => {
+    expect(policyTargetCounts([base, newly])).toEqual({ youth: 1, newlywed: 1, multichild: 0, elderly: 0 });
   });
 });

@@ -3,8 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import { Icon } from "@/app/_components/icons";
-import { ALL_SUPPLY_TYPES, type PolicyCondition } from "@/incident/match";
-import { SUPPLY_TYPES, type ConditionOverride } from "@/incident/notice-list";
+import { ALL_SUPPLY_TYPES, TARGET_GROUPS, type PolicyCondition, type TargetGroup } from "@/incident/match";
+import { SUPPLY_TYPES, TARGET_LABELS, type ConditionOverride } from "@/incident/notice-list";
 import { SIDO_OPTIONS } from "@/watch/sido";
 import { saveConditions } from "../my/conditions/actions";
 import { SigunguField } from "../my/conditions/sigungu-field";
@@ -12,13 +12,14 @@ import styles from "./notices.module.css";
 
 // spec 022(캔버스 v2-s3-pc·s3-filter-pc, 현경 결정 2026-11-22): 내 조건 줄. 칩을 눌러 조건을 바꾼다.
 // 조건 고정을 켜면 내 조건(설정 > 공고/정책 조건)에 저장, 끄면 주소 값으로 잠깐만(탭을 나갔다 오면 저장된 조건으로)
-type Chips = { region: string; types: string; rent: string; age: string };
-type Props = { condition: PolicyCondition; chips: Chips; typeCounts: Record<string, number> };
-type ChipKey = "region" | "types" | "rent" | "age";
+type Chips = { region: string; types: string; rent: string; age: string; targets: string };
+type ChipKey = "region" | "types" | "rent" | "age" | "targets";
+/** fields: 보일 칩(공고 탭은 지역·공급 유형·월 임대료·나이, 정책 탭은 지역·나이·대상, v2-s3b-pc) */
+type Props = { condition: PolicyCondition; chips: Chips; fields: readonly ChipKey[]; typeCounts?: Record<string, number>; targetCounts?: Record<TargetGroup, number> };
 
 const FIXED_KEY = "homefit:condition-fixed";
 const FIXED_TIP = "켜면 여기서 바꾼 조건이 설정의 공고/정책 조건에도 저장돼요. 끄면 지금 잠깐 확인할 때만 쓰고, 이 탭을 나갔다 다시 들어오면 저장된 조건으로 돌아와요.";
-const LABELS: Record<ChipKey, string> = { region: "지역", types: "공급 유형", rent: "월 임대료", age: "나이" };
+const LABELS: Record<ChipKey, string> = { region: "지역", types: "공급 유형", rent: "월 임대료", age: "나이", targets: "대상" };
 
 // 조건 고정은 이 기기의 편의 설정이라 브라우저에 둔다(기본 켜짐, 저장소를 못 쓰면 켜짐)
 const fixedListeners = new Set<() => void>();
@@ -39,7 +40,7 @@ function toFormData(condition: PolicyCondition, patch: ConditionOverride): FormD
   form.set("sidoCode", patch.sido ?? condition.sidoCode);
   form.set("sigunguCode", patch.sgg ?? (patch.sido && patch.sido !== condition.sidoCode ? "" : condition.sigunguCode ?? ""));
   (patch.types !== undefined ? patch.types.split(",") : condition.supplyTypes).forEach((type) => form.append("supplyTypes", type));
-  condition.targetGroups.forEach((group) => form.append("targetGroups", group));
+  (patch.targets !== undefined ? patch.targets.split(",").filter(Boolean) : condition.targetGroups).forEach((group) => form.append("targetGroups", group));
   form.set("maxMonthlyRent", patch.rent ?? (condition.maxMonthlyRent === null ? "" : String(condition.maxMonthlyRent)));
   form.set("age", patch.age ?? (condition.age === null ? "" : String(condition.age)));
   return form;
@@ -105,6 +106,36 @@ function TypesForm({ condition, typeCounts, onApply }: { condition: PolicyCondit
   );
 }
 
+function TargetsForm({ condition, counts, onApply }: { condition: PolicyCondition; counts: Record<TargetGroup, number>; onApply: (p: ConditionOverride) => void }) {
+  const [picked, setPicked] = useState<TargetGroup[]>([...condition.targetGroups]);
+  const toggle = (group: TargetGroup) => setPicked((prev) => (prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]));
+  return (
+    <div className={styles.popForm}>
+      <div className={styles.popHead}>
+        <span className={styles.popTitle}>대상</span>
+        <span className={styles.popMeta}>{picked.length === 0 ? "모두" : `${picked.length}개 선택`}</span>
+      </div>
+      <p className={styles.popHelp}>여러 개 고를 수 있어요. 정책 글에 그 대상 낱말이 있는 것만 보여요(자격 판정이 아니에요).</p>
+      <div className={styles.checkList}>
+        {TARGET_GROUPS.map((group) => {
+          const on = picked.includes(group);
+          return (
+            <button key={group} type="button" role="checkbox" aria-checked={on} className={`${styles.checkRow} ${on ? styles.checkOn : ""}`} onClick={() => toggle(group)}>
+              <span className={styles.checkBox} aria-hidden="true">{on ? <Icon name="tick" size={16} /> : null}</span>
+              <span className={styles.checkName}>{TARGET_LABELS[group]}</span>
+              <span className={styles.checkCount}>{counts[group]}건</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className={styles.popActions}>
+        <button type="button" className={styles.textButton} onClick={() => setPicked([])}>선택 지우기</button>
+        <button type="button" className={styles.popSubmit} onClick={() => onApply({ targets: picked.join(",") })}>이 대상으로 보기</button>
+      </div>
+    </div>
+  );
+}
+
 function NumberForm({ name, label, unit, help, initial, onApply }: { name: "rent" | "age"; label: string; unit: string; help: string; initial: string; onApply: (p: ConditionOverride) => void }) {
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -150,7 +181,7 @@ function Chip({ id, label, value, open, onToggle, children }: { id: ChipKey; lab
   );
 }
 
-export function ConditionBar({ condition, chips, typeCounts }: Props) {
+export function ConditionBar({ condition, chips, fields, typeCounts = {}, targetCounts }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -177,7 +208,14 @@ export function ConditionBar({ condition, chips, typeCounts }: Props) {
     router.refresh();
   };
 
-  const summary = [chips.region, chips.types, chips.rent, chips.age].join(", ");
+  const popover = (key: ChipKey): ReactNode => {
+    if (key === "region") return <RegionForm condition={condition} onApply={apply} />;
+    if (key === "types") return <TypesForm condition={condition} typeCounts={typeCounts} onApply={apply} />;
+    if (key === "targets") return <TargetsForm condition={condition} counts={targetCounts ?? { youth: 0, newlywed: 0, multichild: 0, elderly: 0 }} onApply={apply} />;
+    if (key === "rent") return <NumberForm name="rent" label="월 임대료 상한" unit="만 원 이하" help="비우면 임대료로 거르지 않아요." initial={condition.maxMonthlyRent === null ? "" : String(condition.maxMonthlyRent / 10_000)} onApply={apply} />;
+    return <NumberForm name="age" label="만 나이" unit="세" help="청년 정책을 고를 때 써요. 공고 자격은 판정하지 않아요." initial={condition.age === null ? "" : String(condition.age)} onApply={apply} />;
+  };
+  const summary = fields.map((key) => chips[key]).join(", ");
   const fixedRow = (
     <span className={styles.fixedRow}>
       <Switch on={fixed} onChange={() => writeFixed(!fixed)} />
@@ -201,14 +239,9 @@ export function ConditionBar({ condition, chips, typeCounts }: Props) {
       {expanded ? (
         <>
           <div className={styles.chips}>
-            <Chip id="region" label={LABELS.region} value={chips.region} open={openChip === "region"} onToggle={setOpenChip}><RegionForm condition={condition} onApply={apply} /></Chip>
-            <Chip id="types" label={LABELS.types} value={chips.types} open={openChip === "types"} onToggle={setOpenChip}><TypesForm condition={condition} typeCounts={typeCounts} onApply={apply} /></Chip>
-            <Chip id="rent" label={LABELS.rent} value={chips.rent} open={openChip === "rent"} onToggle={setOpenChip}>
-              <NumberForm name="rent" label="월 임대료 상한" unit="만 원 이하" help="비우면 임대료로 거르지 않아요." initial={condition.maxMonthlyRent === null ? "" : String(condition.maxMonthlyRent / 10_000)} onApply={apply} />
-            </Chip>
-            <Chip id="age" label={LABELS.age} value={chips.age} open={openChip === "age"} onToggle={setOpenChip}>
-              <NumberForm name="age" label="만 나이" unit="세" help="청년 정책을 고를 때 써요. 공고 자격은 판정하지 않아요." initial={condition.age === null ? "" : String(condition.age)} onApply={apply} />
-            </Chip>
+            {fields.map((key) => (
+              <Chip key={key} id={key} label={LABELS[key]} value={chips[key]} open={openChip === key} onToggle={setOpenChip}>{popover(key)}</Chip>
+            ))}
             <button type="button" className={styles.reset} onClick={() => router.push(pathname, { scroll: false })} disabled={params.toString() === ""}>조건 초기화</button>
           </div>
           <span className={styles.fixedPhone}>{fixedRow}</span>

@@ -87,11 +87,11 @@ async function Detail({ params }: { params: PageProps<"/policy/[id]">["params"] 
 // IA PL_090100_PG 정책 상세 (spec 006 v0.3 FR-007, 사용자 요청 2026-11-18)
 export default function PolicyDetailPage({ params }: PageProps<"/policy/[id]">) {
   return (
-    <section aria-label="정책 상세">
+    <main className={hub.main} aria-label="정책 상세">
       <p><Link href="/policy">← 청년 주거지원 정책</Link></p>
       <Suspense fallback={<Loading />}>
         <Detail params={params} />
       </Suspense>
-    </section>
+    </main>
   );
 }

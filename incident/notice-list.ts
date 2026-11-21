@@ -1,6 +1,6 @@
 // spec 022(캔버스 v2-s3-*, 현경 결정 2026-11-22): 맞춤 공고 목록. 내 조건 칩, 잠깐 좁히기(주소 값), 상태 묶음, 정렬. 순수 함수
 import { parseConditionForm } from "@/incident/condition-form";
-import { ALL_SUPPLY_TYPES, matchesCondition, type PolicyCondition } from "@/incident/match";
+import { ALL_SUPPLY_TYPES, matchesCondition, type PolicyCondition, type TargetGroup } from "@/incident/match";
 import type { MatchedNotice } from "@/incident/matched";
 import type { Notice } from "@/watch/notice";
 
@@ -8,7 +8,10 @@ import type { Notice } from "@/watch/notice";
 export const SUPPLY_TYPES = ["국민임대", "행복주택", "영구임대", "공공임대", "전세임대", "매입임대"] as const;
 
 /** 주소(?sido=&sgg=&types=&rent=&age=)로 받은 잠깐 바꾼 조건. 없는 칸은 저장된 값 */
-export type ConditionOverride = Partial<Record<"sido" | "sgg" | "types" | "rent" | "age", string>>;
+export type ConditionOverride = Partial<Record<"sido" | "sgg" | "types" | "rent" | "age" | "targets", string>>;
+
+/** 대상 이름(화면 라벨은 "/"로 잇는다) */
+export const TARGET_LABELS: Record<TargetGroup, string> = { youth: "청년/사회초년생", newlywed: "신혼/신생아", multichild: "다자녀", elderly: "고령자" };
 
 export type NoticeGroup = "new" | "follow" | "ignore" | "closed";
 export type NoticeSort = "deadline" | "recent";
@@ -23,7 +26,7 @@ export function applyOverride(saved: PolicyCondition, override: ConditionOverrid
     sidoCode: override.sido ?? saved.sidoCode,
     sigunguCode: override.sgg ?? (sidoChanged ? "" : saved.sigunguCode ?? ""),
     supplyTypes: override.types !== undefined ? override.types.split(",") : saved.supplyTypes,
-    targetGroups: saved.targetGroups,
+    targetGroups: override.targets !== undefined ? override.targets.split(",").filter(Boolean) : saved.targetGroups,
     maxMonthlyRent: override.rent ?? (saved.maxMonthlyRent === null ? "" : String(saved.maxMonthlyRent)),
     age: override.age ?? (saved.age === null ? "" : String(saved.age)),
   });
@@ -69,9 +72,11 @@ export function sortNotices<T extends { announcedOn: string | null }>(items: rea
 }
 
 /** 내 조건 칩 글자(v2-s3-pc "행복주택 외 1", "50만원 이하", "만 27세") */
-export function conditionChips(condition: PolicyCondition, regionName: string): { region: string; types: string; rent: string; age: string } {
+export function conditionChips(condition: PolicyCondition, regionName: string): { region: string; types: string; rent: string; age: string; targets: string } {
   const types = condition.supplyTypes.includes(ALL_SUPPLY_TYPES) ? "전체"
     : condition.supplyTypes.length === 1 ? condition.supplyTypes[0] : `${condition.supplyTypes[0]} 외 ${condition.supplyTypes.length - 1}`;
   const rent = condition.maxMonthlyRent === null ? "제한 없음" : `${Math.round(condition.maxMonthlyRent / 10_000).toLocaleString("ko-KR")}만원 이하`;
-  return { region: regionName, types, rent, age: condition.age === null ? "입력 안 함" : `만 ${condition.age}세` };
+  const groups = condition.targetGroups;
+  const targets = groups.length === 0 ? "모두" : groups.length === 1 ? TARGET_LABELS[groups[0]] : `${TARGET_LABELS[groups[0]]} 외 ${groups.length - 1}`;
+  return { region: regionName, types, rent, age: condition.age === null ? "입력 안 함" : `만 ${condition.age}세`, targets };
 }

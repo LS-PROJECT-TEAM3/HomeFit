@@ -597,6 +597,20 @@ select.popInput {
   background: var(--background-elevated-normal);
 }
 
+.rowLink {
+  color: var(--label-normal);
+  text-decoration: none;
+}
+
+.rowLink:hover .rowTitle { text-decoration: underline; text-underline-offset: 4px; }
+
+.footNote {
+  margin: 24px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--label-neutral);
+}
+
 .rowChecked { box-shadow: inset 0 0 0 2px var(--primary-normal); }
 
 .rowCheck {
@@ -647,6 +661,7 @@ select.popInput {
 .badgeFollow { background: var(--status-positive-tint); color: var(--primary-normal); }
 .badgeIgnored { background: var(--background-normal-alternative); color: var(--label-neutral); }
 .badgeClosed { background: transparent; box-shadow: inset 0 0 0 1px var(--line-normal-alternative); color: var(--label-neutral); }
+.badgeMuted { background: var(--background-normal-alternative); color: var(--label-normal); }
 .badgeDeadline { background: var(--status-negative-tint); color: var(--status-negative); }
 
 .rowTitle {
@@ -828,6 +843,7 @@ select.popInput {
 .selectAction:focus-visible,
 .rowCheck:focus-visible,
 .rowMain:focus-visible,
+.rowLink:focus-visible,
 .iconButton:focus-visible,
 .more:focus-visible,
 .emptyLink:focus-visible {

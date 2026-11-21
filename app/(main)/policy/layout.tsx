@@ -1,16 +1,4 @@
-import { Suspense } from "react";
-import { PolicyTabs } from "@/app/_components/policy-tabs";
-import styles from "@/app/_components/hub.module.css";
-
+// spec 022(v2-s3b-pc): 정책 목록은 맞춤 공고 화면의 두 번째 탭이라 머리(ListingHead)를 화면이 그린다
 export default function PolicyLayout({ children }: LayoutProps<"/policy">) {
-  return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>청년 정책</h1>
-      {/* 정책 상세(/policy/[id])처럼 주소에 값이 있는 화면은 탭이 주소를 읽을 때까지 기다려야 한다(Cache Components 빌드 오류, 관리자 탭과 같음) */}
-      <Suspense fallback={<div className={styles.tabsFallback} aria-hidden="true" />}>
-        <PolicyTabs />
-      </Suspense>
-      {children}
-    </main>
-  );
+  return children;
 }

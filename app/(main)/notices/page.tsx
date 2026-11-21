@@ -2,41 +2,20 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { LoadError, Loading } from "@/app/_components/states";
-import { conditionChips, daysLeft, groupCounts, noticeGroup, type ConditionOverride } from "@/incident/notice-list";
+import { conditionChips, daysLeft, groupCounts, noticeGroup } from "@/incident/notice-list";
 import { listMyMatchedNotices, type MatchedResult } from "@/incident/notices.server";
 import { listMyPolicies } from "@/incident/policies.server";
 import { toKstDate } from "@/watch/kst";
 import type { Notice } from "@/watch/notice";
-import { fetchSigunguList } from "@/watch/region.server";
-import { SIDO_OPTIONS } from "@/watch/sido";
 import { ConditionBar } from "./condition-bar";
+import { readOverride, regionLabel, sidoName, sigunguNames } from "./listing-data";
 import { ListingHead } from "./listing-head";
 import { NoticeList, type NoticeRow } from "./notice-list";
 import styles from "./notices.module.css";
 
 export const metadata = { title: "맞춤 공고 | HomeFit AI" };
 
-const OVERRIDE_KEYS = ["sido", "sgg", "types", "rent", "age"] as const;
-
-function readOverride(params: Record<string, string | string[] | undefined>): ConditionOverride {
-  const override: ConditionOverride = {};
-  for (const key of OVERRIDE_KEYS) {
-    const value = params[key];
-    if (typeof value === "string") override[key] = value;
-  }
-  return override;
-}
-
-const sidoName = (code: string | null) => SIDO_OPTIONS.find((o) => o.code === code)?.name ?? "";
-
-/** 시군구 이름은 30일 기억하는 목록에서. 못 읽으면 시도 이름만 보인다 */
-async function sigunguNames(sidoCode: string): Promise<Map<string, string>> {
-  try {
-    return new Map((await fetchSigunguList(sidoCode)).map((s) => [s.code, s.name]));
-  } catch {
-    return new Map();
-  }
-}
+const NOTICE_FIELDS = ["region", "types", "rent", "age"] as const;
 
 function regionOf(notice: Notice, names: Map<string, string>): string {
   // spec 001 v0.6: 전세임대는 전국 수시모집
@@ -52,7 +31,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/notices">["
   let result: MatchedResult;
   let policyCount: number | null = null;
   try {
-    const [notices, policies] = await Promise.all([listMyMatchedNotices(today, override), listMyPolicies(today).catch(() => null)]);
+    const [notices, policies] = await Promise.all([listMyMatchedNotices(today, override), listMyPolicies(today, override).catch(() => null)]);
     result = notices;
     policyCount = policies?.hasCondition ? policies.items.length : null;
   } catch {
@@ -71,7 +50,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/notices">["
     );
   }
   const names = await sigunguNames(result.condition.sidoCode);
-  const region = [sidoName(result.condition.sidoCode), result.condition.sigunguCode ? names.get(result.condition.sigunguCode) : null].filter(Boolean).join(" ");
+  const region = regionLabel(result.condition.sidoCode, result.condition.sigunguCode, names);
   const rows: NoticeRow[] = result.items.map((item) => ({
     id: item.notice.announcementId, title: item.notice.title, supplyType: item.notice.supplyType ?? "공급 유형 공고문 확인", region: regionOf(item.notice, names),
     group: noticeGroup(item), days: daysLeft(item.notice.applyEnd, today), deadline: item.notice.applyEnd, announcedOn: item.notice.announcedOn, simulated: item.isSimulated,
@@ -79,7 +58,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/notices">["
   return (
     <>
       <ListingHead active="notices" counts={{ notices: rows.length, policy: policyCount }} />
-      <ConditionBar condition={result.condition} chips={conditionChips(result.condition, region || sidoName(result.condition.sidoCode))} typeCounts={result.typeCounts} />
+      <ConditionBar condition={result.condition} chips={conditionChips(result.condition, region)} fields={NOTICE_FIELDS} typeCounts={result.typeCounts} />
       {rows.length === 0 ? (
         <section className={styles.emptyCard}>
           <h2 className={styles.emptyTitle}>조건에 맞는 공고가 아직 없어요</h2>

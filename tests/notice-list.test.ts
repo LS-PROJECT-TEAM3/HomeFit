@@ -60,7 +60,18 @@ describe("sortNotices", () => {
 
 describe("conditionChips", () => {
   it("칩 글자", () => {
-    expect(conditionChips(saved, "서울특별시 관악구")).toEqual({ region: "서울특별시 관악구", types: "행복주택 외 1", rent: "50만원 이하", age: "만 27세" });
+    expect(conditionChips(saved, "서울특별시 관악구")).toMatchObject({ region: "서울특별시 관악구", types: "행복주택 외 1", rent: "50만원 이하", age: "만 27세" });
     expect(conditionChips({ ...saved, supplyTypes: ["ALL"], maxMonthlyRent: null, age: null }, "서울특별시")).toMatchObject({ types: "전체", rent: "제한 없음", age: "입력 안 함" });
+  });
+});
+
+describe("대상 칩(정책 탭)", () => {
+  it("주소 값 targets로 대상을 덮어쓴다(빈 값 = 모두)", () => {
+    expect(applyOverride(saved, { targets: "youth,newlywed" }).targetGroups).toEqual(["youth", "newlywed"]);
+    expect(applyOverride({ ...saved, targetGroups: ["youth"] }, { targets: "" }).targetGroups).toEqual([]);
+  });
+  it("칩 글자", () => {
+    expect(conditionChips({ ...saved, targetGroups: ["youth", "elderly"] }, "서울").targets).toBe("청년/사회초년생 외 1");
+    expect(conditionChips(saved, "서울").targets).toBe("모두");
   });
 });
