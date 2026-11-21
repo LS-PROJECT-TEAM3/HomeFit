@@ -1,0 +1,95 @@
+/* spec 022 FR-014 관리자 화면. 값은 캔버스 v2-admin-*-pc·phone(DS Card 32/36, 표 머리 14px·칸 15px). 색은 tokens 변수만 */
+.stack { display: flex; flex-direction: column; gap: 24px; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 24px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.head { display: flex; align-items: center; gap: 4px; }
+.title { margin: 0; font-family: var(--font-serif); font-size: 21px; font-weight: 500; line-height: 1.35; letter-spacing: -0.01em; }
+.titleCount { margin-left: 6px; font-family: var(--font-sans); font-size: 17px; color: var(--label-neutral); font-variant-numeric: tabular-nums; }
+
+.help { margin: 0; font-size: 14px; line-height: 1.6; color: var(--label-neutral); }
+
+/* 표 */
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { padding: 10px 12px; font-size: 14px; font-weight: 700; color: var(--label-neutral); text-align: left; white-space: nowrap; }
+.table td,
+.table tbody th { padding: 14px 12px; border-top: 1px solid var(--line-normal-normal); font-size: 15px; font-weight: 400; color: var(--label-normal); text-align: left; vertical-align: top; font-variant-numeric: tabular-nums; }
+.table tbody th { font-weight: 700; }
+.num { text-align: right !important; }
+.table td:first-child { white-space: nowrap; }
+.link { color: var(--label-normal); font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+
+/* 상태 글자(색 + 글자) */
+.ok { color: var(--primary-normal); font-weight: 700; }
+.fail { color: var(--status-negative); font-weight: 700; }
+.wait { color: var(--status-cautionary); font-weight: 700; }
+.off { color: var(--label-alternative); font-weight: 700; }
+
+/* 출처별 상태(4칸) */
+.sources { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.source { display: flex; flex-direction: column; gap: 14px; padding: 20px; border: 1px solid var(--line-normal-neutral); border-radius: var(--radius-control); }
+.sourceName { font-size: 17px; font-weight: 700; }
+.sourceFail { font-size: 15px; color: var(--label-neutral); }
+.sourceFail b { font-size: 18px; color: var(--label-normal); font-variant-numeric: tabular-nums; }
+
+/* 버튼 */
+.outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.outline:disabled { opacity: 0.6; cursor: progress; }
+.runResult { margin: 8px 0 0; font-size: 14px; line-height: 1.6; }
+
+/* 시뮬레이터 묶음(3칸) */
+.sims { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.sim { display: flex; flex-direction: column; gap: 14px; padding: 20px; border: 1px solid var(--line-normal-neutral); border-radius: var(--radius-control); }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.label { font-size: 15px; font-weight: 700; }
+
+.select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 48px 0 16px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal) var(--icon-chevron-down) no-repeat right 16px center / 20px;
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+  appearance: none;
+}
+
+.outline:focus-visible,
+.select:focus-visible,
+.link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (min-width: 960px) {
+  .card { padding: 32px 36px; }
+  .sources { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .sims { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
