@@ -188,10 +188,10 @@
 }
 
 /* 목차 탭 */
+/* 사용자 요청(2026-11-22): 탭 옆 스크롤 막대를 없앤다. 탭 3개는 휴대폰 폭에도 들어가므로 넘침 스크롤을 두지 않는다 */
 .tabs {
   display: flex;
   gap: 4px;
-  overflow-x: auto;
   border-bottom: 1px solid var(--line-normal-normal);
 }
 

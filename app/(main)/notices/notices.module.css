@@ -421,6 +421,22 @@ select.popInput {
   color: var(--label-neutral);
 }
 
+/* 알림 목록(spec 022, 보드 없음: 맞춤 공고 목록과 같은 모양) */
+.statusNav { margin-top: 32px; }
+.statusNav .filter { text-decoration: none; }
+
+.periodForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 24px;
+}
+
+.periodForm + .emptyCard { margin-top: 0; }
+
+.periodSelect { width: auto; min-width: 160px; }
+
 /* 공고 목록 */
 .listSection {
   display: flex;
@@ -655,6 +671,8 @@ select.popInput {
 .badgeIgnored { background: var(--background-normal-alternative); color: var(--label-neutral); }
 .badgeClosed { background: transparent; box-shadow: inset 0 0 0 1px var(--line-normal-alternative); color: var(--label-neutral); }
 .badgeMuted { background: var(--background-normal-alternative); color: var(--label-normal); }
+.badgeRisk { background: var(--status-negative); color: var(--static-white); }
+.badgePending { background: var(--status-cautionary); color: var(--static-white); }
 .badgeDeadline { background: var(--status-negative-tint); color: var(--status-negative); }
 
 .rowTitle {
