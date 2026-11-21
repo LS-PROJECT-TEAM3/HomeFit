@@ -40,6 +40,31 @@ export async function ignoreNotice(announcementId: string, reason: string): Prom
   return decide(announcementId, "ignore", trimmed === "" ? null : trimmed);
 }
 
+const MAX_BULK = 100;
+
+/**
+ * spec 022(v2-s3-select-pc, 현경 결정 2026-11-22): 목록에서 여러 공고를 한꺼번에 팔로우·관심 없음으로. 관심 없음 사유는 하나로 같이 저장.
+ * 한 줄씩 결정하는 것과 같은 표(notice_follows), 본인 행만(RLS)
+ */
+export async function decideNotices(announcementIds: string[], decision: FollowDecision, reason: string): Promise<FollowState> {
+  const userId = await currentUserId();
+  if (!userId) redirect("/login");
+  const ids = [...new Set(announcementIds.filter((id) => typeof id === "string" && id !== ""))];
+  if (ids.length === 0) return { error: "고른 공고가 없습니다. 공고를 하나 이상 골라 주세요." };
+  if (ids.length > MAX_BULK) return { error: `한 번에 ${MAX_BULK}개까지 바꿀 수 있습니다.` };
+  if (decision !== "follow" && decision !== "ignore") return { error: "알 수 없는 결정입니다." };
+  const trimmed = reason.trim().slice(0, MAX_REASON);
+  const decidedAt = new Date().toISOString();
+  const supabase = await createClient();
+  const { error } = await supabase.from("notice_follows").upsert(ids.map((id) => ({
+    user_id: userId, source_code: "myhome_notice", announcement_id: id,
+    decision, reason: decision === "ignore" && trimmed !== "" ? trimmed : null, decided_at: decidedAt,
+  })));
+  if (error) return { error: "저장하지 못했습니다. 잠시 뒤 다시 해 주세요." };
+  revalidatePath("/notices");
+  return { decision };
+}
+
 export type AddToScheduleState = { scheduleId?: string; error?: string };
 
 /**
