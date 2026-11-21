@@ -1,0 +1,61 @@
+/* spec 022 포스터 띠(홈). 값은 DS .hf-band-home 그대로, 색은 app/tokens.css 변수만 */
+.band {
+  display: none;
+  /* 1440px에서 176px. 띠 글자가 아래 본문(최대 1200px, 좌우 56px) 왼쪽 끝과 맞도록 */
+  padding: 48px max(var(--spacing-screen-padding-pc), calc((100% - 1088px) / 2)) 56px;
+  background: var(--inverse-background);
+  color: var(--inverse-label);
+}
+
+@media (min-width: 960px) {
+  .band { display: block; }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 56px;
+  align-items: end;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 72px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--inverse-label);
+}
+
+.sub {
+  margin: 0; /* 캔버스 보드에서 실제로 그려진 값(보드 기본 스타일이 DS의 12px을 0으로 덮음) */
+  font-size: 18px;
+  color: var(--inverse-label-alternative);
+}
+
+.figure { text-align: right; }
+
+.label {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--inverse-label-alternative);
+}
+
+.number {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 132px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--inverse-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin: 0; /* 위와 같은 까닭으로 DS 4px 대신 0 */
+  font-size: 17px;
+  color: var(--inverse-label-alternative);
+}

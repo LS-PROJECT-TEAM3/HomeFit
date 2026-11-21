@@ -1,36 +1,32 @@
-import { countAlertGroups } from "@/incident/home-dashboard";
-import type { HumidityFacts } from "@/incident/humidity-detect";
+import { withEstimate } from "@/incident/energy-estimate";
+import { loadEstimateBasis } from "@/incident/energy-estimate.server";
 import { listMyMatchedNotices } from "@/incident/notices.server";
+import { realCost, type RealCost } from "@/incident/real-cost";
 import { listSchedule, type ScheduleItem } from "@/incident/schedule.server";
 import { createClient } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import { fetchSigunguList } from "@/watch/region.server";
+import { kstMonth } from "./compare/cost-view";
 import { loadMyHome, type MyHome, type MyMeasurement } from "./my/home/load";
 
-// spec 003 v0.2 FR-010: 홈 카드 5개가 읽는 자료. 로그인한 사용자 권한(RLS)으로 읽고, 내 것만 거른다.
+// spec 022 FR-011(홈 보드 v2-home-pc): 띠·카드가 읽는 자료. 로그인한 사용자 권한(RLS)으로 읽고, 내 것만 거른다.
 // 읽기 실패는 던져서 화면이 "조회 실패"를 보이게 한다(빈 값으로 숨기지 않음, P3-12)
 
-export type RecentAlert = { id: string; title: string; status: string; kind: "risk" | "opportunity"; detectedAt: string };
+export type HomeAlert = { id: string; title: string; kind: "risk" | "opportunity"; detectedAt: string };
 
 export type HomeDashboard = {
   home: MyHome | null;
   sigunguName: string | null;
   latestMeasurement: MyMeasurement | null;
-  /** 최근 측정값(최신이 앞). 습도 추이 그래프 (spec 004 v0.2 FR-006) */
-  measurements: MyMeasurement[];
-  /** 최근 알림 5건 타임라인 */
-  recentAlerts: RecentAlert[];
-  /** 열린 습도·결로 위험 중 가장 가까운 것 */
-  openRisk: { id: string; title: string; riskAt: string } | null;
-  lastWeatherCheckAt: string | null;
-  alerts: { newRisk: number; newOpportunity: number; pending: number };
-  recent: { approved: number; rejected: number };
-  hasCondition: boolean;
-  toDecide: number;
+  /** 확인할 일 = 새 알림(status new). 위쪽 메뉴 알림 배지와 같은 수 (사용자 결정 2026-11-21) */
+  newAlerts: HomeAlert[];
   schedule: ScheduleItem[];
+  hasCondition: boolean;
+  /** 아직 정하지 않은 맞춤 공고 수와 그중 첫 공고 이름 */
+  newNotices: { count: number; firstTitle: string | null };
+  /** 월 실질 주거비(월세 + 관리비 + 에너지비). 월세를 모르면 null */
+  cost: RealCost | null;
 };
-
-const RECENT_DAYS_MS = 30 * 86_400_000;
 
 /** 시군구 코드 → 이름. 목록을 못 불러오면 이름 없이 둔다(카드는 그대로) */
 async function sigunguName(code: string): Promise<string | null> {
@@ -41,46 +37,50 @@ async function sigunguName(code: string): Promise<string | null> {
   }
 }
 
-async function loadAlerts(userId: string, now: Date) {
+async function loadNewAlerts(userId: string): Promise<HomeAlert[]> {
   const supabase = await createClient();
-  const since = new Date(now.getTime() - RECENT_DAYS_MS).toISOString();
-  const [open, closed, weather, recent] = await Promise.all([
-    supabase.from("incidents").select("id, incident_type, status, facts").eq("user_id", userId).in("status", ["new", "pending"]),
-    supabase.from("incidents").select("status").eq("user_id", userId).in("status", ["approved", "rejected"]).gte("closed_at", since),
-    supabase.rpc("collection_status", { p_source: "kma_forecast" }),
-    supabase.from("incidents").select("id, incident_type, status, facts, detected_at").eq("user_id", userId).order("detected_at", { ascending: false }).limit(5),
-  ]);
-  if (open.error || closed.error || weather.error || recent.error) throw new Error("알림 현황을 불러오지 못했습니다.");
-  const risks = open.data
-    .filter((row) => row.incident_type === "humidity_condensation")
-    .map((row) => ({ id: row.id, ...(row.facts as unknown as Pick<HumidityFacts, "title" | "riskAt">) }))
-    .filter((risk) => Date.parse(risk.riskAt) > now.getTime())
-    .sort((a, b) => a.riskAt.localeCompare(b.riskAt));
-  return {
-    alerts: countAlertGroups(open.data.map((row) => ({ incidentType: row.incident_type, status: row.status }))),
-    recent: { approved: closed.data.filter((row) => row.status === "approved").length, rejected: closed.data.filter((row) => row.status === "rejected").length },
-    openRisk: risks[0] ? { id: risks[0].id, title: risks[0].title, riskAt: risks[0].riskAt } : null,
-    lastWeatherCheckAt: weather.data[0]?.last_success_at ?? null,
-    recentAlerts: recent.data.map((row) => ({
-      id: row.id, title: (row.facts as { title?: string }).title ?? "알림", status: row.status, detectedAt: row.detected_at,
-      kind: row.incident_type === "housing_support" ? ("opportunity" as const) : ("risk" as const),
-    })),
-  };
+  const { data, error } = await supabase.from("incidents").select("id, incident_type, facts, detected_at")
+    .eq("user_id", userId).eq("status", "new").order("detected_at", { ascending: false });
+  if (error) throw new Error("알림을 불러오지 못했습니다.");
+  return data.map((row) => ({
+    id: row.id, title: (row.facts as { title?: string }).title ?? "알림", detectedAt: row.detected_at,
+    // [GLOSSARY 사건] 위험 = 습도·결로·시세, 주거 기회 = 공고 변화
+    kind: row.incident_type === "housing_support" ? ("opportunity" as const) : ("risk" as const),
+  }));
+}
+
+/**
+ * 집 비교와 같은 계산(realCost)으로 월세 + 관리비 + 에너지비. 홈 카드는 교통비를 넣지 않는다(보드 설명 "월세, 관리비, 에너지비를 더한 한 달 비용").
+ * 전세면 월세 0. 에너지 추정 근거를 못 불러와도 월세·관리비는 보인다
+ */
+async function homeCost(home: MyHome, now: Date): Promise<RealCost | null> {
+  const rent = home.contractType === "jeonse" ? 0 : home.monthlyRent;
+  if (rent === null) return null;
+  const mine = { ...home, monthlyRent: rent, transitFare: null };
+  let estimated = withEstimate(mine, new Map());
+  try {
+    const basis = await loadEstimateBasis([mine], now);
+    estimated = withEstimate(mine, basis.averages, basis.aptAverages);
+  } catch {
+    // 추정 근거만 빠지고 패널 전국 평균으로 계산한다(withEstimate 기본)
+  }
+  return realCost(estimated, kstMonth(now));
 }
 
 export async function loadHomeDashboard(userId: string, now: Date): Promise<HomeDashboard> {
-  const [mine, alerts, matched, schedule] = await Promise.all([
-    loadMyHome(userId), loadAlerts(userId, now), listMyMatchedNotices(toKstDate(now)), listSchedule(3),
+  const [mine, newAlerts, matched, schedule] = await Promise.all([
+    loadMyHome(userId), loadNewAlerts(userId), listMyMatchedNotices(toKstDate(now)), listSchedule(),
   ]);
-  const open = matched.items.filter((item) => !item.expired);
+  const toDecide = matched.items.filter((item) => !item.expired && item.decision === "new");
+  const [name, cost] = mine.home ? await Promise.all([sigunguName(mine.home.sigunguCode), homeCost(mine.home, now)]) : [null, null];
   return {
     home: mine.home,
-    sigunguName: mine.home ? await sigunguName(mine.home.sigunguCode) : null,
+    sigunguName: name,
     latestMeasurement: mine.measurements[0] ?? null,
-    measurements: mine.measurements,
-    ...alerts,
-    hasCondition: matched.hasCondition,
-    toDecide: open.filter((item) => item.decision === "new").length,
+    newAlerts,
     schedule,
+    hasCondition: matched.hasCondition,
+    newNotices: { count: toDecide.length, firstTitle: toDecide[0]?.notice.title ?? null },
+    cost,
   };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contractEndText, countAlertGroups, environmentLine, measurementState, monthlyHousingCost, toPyeong } from "@/incident/home-dashboard";
+import { contractEndText, countAlertGroups, environmentLine, measurementState, monthlyHousingCost, scheduleDateParts, toPyeong } from "@/incident/home-dashboard";
 
 // spec 003 v0.2 FR-010 (홈 카드 5개) 계산. 순수 함수(오늘·지금은 인자)
 describe("monthlyHousingCost (월 예상 주거비 = 월세 + 관리비)", () => {
@@ -73,5 +73,16 @@ describe("environmentLine (리뷰 1: 판단하지 않았으면 '위험 없음'�
   it("새 측정값이면 위험 없음, 예보를 아직 못 봤으면 그렇게", () => {
     expect(environmentLine({ state: "fresh", lastCheckAt: "11. 18. 오전 05:30" })).toBe("앞으로 48시간 결로 위험 없음 · 예보 확인 11. 18. 오전 05:30");
     expect(environmentLine({ state: "fresh", lastCheckAt: null })).toBe("아직 예보를 확인하지 않았습니다");
+  });
+});
+
+// spec 022 FR-011: 홈 다가오는 일정 줄의 날짜 칸("12.05" / "토요일")
+describe("scheduleDateParts", () => {
+  it("날짜를 월.일과 요일로", () => {
+    expect(scheduleDateParts("2026-12-05")).toEqual({ date: "12.05", weekday: "토요일" });
+    expect(scheduleDateParts("2027-01-04")).toEqual({ date: "01.04", weekday: "월요일" });
+  });
+  it("마감일이 없으면 null", () => {
+    expect(scheduleDateParts(null)).toBe(null);
   });
 });

@@ -1,175 +1,149 @@
 import Link from "next/link";
-import { HumidityTrend } from "@/app/_components/humidity-trend";
-import { isIncidentStatus, StatusBadge } from "@/app/_components/status";
+import { Suspense } from "react";
+import { Icon } from "@/app/_components/icons";
+import { AlertRow, Card, KeyValueRow, ScheduleRow, StatItem, TextLink } from "@/app/_components/ui";
 import { describeDeadline } from "@/incident/checklist";
-import { contractEndText, environmentLine, measurementState, monthlyHousingCost, toPyeong } from "@/incident/home-dashboard";
+import { contractEndText, scheduleDateParts, toPyeong } from "@/incident/home-dashboard";
 import { HOUSING_LABELS } from "@/incident/home-form";
-import { describeRiskTime, windowTypeText } from "@/incident/humidity-text";
+import { windowTypeText } from "@/incident/humidity-text";
+import type { CostItem } from "@/incident/real-cost";
 import type { HomeDashboard } from "./dashboard-load";
+import { OutdoorWeather } from "./weather-card";
 import styles from "./page.module.css";
 
-// spec 003 v0.2 FR-010 + spec 004 v0.2 FR-006: "내 집" 중심 벤토 대시보드. 숫자·작은 그래프는 글자와 함께
-// 비어 있는 카드는 지우지 않고 입력을 권하는 카드로 (IA v1.4 홈)
+// spec 022 FR-011: 캔버스 v2-home-pc(PC)·v2-s5-alert-phone·v2-home-phone(휴대폰) 보드 그대로. 순서·문구는 보드를 따른다
 
-function won(value: number): string {
-  return `${value.toLocaleString("ko-KR")}원`;
-}
+const SHOWN_ALERTS = 3;
+const SHOWN_SCHEDULE = 2;
 
-function kst(iso: string): string {
-  return new Date(iso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
-}
+const man = (won: number) => `${Math.round(won / 10_000).toLocaleString("ko-KR")}만 원`;
+const kst = (iso: string) => new Date(iso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
-/** ① 나의 주거 정보 */
-export function HomeInfoCard({ data, today }: { data: HomeDashboard; today: string }) {
+/** "오산시 | 아파트 | 33m² (약 10평) | 이중유리" */
+export function homeSummary(data: HomeDashboard): string {
   const home = data.home;
-  if (!home) {
-    return (
-      <Link href="/my/home" className={`${styles.card} ${styles.span2} ${styles.callout}`}>
-        <span className={styles.cardLabel}>나의 주거 정보</span>
-        <strong className={styles.headline}>내 집을 등록해 주세요</strong>
-        <span className={styles.muted}>등록하면 결로 위험과 월 예상 주거비를 알려 드립니다.</span>
-      </Link>
-    );
-  }
-  const end = contractEndText(home.contractEndDate, today);
+  if (!home) return "내 집을 등록하면 결로 위험과 월 실질 주거비를 알려 드려요";
+  return [data.sigunguName ?? "시군구", HOUSING_LABELS[home.housingType], `${home.exclusiveAreaM2}m² (약 ${toPyeong(home.exclusiveAreaM2)}평)`, windowTypeText(home.windowType)].join(" | ");
+}
+
+/** 휴대폰 머리말(기본형). PC는 포스터 띠가 같은 내용을 보인다 */
+export function PhoneHeader({ data }: { data: HomeDashboard }) {
   return (
-    <Link href="/my/home" className={`${styles.card} ${styles.span2}`} aria-label="나의 주거 정보, 내 집 화면으로">
-      <span className={styles.cardLabel}>나의 주거 정보</span>
-      <strong className={styles.headline}>{data.sigunguName ?? "시군구"} · {HOUSING_LABELS[home.housingType]}</strong>
-      <dl className={styles.facts}>
-        <div><dt>전용면적</dt><dd className="tabular-nums">{home.exclusiveAreaM2}㎡ (약 {toPyeong(home.exclusiveAreaM2)}평)</dd></div>
-        <div><dt>창 종류</dt><dd>{windowTypeText(home.windowType)}</dd></div>
-        <div><dt>계약</dt><dd>{home.contractType ? (home.contractType === "monthly" ? "월세" : "전세") : "미입력"}</dd></div>
-        <div><dt>만료</dt><dd>{end ?? "미입력"}</dd></div>
-      </dl>
-    </Link>
+    <header className={styles.phoneHeader}>
+      <h1 className={styles.phoneTitle}>안녕하세요</h1>
+      <div className={styles.phoneSummary}>
+        <p>{homeSummary(data)}</p>
+        <Link href="/my/home" className={styles.editLink} aria-label="내 집 정보 수정" title="내 집 정보 수정">
+          <span className={styles.editBox}><Icon name="edit" size={18} /></span>
+        </Link>
+      </div>
+    </header>
   );
 }
 
-/** ② 월 예상 주거비 = 월세 + 관리비. 막대는 둘의 비율(숫자도 함께) */
-export function HousingCostCard({ data }: { data: HomeDashboard }) {
-  const home = data.home;
-  if (!home) return null;
-  const cost = monthlyHousingCost(home);
+function SectionHead({ label, count }: { label: string; count: number }) {
+  return <h3 className={styles.sectionHead}>{label} <span className={styles.sectionCount}>{count}건</span></h3>;
+}
+
+/** 확인할 일: 새 알림(위험·주거 기회)과 다가오는 일정. 많으면 "N건 더 보기" (s5-many) */
+export function TodoCard({ data, today }: { data: HomeDashboard; today: string }) {
+  const { newAlerts, schedule } = data;
   return (
-    <Link href="/my/home" className={`${styles.card} ${styles.span2}`}>
-      <span className={styles.cardLabel}>월 예상 주거비</span>
-      {cost.status === "no_contract" ? (
-        <span className={styles.muted}>내 집 화면에 월세·관리비를 넣으면 계산합니다.</span>
-      ) : (
-        <>
-          <span className={`${styles.number} tabular-nums`}>{won(cost.total)}</span>
-          <div className={styles.bar} aria-hidden="true">
-            <span className={styles.barRent} style={{ flexGrow: Math.max(cost.rent, 1) }} />
-            {cost.fee ? <span className={styles.barFee} style={{ flexGrow: cost.fee }} /> : null}
-          </div>
-          <span className={`${styles.muted} tabular-nums`}>
-            <span className={styles.keyRent}>■</span> 월세 {won(cost.rent)}
-            {cost.fee === null ? " · 관리비를 넣으면 더 정확합니다" : <> · <span className={styles.keyFee}>■</span> 관리비 {won(cost.fee)}</>}
-          </span>
-        </>
-      )}
-    </Link>
+    <Card title="확인할 일" className={styles.todoCard}>
+      {newAlerts.length === 0 && schedule.length === 0 ? <p className={styles.emptyLine}>지금은 확인할 일이 없어요</p> : null}
+      {newAlerts.length > 0 ? (
+        <div>
+          <SectionHead label="알림" count={newAlerts.length} />
+          {newAlerts.slice(0, SHOWN_ALERTS).map((alert) => (
+            <AlertRow key={alert.id} href={`/incidents/${alert.id}`} kind={alert.kind} title={alert.title} description={kst(alert.detectedAt)} />
+          ))}
+          {newAlerts.length > SHOWN_ALERTS ? <TextLink href="/incidents?status=new">{newAlerts.length - SHOWN_ALERTS}건 더 보기</TextLink> : null}
+        </div>
+      ) : null}
+      {schedule.length > 0 ? (
+        <div>
+          <SectionHead label="다가오는 일정" count={schedule.length} />
+          {schedule.slice(0, SHOWN_SCHEDULE).map((item) => {
+            const parts = scheduleDateParts(item.dueDate);
+            const left = describeDeadline(item.dueDate, today) ?? "마감일 없음";
+            return <ScheduleRow key={item.id} href={`/schedule/${item.id}`} date={parts?.date ?? "미정"} weekday={parts?.weekday ?? ""} title={item.title} left={left} ended={left === "마감 지남"} />;
+          })}
+          {schedule.length > SHOWN_SCHEDULE ? <TextLink href="/schedule">{schedule.length - SHOWN_SCHEDULE}건 더 보기</TextLink> : null}
+        </div>
+      ) : null}
+    </Card>
   );
 }
 
-/** ③ 주거환경 분석: 지금 습도(큰 숫자)·결로 위험 상태·최근 습도 추이 */
-export function EnvironmentCard({ data, now }: { data: HomeDashboard; now: Date }) {
-  if (!data.home) return null;
-  const measured = data.latestMeasurement;
-  const state = measurementState(measured?.measuredAt ?? null, now);
+function costValue(item: CostItem): string {
+  return item.value === null ? "미입력" : man(item.value);
+}
+
+/** 월 실질 주거비 = 월세 + 관리비 + 에너지비(집 비교와 같은 계산). 추정이면 "(예상)" */
+export function CostCard({ data }: { data: HomeDashboard }) {
+  const cost = data.cost;
   return (
-    <section className={`${styles.card} ${styles.span2}`} aria-labelledby="env-title">
-      <h2 id="env-title" className={styles.cardLabel}>주거환경 분석 현황</h2>
-      {state === "none" || !measured ? (
-        <Link href="/my/home" className={styles.headline}>실내 온습도를 입력해 주세요</Link>
+    <Card title="월 실질 주거비" info="월세, 관리비, 에너지비를 더한 한 달 비용이에요." className={styles.costCard}>
+      {cost ? (
+        <div>
+          <p className={styles.costTotal}>월 {man(cost.total)}</p>
+          <KeyValueRow label="월세" value={costValue(cost.rent)} />
+          <KeyValueRow label="관리비" value={costValue(cost.fee)} divider />
+          <KeyValueRow label={cost.energy.kind === "estimated" ? "에너지비 (예상)" : "에너지비"} value={costValue(cost.energy)} divider />
+        </div>
       ) : (
-        <div className={styles.envRow}>
-          <span className={`${styles.number} tabular-nums`}>{measured.humidityPct}%</span>
-          <span className={styles.muted}>실내 습도 · {measured.temperatureC}°C<br />{kst(measured.measuredAt)}{state === "stale" ? <strong> · 오래된 측정값</strong> : null}</span>
+        <div>
+          <p className={styles.costPending}>계산 전</p>
+          <p className={styles.costHelp}>월세와 관리비를 넣으면 계산해요</p>
+          <Link href="/my/home" className={styles.button}>내 집 정보 입력</Link>
         </div>
       )}
-      {data.openRisk ? (
-        <Link href={`/incidents/${data.openRisk.id}`} className={styles.riskChip}>
-          위험 · {data.openRisk.title} ({describeRiskTime(data.openRisk.riskAt, now).remaining})
-        </Link>
-      ) : (
-        <span className={styles.muted}>{environmentLine({ state, lastCheckAt: data.lastWeatherCheckAt ? kst(data.lastWeatherCheckAt) : null })}</span>
-      )}
-      {data.measurements.length > 1 ? <HumidityTrend measurements={data.measurements} compact /> : null}
-    </section>
+    </Card>
   );
 }
 
-/** ④ 새 위험·주거 기회 [GLOSSARY 사건] */
-export function AlertsCard({ data }: { data: HomeDashboard }) {
+/** 새 공고: PC는 제목 + 큰 숫자, 휴대폰은 한 줄 "새 공고 N건 | 이름" */
+export function NoticeCard({ data }: { data: HomeDashboard }) {
+  if (!data.hasCondition) {
+    return (
+      <Card title="새 공고" className={styles.noticeCard}>
+        <div>
+          <p className={styles.noticeNote}>공고 조건을 넣으면 맞춤 공고를 보여 드려요</p>
+          <div className={styles.noticeLink}><TextLink href="/onboarding">공고 조건 넣기</TextLink></div>
+        </div>
+      </Card>
+    );
+  }
+  const { count, firstTitle } = data.newNotices;
   return (
-    <section className={styles.card} aria-labelledby="alerts-title">
-      <h2 id="alerts-title" className={styles.cardLabel}>새 위험·주거 기회</h2>
-      <Link href="/incidents?status=new" className={styles.pair}>
-        <span><span className={`${styles.number} tabular-nums`}>{data.alerts.newRisk}</span><br />새 위험</span>
-        <span><span className={`${styles.number} tabular-nums`}>{data.alerts.newOpportunity}</span><br />새 주거 기회</span>
-      </Link>
-      {data.hasCondition ? (
-        <Link href="/notices" className="tabular-nums">정할 맞춤 공고 <strong>{data.toDecide}</strong>건</Link>
-      ) : (
-        <Link href="/onboarding">공고 조건을 넣으면 맞춤 공고를 보여 드립니다</Link>
-      )}
-    </section>
+    <Card className={styles.noticeCard}>
+      <h2 className={styles.noticeTitle}>새 공고<span className={styles.phoneOnly}> {count}건</span>
+        {firstTitle ? <span className={`${styles.phoneOnly} ${styles.noticeInline}`}> | {firstTitle}</span> : null}
+      </h2>
+      <div>
+        <p className={`${styles.pcOnly} ${styles.noticeCount}`}>{count}건</p>
+        {firstTitle ? <p className={`${styles.pcOnly} ${styles.noticeNote}`}>{firstTitle}</p> : null}
+        <div className={styles.noticeLink}><TextLink href="/notices">맞춤 공고 보기</TextLink></div>
+      </div>
+    </Card>
   );
 }
 
-/** ⑤ 승인 대기·처리 현황 */
-export function DecisionCard({ data }: { data: HomeDashboard }) {
+/** 우리 집 상태: 실내 습도·온도(최근 측정), 바깥(기상청 지금), 계약 만료까지 */
+export function StatusCard({ data, now, today }: { data: HomeDashboard; now: Date; today: string }) {
+  const home = data.home;
+  if (!home) return null; // 내 집 등록은 월 실질 주거비 카드가 안내한다
+  const measured = data.latestMeasurement;
+  const end = contractEndText(home.contractEndDate, today);
   return (
-    <section className={styles.card} aria-labelledby="decision-title">
-      <h2 id="decision-title" className={styles.cardLabel}>승인 대기·처리 현황</h2>
-      <span className={`${styles.number} tabular-nums`}>{data.alerts.pending}</span>
-      <span className={`${styles.muted} tabular-nums`}>최근 30일 승인 {data.recent.approved} · 거절 {data.recent.rejected}</span>
-      {data.alerts.pending > 0 ? <Link href="/incidents?status=pending" className={styles.cta}>승인하러 가기</Link> : null}
-    </section>
-  );
-}
-
-/** 최근 알림 타임라인 */
-export function TimelineCard({ data }: { data: HomeDashboard }) {
-  return (
-    <section className={`${styles.card} ${styles.span2}`} aria-labelledby="timeline-title">
-      <h2 id="timeline-title" className={styles.cardLabel}>최근 위험·기회 알림</h2>
-      {data.recentAlerts.length === 0 ? (
-        <span className={styles.muted}>아직 알림이 없습니다.</span>
-      ) : (
-        <ol className={styles.timeline}>
-          {data.recentAlerts.map((alert) => (
-            <li key={alert.id}>
-              <span className={styles.kind}>{alert.kind === "risk" ? "위험" : "주거 기회"}</span>
-              <Link href={`/incidents/${alert.id}`}>{alert.title}</Link>
-              <span className={styles.timelineMeta}>{isIncidentStatus(alert.status) ? <StatusBadge status={alert.status} /> : null} {kst(alert.detectedAt)}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
-  );
-}
-
-/** 다가오는 일정 */
-export function ScheduleCard({ data, today }: { data: HomeDashboard; today: string }) {
-  return (
-    <section className={`${styles.card} ${styles.span2}`} aria-labelledby="schedule-title">
-      <h2 id="schedule-title" className={styles.cardLabel}>다가오는 일정</h2>
-      {data.schedule.length === 0 ? (
-        <span className={styles.muted}>알림의 계획을 승인하면 여기에 일정이 생깁니다.</span>
-      ) : (
-        <ul className={styles.list}>
-          {data.schedule.map((item) => (
-            <li key={item.id}>
-              <Link href={`/schedule/${item.id}`}>{item.title}</Link>{" "}
-              <span className={styles.muted}>{describeDeadline(item.dueDate, today) ?? "마감일 없음"}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    <Card title="우리 집 상태" meta={<span className={styles.phoneOnly}>출처: 기상청, 계약 정보</span>} className={styles.statusCard}>
+      <div className={styles.statusGrid}>
+        <StatItem label="실내 습도" value={measured ? `${measured.humidityPct}%` : "미입력"} />
+        <StatItem label="실내 온도" value={measured ? `${measured.temperatureC}°C` : "미입력"} />
+        <StatItem label="바깥" value={<Suspense fallback="불러오는 중">{<OutdoorWeather sigunguCode={home.sigunguCode} now={now} />}</Suspense>} />
+        {/* contractEndText는 "계약 만료까지 361일" 꼴. 보드처럼 이름은 칸 제목으로 빼고 값만 */}
+        <StatItem label="계약 만료까지" value={end ? end.replace("계약 만료까지 ", "") : "미입력"} />
+      </div>
+    </Card>
   );
 }
