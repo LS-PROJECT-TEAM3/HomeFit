@@ -43,3 +43,19 @@ export function summarizeChange(change: IncidentFacts["change"]): string {
   if (lines.length === 0) return "바뀐 내용은 상세에서 확인";
   return lines.length > 1 ? `${lines[0]} 외 ${lines.length - 1}건` : lines[0];
 }
+
+const HEADLINE: Record<TrackedField, string> = {
+  applyStart: "접수 시작일이 바뀌었어요",
+  applyEnd: "접수 마감일이 바뀌었어요",
+  monthlyRent: "월 임대료가 바뀌었어요",
+  supplyType: "공급 유형이 바뀌었어요",
+};
+
+/** spec 022(v2-s4-alert-pc): 공고 상세 "내 알림" 카드 제목. 바뀐 칸이 하나면 그 칸, 여럿이면 묶어서 */
+export function changeHeadline(change: IncidentFacts["change"]): string {
+  if (!change) return "새 공고 알림이 왔어요";
+  if (change.kind === "correction") return "정정공고가 올라왔어요";
+  if (change.kind === "relaxed") return "같은 단지에 새 모집이 올라왔어요";
+  const fields = [...new Set(change.changes.map((c) => c.field))];
+  return fields.length === 1 ? HEADLINE[fields[0]] : "공고 내용이 여러 곳 바뀌었어요";
+}

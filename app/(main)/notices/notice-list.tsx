@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { Icon } from "@/app/_components/icons";
 import type { FollowDecision } from "@/incident/matched";
-import { sortNotices, type NoticeGroup, type NoticeSort } from "@/incident/notice-list";
+import { IGNORE_REASONS as REASONS, sortNotices, type NoticeGroup, type NoticeSort } from "@/incident/notice-list";
 import { decideNotices } from "./[id]/actions";
 import styles from "./notices.module.css";
 
@@ -21,7 +21,6 @@ const IMMINENT_DAYS = 3;
 const FILTERS: [NoticeGroup | "all", string][] = [["all", "전체"], ["new", "새 공고"], ["follow", "팔로우"], ["ignore", "관심 없음"], ["closed", "마감"]];
 const SORTS: [NoticeSort, string][] = [["deadline", "마감이 가까운 순"], ["recent", "최근 공고 순"]];
 const BADGE: Record<NoticeGroup, [string, string]> = { new: ["새 공고", styles.badgeNew], follow: ["팔로우", styles.badgeFollow], ignore: ["관심 없음", styles.badgeIgnored], closed: ["마감", styles.badgeClosed] };
-const REASONS = ["지역이 멀어요", "임대료가 높아요", "자격 조건이 맞지 않아요", "이미 다른 곳에 신청했어요", "기타"];
 
 const imminent = (row: NoticeRow) => row.group !== "closed" && row.days !== null && row.days <= IMMINENT_DAYS;
 function dday(row: NoticeRow): string {
@@ -74,7 +73,7 @@ export function NoticeList({ rows, counts }: { rows: NoticeRow[]; counts: Record
   const [selecting, setSelecting] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
   const [pendingIgnore, setPendingIgnore] = useState<string[]>([]);
-  const [reason, setReason] = useState(REASONS[0]);
+  const [reason, setReason] = useState<string>(REASONS[0]);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
 

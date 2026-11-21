@@ -13,6 +13,9 @@ export type ConditionOverride = Partial<Record<"sido" | "sgg" | "types" | "rent"
 /** 대상 이름(화면 라벨은 "/"로 잇는다) */
 export const TARGET_LABELS: Record<TargetGroup, string> = { youth: "청년/사회초년생", newlywed: "신혼/신생아", multichild: "다자녀", elderly: "고령자" };
 
+/** 관심 없음 이유(목록·상세 팝업에서 하나 고름, 현경 결정 2026-11-22) */
+export const IGNORE_REASONS = ["지역이 멀어요", "임대료가 높아요", "자격 조건이 맞지 않아요", "이미 다른 곳에 신청했어요", "기타"] as const;
+
 export type NoticeGroup = "new" | "follow" | "ignore" | "closed";
 export type NoticeSort = "deadline" | "recent";
 
