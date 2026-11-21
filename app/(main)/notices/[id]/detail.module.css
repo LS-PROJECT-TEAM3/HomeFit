@@ -310,6 +310,8 @@
 .kvKey { flex: none; width: 72px; font-size: 14px; color: var(--label-neutral); }
 .kvValue { flex: 1; min-width: 0; font-size: 16px; line-height: 1.6; word-break: keep-all; }
 
+.kvPre { white-space: pre-line; }
+
 .inlineLink { color: var(--label-normal); text-decoration: underline; text-underline-offset: 4px; }
 
 /* 단지 표 */
