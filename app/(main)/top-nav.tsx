@@ -9,7 +9,7 @@ import { activeMenu, isActivePath, type MenuKey } from "@/app/_components/naviga
 import { SignOutButton } from "./my/push/sign-out-button";
 import styles from "./top-nav.module.css";
 
-// spec 022 FR-010, IA v1.19 네비게이션 모델: 위쪽 메뉴 맞춤 공고·알림·내 일정·더보기(홈은 로고), 오른쪽 이름 메뉴
+// spec 022 FR-010, IA v1.19 네비게이션 모델: 위쪽 메뉴 맞춤 공고·알림·내 일정·집 비교·더보기(홈은 로고), 오른쪽 이름 메뉴
 // 모양은 디자인 시스템 TopNav와 캔버스 menu-* 보드 값 그대로
 type Item = { href: string; label: string };
 // "홈"은 메뉴에서 뺐다. 왼쪽 로고가 홈으로 간다(현경 결정 2026-11-21, IA v1.19)
@@ -17,9 +17,9 @@ const MAIN: (Item & { key: MenuKey })[] = [
   { key: "notices", href: "/notices", label: "맞춤 공고" },
   { key: "alerts", href: "/incidents", label: "알림" },
   { key: "schedule", href: "/schedule", label: "내 일정" },
+  { key: "compare", href: "/compare", label: "집 비교" }, // 사용자 요청(2026-11-22): 더보기에서 꺼냄
 ];
 const MORE: Item[] = [
-  { href: "/compare", label: "집 비교" },
   { href: "/qc", label: "집 점검" },
   { href: "/energy", label: "에너지 분석" },
   { href: "/knowledge", label: "AI 도우미" },

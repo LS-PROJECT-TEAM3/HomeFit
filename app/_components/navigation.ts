@@ -6,14 +6,15 @@ export function isActivePath(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export type MenuKey = "home" | "notices" | "alerts" | "schedule" | "more" | "account";
+export type MenuKey = "home" | "notices" | "alerts" | "schedule" | "compare" | "more" | "account";
 
 // spec 022 FR-010, IA v1.17: 위쪽 메뉴 자리. 정책은 맞춤 공고 안 탭, 설정·관리자는 이름 메뉴
 const MENU_PATHS: [MenuKey, string[]][] = [
   ["notices", ["/notices", "/policy"]],
   ["alerts", ["/incidents"]],
   ["schedule", ["/schedule"]],
-  ["more", ["/compare", "/qc", "/energy", "/knowledge"]],
+  ["compare", ["/compare"]], // 사용자 요청(2026-11-22): 더보기에서 꺼냄
+  ["more", ["/qc", "/energy", "/knowledge"]],
   ["account", ["/my", "/admin"]],
 ];
 

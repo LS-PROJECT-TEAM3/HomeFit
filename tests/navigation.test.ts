@@ -13,8 +13,11 @@ describe("activeMenu", () => {
     expect(activeMenu("/policy")).toBe("notices");
     expect(activeMenu("/policy/123")).toBe("notices");
   });
-  it("집 비교·집 점검·에너지 분석·AI 도우미는 더보기", () => {
-    for (const p of ["/compare/cost", "/qc", "/energy/heating", "/knowledge/history"]) expect(activeMenu(p)).toBe("more");
+  it("집 점검·에너지 분석·AI 도우미는 더보기, 집 비교는 한 칸", () => {
+    for (const p of ["/qc", "/energy/heating", "/knowledge/history"]) expect(activeMenu(p)).toBe("more");
+    // 사용자 요청(2026-11-22): 집 비교는 더보기에서 꺼내 위쪽 메뉴 한 칸
+    expect(activeMenu("/compare")).toBe("compare");
+    expect(activeMenu("/compare/cost")).toBe("compare");
   });
   it("설정과 관리자는 이름 메뉴", () => {
     expect(activeMenu("/my/home")).toBe("account");
