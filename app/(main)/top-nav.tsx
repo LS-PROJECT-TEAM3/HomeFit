@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { chromeLocked, setChromeHidden } from "@/app/_components/chrome";
 import { Icon } from "@/app/_components/icons";
 import { activeMenu, isActivePath, type MenuKey } from "@/app/_components/navigation";
 import { SignOutButton } from "./my/push/sign-out-button";
@@ -123,7 +124,7 @@ function AccountItems({ pathname, isAdmin, email, onPick, phone }: { pathname: s
 
 function PcNav({ pathname, active, newAlerts, isAdmin, email }: Props & { pathname: string; active: MenuKey | null }) {
   return (
-    <header className={styles.bar72}>
+    <header className={`${styles.bar72} ${styles.chrome}`} data-topnav>
       <Logo current={active === "home"} />
       <nav aria-label="주 메뉴" className={styles.list}>
         {MAIN.map((m) => (
@@ -150,7 +151,7 @@ function PhoneNav({ pathname, active, newAlerts, isAdmin, email }: Props & { pat
   const close = () => dialogRef.current?.close();
   const label = `메뉴 열기${newAlerts ? `, 새 알림 ${newAlerts}건` : ""}`;
   return (
-    <header className={styles.bar60}>
+    <header className={`${styles.bar60} ${styles.chrome}`} data-topnav>
       <Logo phone current={active === "home"} />
       <span className={styles.right}>
         {newAlerts ? <span className={styles.count} aria-hidden="true">{newAlerts}</span> : null}
@@ -186,7 +187,30 @@ function PhoneNav({ pathname, active, newAlerts, isAdmin, email }: Props & { pat
 }
 
 /** PC(960px 이상)는 위쪽 메뉴줄, 휴대폰은 메뉴 버튼을 누르면 전체 화면 메뉴 */
+/**
+ * 사용자 요청(2026-11-21): 직접 아래로 스크롤하면 메뉴(와 화면 탭)를 숨기고, 위로 스크롤하면 보인다. 맨 위에서는 늘 보인다.
+ * 작은 흔들림(4px 미만)은 무시하고, 자동 이동 중(chromeLocked)에는 판단하지 않는다
+ */
+function useHideOnScroll() {
+  useEffect(() => {
+    let lastY = window.scrollY;
+    setChromeHidden(false);
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (chromeLocked()) { lastY = y; return; }
+      if (y <= 0) setChromeHidden(false);
+      else if (y > lastY + 4 && y > 80) setChromeHidden(true);
+      else if (y < lastY - 4) setChromeHidden(false);
+      else return;
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+}
+
 export function TopNav(props: Props) {
+  useHideOnScroll();
   const pathname = usePathname();
   const active = activeMenu(pathname);
   return (

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  assessCondensationRisk, dewPoint, isMoreSevere, RISK_RULES, sameRiskWindow, surfaceTemperature,
+  assessCondensationRisk, condensationLevel, dewPoint, isMoreSevere, RISK_RULES, sameRiskWindow, surfaceTemperature,
   type HourlyForecast,
 } from "@/incident/condensation";
 
@@ -169,5 +169,20 @@ describe("isMoreSevere", () => {
     expect(isMoreSevere({ marginC: -5 }, { marginC: -7 })).toBe(true);
     expect(isMoreSevere({ marginC: -5 }, { marginC: -5 })).toBe(false);
     expect(isMoreSevere({ marginC: -5 }, { marginC: -3 })).toBe(false);
+  });
+});
+
+// spec 022 FR-011(집 점검 결로 위험 보드, 현경 결정 2026-11-21): 3단계. 알림 규칙(차이 1°C 이하 = 위험)을 주의·높음으로 나눈다
+describe("condensationLevel", () => {
+  it("차이가 1°C 넘으면 낮음", () => {
+    expect(condensationLevel(15, 13.9)).toBe("low");
+  });
+  it("0 초과 1°C 이하면 주의(보드 예시 0.3°C)", () => {
+    expect(condensationLevel(14.2, 13.9)).toBe("caution");
+    expect(condensationLevel(14.9, 13.9)).toBe("caution");
+  });
+  it("창이 이슬점과 같거나 더 차가우면 높음", () => {
+    expect(condensationLevel(13.9, 13.9)).toBe("high");
+    expect(condensationLevel(10, 13.9)).toBe("high");
   });
 });

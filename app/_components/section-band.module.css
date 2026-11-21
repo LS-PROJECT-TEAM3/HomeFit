@@ -1,0 +1,153 @@
+/* spec 022 탭 있는 포스터형 머리. PC 값은 v2-qc-sim-tab-pc, 휴대폰 값은 v2-qc-sim-phone 그대로. 색은 app/tokens.css 변수만 */
+
+/* 휴대폰: 기본형 머리 */
+.band,
+.folderBar,
+.sentinelPc { display: none; }
+
+.phoneHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 20px 0;
+}
+
+.phoneTitle {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.phoneLine {
+  display: block;
+  width: 1px;
+  height: 40px;
+  margin: 20px auto 8px;
+  background: var(--label-normal);
+}
+
+/* 탭 줄: 위쪽 메뉴(휴대폰 60px) 아래에 붙고, 메뉴가 숨으면 같이 숨는다 */
+.phoneTabsBar {
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  padding: 0 20px;
+  background: var(--background-normal-normal);
+  transition: transform 0.2s ease;
+}
+
+:global(html[data-chrome="hidden"]) .phoneTabsBar { transform: translateY(calc(-100% - 60px)); }
+
+.phoneTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 8px;
+}
+
+.phoneTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--line-normal-normal);
+  color: var(--label-neutral);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.phoneOn {
+  border-bottom: 2px solid var(--primary-normal);
+  color: var(--label-normal);
+  font-weight: 700;
+}
+
+/* PC: 진초록 띠 + 폴더 탭 */
+@media (min-width: 960px) {
+  .phoneHead,
+  .phoneTabsBar,
+  .sentinelPhone { display: none; }
+
+  .band,
+  .folderBar {
+    display: block;
+    /* 1440px에서 176px. 아래 본문(최대 1200px, 좌우 56px)과 글자 시작을 맞춘다 */
+    padding: 36px max(var(--spacing-screen-padding-pc), calc((100% - 1088px) / 2)) 0;
+    background: var(--inverse-background);
+    color: var(--inverse-label);
+  }
+
+  .band { padding-bottom: 28px; }
+
+  .sentinelPc { display: block; }
+
+  /* 폴더 탭 줄: 위쪽 메뉴(72px) 아래에 붙고, 메뉴가 숨으면 같이 숨는다 */
+  .folderBar {
+    position: sticky;
+    top: 72px;
+    z-index: 20;
+    padding-top: 0; /* 설명과 탭 사이 28px은 띠 아래 여백으로(탭을 맨 위에 맞출 때 빈 줄이 남지 않게) */
+    transition: transform 0.2s ease;
+  }
+
+  :global(html[data-chrome="hidden"]) .folderBar { transform: translateY(calc(-100% - 72px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folderBar,
+  .phoneTabsBar { transition: none; }
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 60px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--inverse-label);
+}
+
+.sub {
+  margin: 8px 0 0;
+  font-size: 17px;
+  color: var(--inverse-label-alternative);
+}
+
+.folder {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 56px;
+}
+
+.folderTab {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 28px;
+  border-radius: 12px 12px 0 0;
+  background: var(--inverse-fill);
+  color: var(--inverse-label);
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* 지금 탭: 아래 바탕과 이어지는 크림색 + 굵게 + 더 높게(색만으로 구분하지 않음) */
+.folderOn {
+  height: 56px;
+  background: var(--background-normal-normal);
+  color: var(--primary-heavy);
+  font-weight: 700;
+}
+
+.folderTab:focus-visible,
+.phoneTab:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--static-white);
+}

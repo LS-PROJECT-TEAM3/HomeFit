@@ -204,3 +204,13 @@
 .summaryCard p {
   margin: 0;
 }
+
+/* 드롭다운 화살표를 보드처럼 오른쪽 16px 안쪽에(브라우저 기본 화살표는 끝에 붙음) */
+select.input {
+  appearance: none;
+  padding-right: 48px;
+  background-image: var(--icon-chevron-down);
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 20px;
+}

@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ChatWidget } from "@/app/_components/chat-widget";
+import { FocusScroll } from "@/app/_components/focus-scroll";
 import { ScrollTop } from "@/app/_components/scroll-top";
 import { countOpenIncidents } from "@/incident/queries.server";
 import { createClient } from "@/lib/supabase/server";
@@ -37,6 +38,7 @@ export default function MainLayout({ children }: LayoutProps<"/">) {
       {/* spec 004 v0.2 FR-007: 모든 화면에 뜨는 챗봇 창(틀) */}
       <ChatWidget />
       <ScrollTop />
+      <FocusScroll />
     </div>
   );
 }

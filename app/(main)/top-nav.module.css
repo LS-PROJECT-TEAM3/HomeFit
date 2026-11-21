@@ -9,8 +9,6 @@
   padding: 0 var(--spacing-screen-padding-pc);
   background: var(--background-elevated-normal);
   border-bottom: 1px solid var(--line-normal-neutral);
-  position: relative;
-  z-index: 10;
 }
 
 /* 휴대폰 메뉴줄 60px */
@@ -319,3 +317,17 @@
 /* 로그아웃은 버튼이라 막대 칸이 없다. 다른 줄과 글자 시작을 맞춘다(막대 2px + 14px) */
 .signOut { padding-left: 34px; }
 .sheetSub .signOut { padding-left: 16px; }
+
+/* 화면 위에 붙는 메뉴. 아래로 스크롤하면 위로 숨고 위로 스크롤하면 내려온다(app/_components/chrome.ts) */
+.chrome {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  transition: transform 0.2s ease;
+}
+
+:global(html[data-chrome="hidden"]) .chrome { transform: translateY(-100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .chrome { transition: none; }
+}
