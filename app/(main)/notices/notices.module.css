@@ -604,13 +604,6 @@ select.popInput {
 
 .rowLink:hover .rowTitle { text-decoration: underline; text-underline-offset: 4px; }
 
-.footNote {
-  margin: 24px 0 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--label-neutral);
-}
-
 .rowChecked { box-shadow: inset 0 0 0 2px var(--primary-normal); }
 
 .rowCheck {

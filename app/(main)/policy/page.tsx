@@ -63,8 +63,6 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/policy">["s
           <p className={styles.emptyText}>위 칩에서 지역이나 대상을 넓혀 보세요. 정책은 하루 한 번 새로 받아 와요.</p>
         </section>
       ) : <PolicyList rows={rows} />}
-      {/* PRD 9절: 자격은 판정하지 않는다 */}
-      <p className={styles.footNote}>자격은 정책 원문 기준으로 확인해 주세요. 온통청년 주거 분야 정책 가운데 신청이 끝나지 않은 것만 보여요.</p>
     </>
   );
 }
