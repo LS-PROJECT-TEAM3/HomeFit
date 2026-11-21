@@ -245,6 +245,8 @@
   /* 칸은 두 줄로, 도움말·고르기 묶음 같은 나머지는 한 줄 전체 */
   .foldBody { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
   .foldBody > :not(.field) { grid-column: 1 / -1; }
+  .foldBody > .optionField.full { grid-column: 1 / -1; }
+  .foldBody > .triple { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 28px; }
 }
 
 /* 저장된 내용 한눈에 보기 */
@@ -305,3 +307,90 @@ select.input {
 }
 
 .noticeTime { margin-left: 10px; font-weight: 400; color: var(--label-neutral); }
+
+/* 이름표의 필수 * 와 (선택) */
+.req { margin-left: 3px; color: var(--status-negative); font-weight: 700; }
+.optional { margin-left: 4px; color: var(--label-alternative); font-size: 14px; font-weight: 400; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 칸 안 오른쪽 단위 */
+.unitBox { position: relative; display: flex; align-items: center; }
+.unitBox > .input { padding-right: 56px; }
+.unitText {
+  position: absolute;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--label-alternative);
+  font-size: 15px;
+  pointer-events: none;
+}
+.unitText:has(select) { right: 6px; pointer-events: auto; }
+.unitText select {
+  min-height: 40px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--label-alternative);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* 고르기 버튼 묶음(DS OptionButton: 52px, 고르면 초록 바탕 + ✓) */
+.optionField { margin: 0; padding: 0; border: 0; min-width: 0; }
+.optionField > legend { margin-bottom: 8px; padding: 0; }
+.options { display: grid; gap: 8px; }
+.optionsInline { display: flex; flex-wrap: wrap; gap: 8px; }
+.optionsInline .option { padding: 0 18px; }
+
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 12px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+}
+
+.option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.option:has(input:checked) { border-color: var(--primary-normal); background: var(--primary-normal); color: var(--static-white); font-weight: 700; }
+.option:has(input:checked) span::before { content: "✓ "; }
+.option:has(input:focus-visible) { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+
+/* 휴대폰은 한 줄씩, PC는 3칸(교통비·관리비) */
+.triple { display: grid; gap: 24px; }
+
+/* PC 2칸 배치에서 한 줄 전체를 쓰는 칸 */
+.full { grid-column: 1 / -1; }
+.computed { display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 10px 16px; border-radius: var(--radius-control); background: var(--background-normal-normal); font-size: 15px; }
+.computed b { font-size: 17px; font-variant-numeric: tabular-nums; }
+
+/* 첫 설정 아래에 붙는 단계 줄(v2-s1-open-pc 85px) */
+.stepBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 85px;
+  margin: 8px -20px 0;
+  padding: 0 20px;
+  border-top: 1px solid var(--line-normal-neutral);
+  background: var(--background-normal-normal);
+}
+
+.stepLeft { display: flex; align-items: center; gap: 20px; }
+.stepCount { font-size: 15px; color: var(--label-alternative); font-variant-numeric: tabular-nums; }
+.stepLeft .assistive { display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border: 1px solid var(--line-solid-normal); background: transparent; text-decoration: none; }
+.stepBar .primary { min-width: 132px; min-height: 48px; }
+

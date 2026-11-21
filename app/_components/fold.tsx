@@ -1,4 +1,7 @@
+"use client";
+
 import { Icon } from "@/app/_components/icons";
+import { InfoTip } from "@/app/_components/info-tip";
 import styles from "@/app/_components/form.module.css";
 
 /**
@@ -6,11 +9,13 @@ import styles from "@/app/_components/form.module.css";
  * 브라우저 기본 details/summary라 키보드(Enter·Space)로 열고 닫히고, 접혀 있어도 칸은 폼과 함께 저장된다.
  * status는 "입력함 4/5"처럼 글자로 보인다(색만으로 구분하지 않음, 디자인 기본선 5)
  */
-export function Fold({ title, status, open, children }: { title: string; status?: string; open?: boolean; children: React.ReactNode }) {
+/** tip: 제목 옆 설명 아이콘(보드). 눌러도 칸이 접히지 않게 막는다 */
+export function Fold({ title, status, open, tip, children }: { title: string; status?: string; open?: boolean; tip?: string; children: React.ReactNode }) {
   return (
     <details className={styles.fold} open={open}>
       <summary className={styles.foldSummary}>
         <span className={styles.foldTitle}>{title}</span>
+        {tip ? <span onClick={(e) => e.preventDefault()}><InfoTip icon text={tip} label={`${title} 설명 보기`} /></span> : null}
         {status ? <span className={styles.foldStatus}>{status}</span> : null}
         <span className={styles.foldChevron} aria-hidden="true"><Icon name="chevron-down" size={20} /></span>
       </summary>
