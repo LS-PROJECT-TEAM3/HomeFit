@@ -76,6 +76,12 @@ tr:last-child td { border-bottom: 0; }
 .bar-ui { height: 56px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: var(--c-card); border-top: 1px solid var(--c-border); }
 .bar-ui button { min-width: 56px; min-height: 44px; padding: 0 18px; font: inherit; font-size: 16px; border-radius: 8px; border: 1px solid var(--c-border); background: var(--c-card); color: var(--c-text); cursor: pointer; }
 .bar-ui button:hover { border-color: var(--c-primary); }
+/* 밝기 버튼: 글자 대신 해·달 선 그림(밝을 땐 달, 어두울 땐 해) */
+.bar-ui #theme { width: 44px; min-width: 44px; padding: 0; border-radius: 50%; display: inline-grid; place-items: center; color: var(--c-muted); transition: color .2s, border-color .2s; }
+.bar-ui #theme:hover { color: var(--c-primary); }
+#theme .i-sun { display: none; }
+:root[data-theme="dark"] #theme .i-moon { display: none; } :root[data-theme="dark"] #theme .i-sun { display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #theme .i-moon { display: none; } :root:not([data-theme="light"]) #theme .i-sun { display: block; } }
 .bar-ui button:focus-visible, a:focus-visible { outline: 3px solid var(--c-primary); outline-offset: 2px; }
 .bar-ui .pos { font-size: 16px; min-width: 70px; text-align: center; font-variant-numeric: tabular-nums; }
 @media (max-width: 760px) {
@@ -358,7 +364,7 @@ tr:last-child td { border-bottom: 0; }
   <button id="prev" aria-label="이전 슬라이드">이전</button>
   <span class="pos" id="pos" aria-live="polite">1 / 18</span>
   <button id="next" aria-label="다음 슬라이드">다음</button>
-  <button id="theme" aria-label="밝게·어둡게 바꾸기">밝기</button>
+  <button id="theme" aria-label="밝게·어둡게 바꾸기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="i-moon"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="i-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg></button>
 </nav>
 
 <script>
