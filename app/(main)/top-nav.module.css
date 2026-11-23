@@ -198,12 +198,6 @@
 
 [aria-current="page"] .bar { background: var(--primary-normal); }
 
-.note {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--label-neutral);
-}
-
 .account {
   padding: 12px 20px;
   border-bottom: 1px solid var(--line-normal-normal);

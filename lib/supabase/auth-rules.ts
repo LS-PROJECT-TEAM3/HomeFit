@@ -44,3 +44,8 @@ export function safeNextPath(next: string | null): string {
   if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\") || CONTROL_CHAR.test(next)) return "/";
   return next;
 }
+
+/** 사용자 요청(2026-11-23): 내 집도 공고/정책 조건도 없는 처음 계정은 로그인 뒤 첫 설정으로, 그 밖에는 홈으로 */
+export function afterSignInPath(saved: { hasHome: boolean; hasCondition: boolean }): "/onboarding" | "/" {
+  return saved.hasHome || saved.hasCondition ? "/" : "/onboarding";
+}

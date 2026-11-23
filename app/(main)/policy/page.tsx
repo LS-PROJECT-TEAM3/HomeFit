@@ -48,12 +48,13 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/policy">["s
   if (!result.hasCondition) {
     return (
       <>
-        <ListingHead active="policy" counts={{ notices: noticeCount, policy: null }} />
+        <ListingHead active="policy" counts={{ notices: noticeCount, policy: null }}>
         <section className={styles.emptyCard}>
           <h2 className={styles.emptyTitle}>아직 내 조건이 없어요</h2>
           <p className={styles.emptyText}>지역과 나이를 정하면 맞는 청년 주거 정책을 골라 보여 드려요.</p>
           <Link href="/my/conditions" className={styles.emptyLink}>조건 입력하기</Link>
         </section>
+        </ListingHead>
       </>
     );
   }
@@ -66,7 +67,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/policy">["s
   }));
   return (
     <>
-      <ListingHead active="policy" counts={{ notices: noticeCount, policy: rows.length }} />
+      <ListingHead active="policy" counts={{ notices: noticeCount, policy: rows.length }}>
       <ConditionBar condition={result.condition} chips={conditionChips(result.condition, regionLabel(result.condition.sidoCode, result.condition.sigunguCode, names))} fields={POLICY_FIELDS} targetCounts={result.targetCounts} />
       {rows.length === 0 ? (
         <section className={styles.emptyCard}>
@@ -74,6 +75,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/policy">["s
           <p className={styles.emptyText}>위 칩에서 지역이나 대상을 넓혀 보세요. 정책은 하루 한 번 새로 받아 와요.</p>
         </section>
       ) : <PolicyList rows={rows} followsFailed={follows === null} />}
+      </ListingHead>
     </>
   );
 }
