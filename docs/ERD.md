@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-20 (v1.12, spec 021: push_subscriptions 웹 푸시 기기, notifications.channel `web_push`. v1.11 spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
+- 최종 갱신: 2026-11-23 (v1.13, spec 023: notice_follows 본인 지우기, incident_actions에 `cancel_approve`·`cancel_reject`, 승인 취소 때 일정 지움. v1.12 spec 021: push_subscriptions 웹 푸시 기기, notifications.channel `web_push`. v1.11 spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -280,7 +280,7 @@ erDiagram
 | id | uuid (PK) | ✔ | 지우거나 고치지 않는다(쌓기만) | [평가항목 P3-04, P3-13] |
 | incident_id | uuid (FK incidents) | ✔ | | [PRD FR-16, FR-17] |
 | actor_id | uuid (FK profiles) | ✔ | 한 사람 | [PRD FR-16, FR-17] |
-| action | text: `approve` / `reject` | ✔ | 관리자 수정은 audit_logs에 따로 | [PRD FR-16, FR-17, FR-22] |
+| action | text: `approve` / `reject` / `cancel_approve` / `cancel_reject` | ✔ | 관리자 수정은 audit_logs에 따로. 취소도 새 줄(v1.13) | [PRD FR-16, FR-17, FR-22] [spec 023] |
 | reason | text | | 거절이면 필수 | [PRD FR-17] |
 | created_at | timestamptz | ✔ | 시각 | [PRD FR-16, FR-17] |
 
@@ -453,11 +453,11 @@ erDiagram
 | notification_settings | 내 행만 읽기, 알림 켜기·끄기(enabled·enabled_at·updated_at)만 수정. 이메일·슬랙 사람 ID는 서버만 씀(0008) | **볼 수 없음**(슬랙 이메일은 개인 정보) | 읽기·쓰기 |
 | notifications | 내 행 읽기 | 읽기(주소 없음) | 쓰기 |
 | push_subscriptions | 내 행만 읽기·지우기. 넣기·바꾸기는 서버만(같은 브라우저 다른 계정, 0022) | **볼 수 없음**(받을 주소는 개인 정보) | 읽기·쓰기 |
-| notice_follows | 내 행 읽기·쓰기 | 읽기 | 읽기 |
+| notice_follows | 내 행 읽기·쓰기·지우기(v1.13, 지우면 "새 공고") | 읽기 | 읽기 |
 | notice_summaries | 로그인하면 읽기 | 읽기 | 쓰기 |
 | incidents, response_plans | 내 행만 읽기 | 전체 읽기 | 쓰기 |
-| incident_actions | 내 사건에만 승인·거절 추가 | 읽기만 (대신 승인 불가) | |
-| schedule_items | 내 행 읽기, 체크 상태 수정 | 읽기 | 승인 때 생성 |
+| incident_actions | 내 사건에만 승인·거절·취소 추가 | 읽기만 (대신 승인 불가) | |
+| schedule_items | 내 행 읽기, 체크 상태 수정 | 읽기 | 승인 때 생성, 승인 취소 때 그 일정 지움(v1.13) |
 | knowledge_chunks | 내 행 찾기 | | 쓰기 |
 | audit_logs | 볼 수 없음 | 추가·읽기. 수정·삭제 불가 | |
 | wiki_chunks, chat_logs | 볼 수 없음 | 챗봇 사용, 내 질문 기록 | 위키 반영 |
@@ -498,6 +498,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-18 | v1.10 | spec 012(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-23 | v1.13 (승인 2026-11-23 "추천대로 승인", spec 023) | notice_follows 본인 지우기 권한, incident_actions.action에 `cancel_approve`·`cancel_reject`, 승인 취소 때 승인으로 만든 schedule_items 지움 |
 | 2026-11-20 | v1.12 (승인 2026-11-20 "모두 승인", 마이그레이션 0022) | push_subscriptions 표와 접근 규칙, notifications.channel에 `web_push`. PRD v1.20 FR-35, spec 021 |
 | 2026-11-19 | v1.11 (승인 2026-11-19 "추천대로 진행", 마이그레이션 0021) | interest_homes에 move_in_checklist(jsonb)·move_in_note, defect_records 표, 사진 저장소 defect-photos와 접근 규칙. PRD v1.17 FR-29·FR-30 1차, spec 019 |
 | 2026-11-18 | v1.9 (승인 2026-11-18, 마이그레이션 0020) | interest_homes 표 추가, homes에 energy_cost·electricity_kwh·transit_fare·trips_per_day·commute_days. 실질 주거비 알파(PRD v1.10 FR-28, spec 009) |
