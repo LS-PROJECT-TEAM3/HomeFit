@@ -184,7 +184,8 @@ function HomeFields({ values, costs, gas, state, action, pending, mode, extra }:
     <form ref={formRef} action={action} className={styles.form} noValidate>
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
       {state.saved && mode === "settings" ? <SavedNotice /> : null}
-      {mode === "onboarding" ? <p className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</p> : null}
+      {/* 사용자 요청(2026-11-23): "* 필수 입력"은 아래 버튼 줄 대신 맨 위에 */}
+      <p className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</p>
       <BasicFold values={values} errors={errors} expand={expand} sidoCode={sidoCode} setSidoCode={setSidoCode} />
       <ContractFold values={values} errors={errors} expand={expand} />
       <ManagementFold values={values} costs={costs} errors={errors} expand={expand} />
@@ -193,7 +194,6 @@ function HomeFields({ values, costs, gas, state, action, pending, mode, extra }:
       {extra}
       {mode === "settings" ? (
         <div className={styles.actions}>
-          <span className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</span>
           <button type="reset" className={styles.assistive}>취소</button>
           <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : "저장"}</button>
         </div>

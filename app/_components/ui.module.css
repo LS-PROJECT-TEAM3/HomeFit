@@ -272,3 +272,6 @@
   .kvValue { font-weight: 600; }
   .statLabel { font-size: 15px; }
 }
+
+/* 링크가 든 긴 설명(InfoTip body). 휴대폰에서는 화면 폭 안으로 */
+.tipPopWide { width: min(420px, calc(100vw - 48px)); }
