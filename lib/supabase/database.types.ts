@@ -210,6 +210,8 @@ export type Database = {
     Views: Record<never, never>;
     Functions: {
       add_notice_to_schedule: { Args: { p_announcement_id: string; p_checklist: Json }; Returns: string };
+      // spec 026 (0025): 팔로우한 정책을 내 일정에
+      add_policy_to_schedule: { Args: { p_policy_id: string; p_checklist: Json }; Returns: string };
       admin_update_member_input: { Args: { p_table: string; p_target_id: string; p_changes: Json; p_reason: string }; Returns: string };
       approve_incident: { Args: { p_incident_id: string }; Returns: string };
       collection_status: {
