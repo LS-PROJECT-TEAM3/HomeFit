@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildFlow, sourceStarts } from "@/flow/graph";
+import { buildFlow, friendlyRunError, sourceStarts } from "@/flow/graph";
 
 // spec 005 FR-003 (PRD FR-23, IA AD_070400_TB·AD_070401_MD): 실행 기록 → 상자·화살표. 미리 그린 그림이 아니라 기록에서 (CUJ-04 MOT)
 const step = (step_name: string, status: string, items_in: number | null, items_out: number | null, detail: unknown = null) => ({ step_name, status, items_in, items_out, detail });
@@ -79,5 +79,15 @@ describe("알림 단계 (spec 021)", () => {
     expect(rows.map((r) => r.label)).toEqual(["보냄", "실패", "다시 시도", "슬랙", "웹 푸시", "오류"]);
     expect(rows[4].value).toBe("보냄 1 · 실패 0 · 다시 시도 0 · 지운 기기 1");
     expect(rows[5].value).toBe("없음");
+  });
+});
+
+describe("friendlyRunError (흐름 화면 오류 쉬운 문장)", () => {
+  it("연결 실패, 인증 거절, 한도, 응답 모양, 그 밖을 나눈다", () => {
+    expect(friendlyRunError("fetch failed: https://apis.data.go.kr/x?serviceKey=***")).toContain("연결하지 못했어요");
+    expect(friendlyRunError("HTTP 401 Unauthorized")).toContain("인증키");
+    expect(friendlyRunError("HTTP 429 Too Many Requests")).toContain("한도");
+    expect(friendlyRunError("Unexpected token < in JSON")).toContain("응답 모양");
+    expect(friendlyRunError("무슨 일")).toContain("원문을 확인");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkEmail, checkNewPassword, routeAccess, safeNextPath } from "@/lib/supabase/auth-rules";
+import { afterSignInPath, checkEmail, checkNewPassword, routeAccess, safeNextPath } from "@/lib/supabase/auth-rules";
 
 // spec 014 FR-001~003, 경계 E1·E4·E5·E7
 describe("routeAccess (주소별 로그인 규칙)", () => {
@@ -60,5 +60,13 @@ describe("safeNextPath (바깥 주소로 보내지 않기)", () => {
   it("탭·줄바꿈·캐리지 리턴 같은 제어 문자가 있으면 홈으로", () => {
     for (const bad of ["/\t/evil.example", "/\n/evil.example", "/\r/evil.example", "/reset-password\u0000"]) expect(safeNextPath(bad)).toBe("/");
     for (const bad of ["/\t/evil.example", "/\n/evil.example", "/\r/evil.example"]) expect(new URL(bad, "http://localhost:3000").host).toBe("evil.example");
+  });
+});
+
+describe("afterSignInPath (로그인 뒤 갈 곳)", () => {
+  it("내 집도 조건도 없으면 첫 설정, 하나라도 있으면 홈", () => {
+    expect(afterSignInPath({ hasHome: false, hasCondition: false })).toBe("/onboarding");
+    expect(afterSignInPath({ hasHome: true, hasCondition: false })).toBe("/");
+    expect(afterSignInPath({ hasHome: false, hasCondition: true })).toBe("/");
   });
 });

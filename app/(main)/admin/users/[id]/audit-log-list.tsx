@@ -1,11 +1,12 @@
 import { LoadError } from "@/app/_components/states";
 import { EDITABLE_FIELDS, type EditTable } from "@/incident/admin-edit";
 import { createClient } from "@/lib/supabase/server";
-import styles from "@/app/_components/hub.module.css";
+import { AdminCard } from "../../admin-card";
+import styles from "../../admin.module.css";
 
-const TABLE_LABEL: Record<string, string> = { policy_conditions: "공고 조건", homes: "내 집" };
+const TABLE_LABEL: Record<string, string> = { policy_conditions: "공고/정책 조건", homes: "사는 집" };
 
-const kst = (iso: string) => new Date(iso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+const kst = (iso: string) => new Date(iso).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(5, 16).replace("-", ".");
 
 /** {칸: 값} → "월세 (원) 500,000" 한 줄씩. 칸 이름은 화면 라벨로 */
 function describe(table: string, values: unknown): string {
@@ -26,9 +27,8 @@ export async function AuditLogList({ targetIds }: { targetIds: string[] }) {
     .limit(20);
   if (error) return <LoadError>수정 기록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   return (
-    <>
-      <h2 className={styles.section}>관리자 수정 기록</h2>
-      {data.length === 0 ? <p className={styles.muted}>고친 기록이 없습니다.</p> : (
+    <AdminCard id="m-audit" title="관리자 수정 기록" tip="담당자, 시각, 고치기 전후 값, 사유가 남아요. 지우거나 고칠 수 없어요.">
+      {data.length === 0 ? <p className={styles.help}>고친 기록이 없습니다.</p> : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead><tr><th scope="col">시각</th><th scope="col">담당자</th><th scope="col">고친 곳</th><th scope="col">전 → 후</th><th scope="col">사유</th></tr></thead>
@@ -38,7 +38,7 @@ export async function AuditLogList({ targetIds }: { targetIds: string[] }) {
                   <td>{kst(log.created_at)}</td>
                   <td>관리자 {log.actor_id.slice(0, 8)}</td>
                   <td>{TABLE_LABEL[log.target_table] ?? log.target_table}</td>
-                  <td className="tabular-nums">{describe(log.target_table, log.before)} → {describe(log.target_table, log.after)}</td>
+                  <td>{describe(log.target_table, log.before)} → {describe(log.target_table, log.after)}</td>
                   <td>{log.reason}</td>
                 </tr>
               ))}
@@ -46,6 +46,6 @@ export async function AuditLogList({ targetIds }: { targetIds: string[] }) {
           </table>
         </div>
       )}
-    </>
+    </AdminCard>
   );
 }

@@ -22,13 +22,13 @@ export function UnitBox({ unit, children }: { unit: ReactNode; children: ReactNo
 type Option = { value: string; label: string };
 
 /** 고르기 버튼 묶음(라디오, 보드 OptionButton) */
-/** fill: 칸 폭을 같은 크기로 나눠 채운다(계약 형태). 없으면 글자 폭 버튼을 나란히(주택 유형) */
+/** fill: 칸 폭을 같은 크기로 나눠 채운다(계약 형태·주택 유형, 3개 이상이면 휴대폰은 2칸). 없으면 글자 폭 버튼을 나란히 */
 export function OptionGroup({ name, label, options, value, required, error, help, fill }: { name: string; label: string; options: Option[]; value: string; required?: boolean; error?: string; help?: string; fill?: boolean }) {
   const describedBy = [help ? `${name}-help` : "", error ? `${name}-error` : ""].filter(Boolean).join(" ") || undefined;
   return (
-    <fieldset className={`${styles.field} ${styles.optionField}`} aria-describedby={describedBy}>
+    <fieldset className={`${styles.field} ${styles.optionField}`} aria-describedby={describedBy} data-invalid={error ? "true" : undefined}>
       <FieldLabel label={label} required={required} as="legend" />
-      <div className={fill ? styles.options : styles.optionsInline} style={fill ? { gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` } : undefined}>
+      <div className={fill ? `${styles.options} ${options.length > 2 ? styles.optionsWide : ""}` : styles.optionsInline} style={fill ? { gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` } : undefined}>
         {options.map((o) => (
           <label key={o.value} className={styles.option}>
             <input type="radio" name={name} value={o.value} defaultChecked={value === o.value} />

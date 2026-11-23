@@ -1,0 +1,77 @@
+/* spec 022 로그인·가입·재설정. 첫 설정(setup.module.css)과 같은 머리·왼쪽 안내 틀. 색은 tokens 변수만 */
+.shell { min-height: 100dvh; display: flex; flex-direction: column; background: var(--background-normal-normal); color: var(--label-normal); }
+
+.head {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line-normal-neutral);
+}
+
+.logo { font-family: var(--font-logo); font-size: 24px; font-weight: 500; letter-spacing: 0.02em; color: var(--label-normal); text-decoration: none; }
+
+.body { flex: 1; display: flex; flex-direction: column; }
+
+/* 휴대폰은 입력이 먼저, 소개는 아래 */
+.main { padding: 32px 20px 40px; }
+.panel { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 420px; margin: 0 auto; }
+
+.aside { display: flex; flex-direction: column; gap: 24px; padding: 32px 20px 48px; background: var(--background-elevated-normal); border-top: 1px solid var(--line-normal-neutral); }
+.asideTitle { margin: 0; word-break: keep-all; font-family: var(--font-serif); font-size: 24px; font-weight: 500; line-height: 1.45; letter-spacing: -0.01em; }
+
+.points { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line-normal-normal); }
+.point { display: flex; align-items: baseline; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line-normal-normal); }
+.pointNum { flex: none; font-family: var(--font-logo); font-size: 20px; font-weight: 500; color: var(--primary-normal); font-variant-numeric: tabular-nums; }
+.pointText { display: flex; flex-direction: column; gap: 2px; font-size: 15px; color: var(--label-neutral); }
+.pointName { font-size: 16px; font-weight: 700; color: var(--label-normal); }
+
+/* 오른쪽 입력 */
+.titleBox { display: flex; flex-direction: column; gap: 8px; }
+.title { margin: 0; font-family: var(--font-serif); font-size: 30px; font-weight: 500; line-height: 1.3; }
+.lead { margin: 0; font-size: 15px; line-height: 1.6; color: var(--label-neutral); }
+
+.full { width: 100%; }
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--label-normal);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.forgot { align-self: flex-end; margin-top: -12px; }
+
+.switch { display: flex; flex-direction: column; gap: 12px; padding-top: 24px; border-top: 1px solid var(--line-normal-normal); }
+.switchText { margin: 0; font-size: 15px; color: var(--label-neutral); text-align: center; }
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.secondary:hover { background: var(--background-normal-alternative); }
+
+.textLink:focus-visible,
+.secondary:focus-visible,
+.logo:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+
+@media (min-width: 960px) {
+  .head { height: 68px; padding: 0 var(--spacing-screen-padding-pc); }
+  .logo { font-size: 26px; }
+  .body { flex-direction: row-reverse; align-items: stretch; }
+  .aside { width: 520px; flex: none; justify-content: center; gap: 40px; padding: 64px; border-top: 0; border-right: 1px solid var(--line-normal-neutral); }
+  .asideTitle { font-size: 36px; }
+  .main { flex: 1; display: flex; align-items: center; padding: 64px 96px; }
+  .title { font-size: 34px; }
+}
