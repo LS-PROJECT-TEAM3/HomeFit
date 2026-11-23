@@ -109,7 +109,7 @@ tr:last-child td { border-bottom: 0; }
     <div class="card"><h3>선우</h3><p class="sub">sunwood0803</p></div>
     <div class="card"><h3>서윤</h3><p class="sub">lilyoon333</p></div>
   </div>
-  <p class="sub">서비스 주소 homefit-lac.vercel.app (로그인해야 화면이 보여요) 2026-11-19</p>
+  <p class="sub">서비스 주소 homefit-lac.vercel.app (로그인해야 화면이 보여요) 2026-11-23</p>
 </section>
 
 <!-- 2 문제 -->
@@ -209,12 +209,10 @@ tr:last-child td { border-bottom: 0; }
     <div class="card"><h3>사용자</h3><p>홈, 위험/기회 알림, 맞춤 공고, 내 정보, 집 비교, 기록 찾기, 내 일정</p></div>
     <div class="card"><h3>관리자 (/admin)</h3><p>수집 현황, 시뮬레이터, 흐름 화면, 채점 결과, 위키 챗봇</p></div>
   </div>
-  <div class="grid g3">
-    <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;홈 대시보드</div>
-    <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;알림 상세</div>
+  <div class="grid g2">
+    <div class="card"><h3>사용자 화면은 시연에서</h3><p class="t">홈 대시보드와 알림 상세는 이어지는 시연에서 실제 화면으로 보여 드려요.</p></div>
     <div class="shot has-img"><img src="img/flow-success.png" alt="관리자 흐름 화면: 마이홈 공고 정기 실행이 수집·비교·감지까지 성공하고 나머지 단계는 건너뛴 모습"></div>
   </div>
-  <p class="sub">캡처에는 가상 계정과 관리자 계정이 필요해요. 이메일, 계정 정보는 가려서 넣어요.</p>
 </section>
 
 <!-- 9 사건과 승인 -->
@@ -250,10 +248,9 @@ tr:last-child td { border-bottom: 0; }
     <tr><td>6</td><td>시뮬레이터(예보, 시세)</td><td>사건 종류가 둘 이상</td></tr>
   </table>
   <div class="grid g2">
-    <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;시뮬레이터 실행 결과</div>
+    <div class="card"><h3>이제 실제 화면으로</h3><p class="t">이어서 선우가 운영 화면에서 직접 시연해요. 오른쪽은 예보 실행이 승인 대기에서 멈춘 흐름 화면이에요.</p></div>
     <div class="shot has-img"><img class="from-mid" src="img/flow-waiting.png" alt="흐름 화면: 기상청 예보 정기 실행이 승인 대기(점선 상자)에서 멈춘 모습"></div>
   </div>
-  <p class="sub">시연은 서윤과 선우가 맡아요. 역할은 정해졌어요(선우 장면 1, 3, 5, 7, 서윤 장면 2, 4, 6, 8, 9). 리허설 날짜는 정하는 중이에요.</p>
 </section>
 
 <!-- 11 실패 -->
@@ -261,12 +258,10 @@ tr:last-child td { border-bottom: 0; }
   <div class="kicker">시연 ② 실패 장면</div>
   <h2>읽기 실패는 "변화 없음"이 아니다</h2>
   <div class="card"><p class="big">읽기에 실패하면 "변화 없음"이 아니라 수집 오류로 기록한다.</p></div>
-  <div class="grid g3">
-    <div class="card"><h3>1. 실패 묶음 실행</h3><p class="t">가짜 묶음 <b>failure</b> 또는 <b>malformed</b>를 돌려요.</p></div>
-    <div class="card"><h3>2. 흐름 화면</h3><p class="t">실패한 상자가 빨강과 "실패" 글자로 보여요.</p></div>
-    <div class="card"><h3>3. 수집 현황</h3><p class="t">최근 실행 표에 "시뮬레이터, 수집 오류"가 한 줄 생기고, 오류 문구에서 키는 가려져요. 시뮬레이터 실행은 연속 실패 수에 안 들어가요.</p></div>
+  <div class="grid g2">
+    <div class="card"><ul><li><b>1. 실패 묶음 실행</b>: 가짜 묶음 <b>failure</b> 또는 <b>malformed</b>를 돌려요.</li><li><b>2. 흐름 화면</b>: 실패한 상자가 빨강과 "실패" 글자로 보여요.</li><li><b>3. 수집 현황</b>: 최근 실행 표에 "시뮬레이터, 수집 오류"가 한 줄 생기고, 오류 문구에서 키는 가려져요. 시뮬레이터 실행은 연속 실패 수에 안 들어가요.</li></ul></div>
+    <div class="shot has-img"><img style="object-position: center 15%" src="img/flow-failed.png" alt="흐름 화면: 마이홈 공고 시뮬레이터 실행이 수집 단계에서 실패하고 나머지 단계는 도달 못 함으로 남은 모습"></div>
   </div>
-  <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;실패 상자와 "시뮬레이터, 수집 오류" 한 줄</div>
 </section>
 
 <!-- 12 채점 -->
@@ -293,10 +288,7 @@ tr:last-child td { border-bottom: 0; }
     <tr><td>Vercel 커넥터</td><td>배포 상태, 운영 환경변수 확인</td><td>배포 목록, 상세, 환경변수 확인</td><td>아니오</td></tr>
     <tr><td>GitHub 커넥터</td><td>PR 만들기, 리뷰, 병합</td><td>예림 PC는 모두 커넥터로 PR 작업</td><td>아니오</td></tr>
   </table>
-  <div class="grid g2">
-    <div class="card"><h3>막히면 다른 길로</h3><p class="t">Notion 404 → 내장 브라우저로 읽기만, GitHub 연결 오류 → <b>gh</b> 명령줄, Supabase 권한 없음 → 대시보드 읽기로 ERD 대조.</p></div>
-    <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;Supabase, Vercel 호출 화면</div>
-  </div>
+  <div class="card"><h3>막히면 다른 길로</h3><p class="t">Notion 404 → 내장 브라우저로 읽기만, GitHub 연결 오류 → <b>gh</b> 명령줄, Supabase 권한 없음 → 대시보드 읽기로 ERD 대조.</p></div>
 </section>
 
 <!-- 14 위키 챗봇 -->
@@ -349,17 +341,14 @@ tr:last-child td { border-bottom: 0; }
     <tr><td>선우 sunwood0803</td><td>조각 C1 제출 문서</td><td>#3 하네스 규칙, #5 제출 문서 3개, #10 커넥터, 서브에이전트, #13 흐름 화면 문서, #17 QA, 흐름 화면 갱신, #26 QA, 디버그 기록 갱신, #39 흐름 화면 캡처, 사람 QA 015~020, #43, #56 qa, 흐름 화면 갱신</td></tr>
     <tr><td>서윤 lilyoon333</td><td>조각 C2 README, 시연, 발표</td><td>#6 README, 시연 순서 6건, README 팀원 표 5건, #22, #36 인터뷰 종합, #27, #35, #38, #42, #45, #49, #50 발표 슬라이드, #30, #37, #48 README 기능 목록, 인터뷰 줄, 웹 푸시, #40 13장 DB 기록 수</td></tr>
   </table>
-  <p class="sub">모두 합쳐진 PR 1개 이상과 리뷰 1개 이상이 있어요. PR 번호와 작성자는 GitHub 기록과 맞춰 봤어요(2026-11-23). 열린 PR은 현경 #62, 선우 #63, 서윤 #64~#67이에요.</p>
+  <p class="sub">모두 합쳐진 PR 1개 이상과 리뷰 1개 이상이 있어요. PR 번호와 작성자는 GitHub 기록과 맞춰 봤어요(2026-11-23). 열린 PR은 현경 #62, 서윤 #64, #65, #67이에요.</p>
 </section>
 
 <!-- 18 다음 -->
 <section class="slide compact" data-title="다음 할 것">
   <div class="kicker">다음</div>
   <h2>다음에 할 것</h2>
-  <div class="grid g2">
     <div class="card"><h3>제품</h3><ul><li>발표 범위 정하기: 새로 들어온 기능 013~026 중 어디까지 보일지</li><li>웹 푸시 사람 QA: 휴대폰으로 확인(예림)</li><li>운영 화면에서 Claude가 답하는지 리허설에서 확인(전환은 2026-11-23)</li><li>팀 밖 1:1 인터뷰를 더 할지 정하기</li></ul></div>
-    <div class="card"><h3>발표 준비</h3><ul><li>시연 리허설: 날짜, 역할 정하고 운영(예림 말로는 배포 끝)에서 처음부터 끝까지</li><li>사람 QA 빈 칸과 DB 적용 기록(0018, 0021~0025) 맞추기</li><li>슬라이드 캡처 채우기(11장 실패 장면 캡처 2장은 선우 님이 찍어 둠), 설문 수집 경로 확인</li><li>강사 계정을 저장소에 초대</li></ul></div>
-  </div>
   <p class="sub">한계: 관리비는 아파트만 파일이 필요하고, 오피스텔, 빌라는 공식 통계가 없어 "미입력"으로 둬요. 발표에서 관리비를 단정하지 않아요.</p>
 </section>
 
