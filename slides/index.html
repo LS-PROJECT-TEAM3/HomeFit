@@ -67,6 +67,7 @@ tr:last-child td { border-bottom: 0; }
 .bar .fill { background: var(--c-primary); height: 100%; border-radius: 999px; }
 .bar b { font-variant-numeric: tabular-nums; }
 .shot { border: 2px dashed var(--c-border); border-radius: 12px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--c-muted); font-size: 1.8cqw; min-height: 10cqw; padding: 1cqw; }
+.shot.has-img { border-style: solid; padding: 0; overflow: hidden; } .shot img { display: block; width: 100%; max-height: 24cqw; object-fit: cover; object-position: top; } .g2 .shot img { max-height: 15cqw; } .shot img.from-bottom { object-position: bottom; }
 .compact { gap: 1cqw; padding-top: 3.6cqw; } .compact h2 { font-size: 3.2cqw; } .compact td, .compact th { padding: .45cqw 1.2cqw; } .compact .card { padding: 1.1cqw 1.4cqw; } .compact .shot { min-height: 6cqw; }
 .foot { margin-top: auto; font-size: 1.3cqw; color: var(--c-muted); display: flex; justify-content: space-between; }
 .cover { justify-content: center; gap: 2cqw; }
@@ -211,7 +212,7 @@ tr:last-child td { border-bottom: 0; }
   <div class="grid g3">
     <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;홈 대시보드</div>
     <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;알림 상세</div>
-    <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;관리자 흐름 화면</div>
+    <div class="shot has-img"><img src="img/flow-success.png" alt="관리자 흐름 화면: 기상청 예보 정기 실행이 성공한 상자와 화살표"></div>
   </div>
   <p class="sub">캡처에는 가상 계정과 관리자 계정이 필요해요. 이메일·계정 정보는 가려서 넣어요.</p>
 </section>
@@ -250,7 +251,7 @@ tr:last-child td { border-bottom: 0; }
   </table>
   <div class="grid g2">
     <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;시뮬레이터 실행 결과</div>
-    <div class="shot"><span class="badge">캡처 준비 중</span>&nbsp;흐름 화면</div>
+    <div class="shot has-img"><img class="from-bottom" src="img/flow-waiting.png" alt="흐름 화면: 마이홈 공고 시뮬레이터 실행이 승인 대기에서 멈춘 모습"></div>
   </div>
   <p class="sub">시연은 서윤과 선우가 맡아요. 리허설 날짜와 누가 누르고 누가 말할지는 정하는 중이에요.</p>
 </section>
