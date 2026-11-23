@@ -177,24 +177,23 @@ type FieldsProps = { values: HomeFormInput; costs: Costs; gas: Gas; state: HomeS
 function HomeFields({ values, costs, gas, state, action, pending, mode, extra }: FieldsProps) {
   const errors = state.errors ?? {};
   const expand = mode === "onboarding";
+  const [sidoCode, setSidoCode] = useState(values.sidoCode);
   const formRef = useRef<HTMLFormElement>(null);
   useFirstError(formRef, state.errors);
-  const [sidoCode, setSidoCode] = useState(values.sidoCode);
   return (
     <form ref={formRef} action={action} className={styles.form} noValidate>
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
       {state.saved && mode === "settings" ? <SavedNotice /> : null}
-      {mode === "onboarding" ? <p className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</p> : null}
+      {/* 사용자 요청(2026-11-23): "* 필수 입력"은 아래 버튼 줄 대신 맨 위에 */}
+      <p className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</p>
       <BasicFold values={values} errors={errors} expand={expand} sidoCode={sidoCode} setSidoCode={setSidoCode} />
       <ContractFold values={values} errors={errors} expand={expand} />
       <ManagementFold values={values} costs={costs} errors={errors} expand={expand} />
       <TransitFold costs={costs} errors={errors} expand={expand} />
-      {/* spec 025: 도시가스 묶음은 설정에만. #52 방식대로 접힌 채, 오류가 있으면 펼침 */}
-      {mode === "settings" ? <GasFold sidoCode={sidoCode} values={gas} errors={errors} open={anyError(errors, ["gasUsage", "gasMonth", "gasRegion"])} /> : null}
+      {mode === "settings" ? <GasFold sidoCode={sidoCode} values={gas} errors={errors} /> : null}
       {extra}
       {mode === "settings" ? (
         <div className={styles.actions}>
-          <span className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</span>
           <button type="reset" className={styles.assistive}>취소</button>
           <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : "저장"}</button>
         </div>

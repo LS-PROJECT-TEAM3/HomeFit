@@ -6,20 +6,19 @@ import { findTariffRegion, sidoOfSigungu, tariffRegionsFor, type GasFieldsInput 
 import styles from "@/app/_components/form.module.css";
 
 // IA MY_030200_TB 내 집 > 도시가스 (spec 025 FR-001·FR-005, PRD FR-28 v1.24): 고지서 한 장(사용량·달). 지역이 여러 개인 도는 요금 지역도.
-// 설정 화면에만 둔다(첫 설정은 짧게). 이 칸이 있다는 표시(gasIncluded)가 있어야 서버가 도시가스 값을 바꾼다
+// 설정 화면에만 둔다(첫 설정은 짧게). spec 022 설정 묶음처럼 접힌 채 시작하고 오류가 있으면 펼친다. 이 칸이 있다는 표시(gasIncluded)가 있어야 서버가 도시가스 값을 바꾼다
 
-/** open: #52 방식 — 설정에서는 접힌 채 열고, 이 묶음에 오류가 있으면 펼친다 */
-type Props = { sidoCode: string; values: GasFieldsInput; errors: Partial<Record<"gasUsage" | "gasMonth" | "gasRegion", string>>; open: boolean };
+type Props = { sidoCode: string; values: GasFieldsInput; errors: Partial<Record<"gasUsage" | "gasMonth" | "gasRegion", string>> };
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   return message ? <p id={id} className={styles.fieldError}>{message}</p> : null;
 }
 
-export function GasFold({ sidoCode, values, errors, open }: Props) {
+export function GasFold({ sidoCode, values, errors }: Props) {
   // 기본 정보에서 고른 시도를 바로 따른다. 저장할 때 서버가 다시 검사한다
   const choices = tariffRegionsFor(sidoOfSigungu(sidoCode));
   return (
-    <Fold title="도시가스" mark="optional" tip="고지서 한 장으로 12개월 예상 난방비를 보여 드려요(에너지 분석 → 난방비). 겨울 고지서일수록 더 가까워요." status={filledStatus([values.usage, values.month])} open={open}>
+    <Fold title="도시가스" tip="고지서 한 장으로 12개월 예상 난방비를 보여 드려요(에너지 분석 → 난방비). 겨울 고지서일수록 더 가까워요." mark="optional" status={filledStatus([values.usage, values.month])} open={Boolean(errors.gasUsage || errors.gasMonth || errors.gasRegion)}>
       <input type="hidden" name="gasIncluded" value="1" />
       <div className={styles.triple}>
         <div className={styles.field}>

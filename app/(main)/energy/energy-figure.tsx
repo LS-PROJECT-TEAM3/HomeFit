@@ -1,72 +1,67 @@
 import Link from "next/link";
 import { InfoTip } from "@/app/_components/info-tip";
-import type { ElectricityBreakdown } from "@/incident/energy-estimate";
 import styles from "./energy.module.css";
 
-// spec 022 FR-012(캔버스 v2-energy-pc 띠, v2-energy-merged-phone 카드): 이번 달 예상 전기요금. 모든 금액은 "약"·"추정"으로(확정처럼 보이지 않게)
+// spec 022 FR-012(캔버스 v2-energy-pc 띠, v2-energy-merged-phone 카드): 이번 달 예상 요금. 모든 금액은 "약"·"추정"으로(확정처럼 보이지 않게)
+// 사용자 요청(2026-11-23): 전기 탭과 난방비 탭이 같은 띠·카드를 쓴다
 
 /** 백 원 단위 어림 "48,300" */
 export const about = (won: number) => (Math.round(won / 100) * 100).toLocaleString("ko-KR");
 
-const BILL_TIP = "기본요금과 전력량요금에 부가세 10%를 더했어요. 기후환경요금, 연료비조정요금, 전력기금 같은 부가 요금은 빠져 있어요.";
+/** title: "이번 달 예상 전기요금"처럼. basis: 추정값(어림)인지 계산값(넣은 값)인지. rows: [항목, 값] */
+export type EnergyFigure = { title: string; basis: "추정값" | "계산값"; tip: string; total: number; rows: [string, string][]; callout: string | null };
 
-type Props = { b: ElectricityBreakdown; kwh: number; estimated: boolean };
-
-function Rows({ b, kwh, className }: Props & { className: string }) {
+function Rows({ rows, className }: { rows: EnergyFigure["rows"]; className: string }) {
   return (
     <dl className={className}>
-      <div><dt>예상 사용량</dt><dd>{kwh.toLocaleString("ko-KR")}kWh</dd></div>
-      <div><dt>전기요금</dt><dd>약 {about(b.bill)}원</dd></div>
-      <div><dt>부가세 10%</dt><dd>약 {about(b.vat)}원</dd></div>
+      {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
     </dl>
   );
 }
 
 /** PC: 진초록 띠 안 큰 숫자 + 항목 표 + 노란 박스 */
-export function BandFigure(props: Props) {
-  const { b, estimated } = props;
+export function BandFigure({ figure }: { figure: EnergyFigure }) {
   return (
     <div className={styles.bandGrid}>
       <div>
         <div className={styles.bandLabelRow}>
-          <p className={styles.bandLabel}>이번 달 예상 전기요금</p>
-          <span className={styles.bandPill}>{estimated ? "추정값 · 부가세 포함" : "계산값 · 부가세 포함"}</span>
-          <span className={styles.bandTip}><InfoTip icon text={BILL_TIP} label="이번 달 예상 전기요금 설명 보기" /></span>
+          <p className={styles.bandLabel}>{figure.title}</p>
+          <span className={styles.bandPill}>{figure.basis} · 부가세 포함</span>
+          <span className={styles.bandTip}><InfoTip icon text={figure.tip} label={`${figure.title} 설명 보기`} /></span>
         </div>
         <div className={styles.bandNumRow}>
           <span className={styles.bandPrefix}>약</span>
-          <span className={styles.bandNumber}>{about(b.total)}</span>
+          <span className={styles.bandNumber}>{about(figure.total)}</span>
           <span className={styles.bandUnit}>원</span>
         </div>
       </div>
       <div className={styles.bandSide}>
-        <Rows {...props} className={styles.bandRows} />
-        {b.save30 > 0 ? <div className={styles.callout}>30kWh 줄이면 월 약 {about(b.save30)}원 덜 나와요</div> : null}
+        <Rows rows={figure.rows} className={styles.bandRows} />
+        {figure.callout ? <div className={styles.callout}>{figure.callout}</div> : null}
       </div>
     </div>
   );
 }
 
 /** 휴대폰: 같은 내용을 카드로(보드 v2-energy-merged-phone) */
-export function PhoneSummary(props: Props) {
-  const { b, estimated } = props;
+export function PhoneSummary({ figure }: { figure: EnergyFigure }) {
   return (
     <section className={`${styles.card} ${styles.phoneOnly}`} aria-labelledby="phone-bill-title">
       <div className={styles.cardHeadRow}>
         <span className={styles.cardTitleRow}>
-          <h2 id="phone-bill-title" className={styles.cardTitle}>이번 달 예상 전기요금</h2>
-          <InfoTip icon text={BILL_TIP} label="이번 달 예상 전기요금 설명 보기" />
+          <h2 id="phone-bill-title" className={styles.cardTitle}>{figure.title}</h2>
+          <InfoTip icon text={figure.tip} label={`${figure.title} 설명 보기`} />
         </span>
         <Link href="/my/home" className={styles.arrowLink}><span>내 집에서 입력</span></Link>
       </div>
-      <span className={styles.greyPill}>{estimated ? "추정값 (부가세 포함)" : "계산값 (부가세 포함)"}</span>
+      <span className={styles.greyPill}>{figure.basis} (부가세 포함)</span>
       <div className={styles.phoneNumRow}>
         <span className={styles.phonePrefix}>약</span>
-        <span className={styles.phoneNumber}>{about(b.total)}</span>
+        <span className={styles.phoneNumber}>{about(figure.total)}</span>
         <span className={styles.phoneUnit}>원</span>
       </div>
-      <Rows {...props} className={styles.kvRows} />
-      {b.save30 > 0 ? <div className={styles.callout}>30kWh 줄이면 월 약 {about(b.save30)}원 덜 나와요</div> : null}
+      <Rows rows={figure.rows} className={styles.kvRows} />
+      {figure.callout ? <div className={styles.callout}>{figure.callout}</div> : null}
     </section>
   );
 }

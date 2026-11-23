@@ -85,7 +85,7 @@ DB 변경(0010, ERD 변경 없음): 표 2개와 RLS(본인 행 읽기·쓰기, �
 | 화면 ID | 화면 | 파일·영역 |
 |---|---|---|
 | MY_030200_TB | 내 집 | app/(main)/my/home/page.tsx, 내 정보 탭에 "내 집" 추가 |
-| MY_030201_MD | 실내 온습도 입력 | app/(main)/my/home/measurement-dialog.tsx |
+| MY_030201_MD | 실내 온습도 입력 | app/(main)/my/home/measurement-fields.tsx (2026-11-23 창 대신 내 집 설정 묶음 안 칸) |
 | IC_020000_PG | 사건 목록 | 종류 배지 "습도·결로 위험", 한 줄 "MM-DD HH시 창 결로 위험" |
 | IC_020100_PG | 사건 상세 | 습도 사건 칸(측정값·예보·추정값), 대응 계획 |
 | IC_020101_MD, IC_020102_MD | 승인·거절 | 기존 그대로 |

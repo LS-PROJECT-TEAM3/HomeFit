@@ -77,6 +77,8 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
       <input type="hidden" name="next" value={next} />
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
       {state.saved ? <SavedNotice /> : null}
+      {/* 사용자 요청(2026-11-23): "* 필수 입력"은 아래 버튼 줄 대신 맨 위에 */}
+      <p className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</p>
 
       {/* 사용자 요청(2026-11-23): 캔버스 흐름1 s2 보드대로 지역 / 공급 유형 / 대상 / 기본 조건 네 묶음. 여러 개 고르기는 "전체 선택" + 체크 칩 */}
       <Fold title="지역" mark="required" status={filledStatus([sidoCode, values.sigunguCode])} open={expand || Boolean(errors.sidoCode || errors.sigunguCode)}>
@@ -138,7 +140,6 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
         </div>
       ) : (
         <div className={styles.actions}>
-          <span className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</span>
           <button type="reset" className={styles.assistive}>취소</button>
           <button type="submit" className={styles.primary} disabled={pending}>
             {pending ? "저장 중…" : submitLabel}
