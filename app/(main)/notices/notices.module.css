@@ -162,20 +162,6 @@
 .switchSmall .knob { width: 18px; height: 18px; }
 .switchSmall.switchOn .knob { left: 19px; }
 
-.tip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-full);
-  background: var(--background-normal-normal);
-  color: var(--label-neutral);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: help;
-}
 
 .chips {
   display: grid;
@@ -851,7 +837,6 @@ select.popInput {
 .segment:focus-visible,
 .conditionToggle:focus-visible,
 .switch:focus-visible,
-.tip:focus-visible,
 .chip:focus-visible,
 .reset:focus-visible,
 .popSubmit:focus-visible,

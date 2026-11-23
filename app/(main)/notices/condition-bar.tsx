@@ -18,7 +18,6 @@ type ChipKey = "region" | "types" | "rent" | "age" | "targets";
 type Props = { condition: PolicyCondition; chips: Chips; fields: readonly ChipKey[]; typeCounts?: Record<string, number>; targetCounts?: Record<TargetGroup, number> };
 
 const FIXED_KEY = "homefit:condition-fixed";
-const FIXED_TIP = "켜면 여기서 바꾼 조건이 설정의 공고/정책 조건에도 저장돼요. 끄면 지금 잠깐 확인할 때만 쓰고, 이 탭을 나갔다 다시 들어오면 저장된 조건으로 돌아와요.";
 const LABELS: Record<ChipKey, string> = { region: "지역", types: "공급 유형", rent: "월 임대료", age: "나이", targets: "대상" };
 
 // 조건 고정은 이 기기의 편의 설정이라 브라우저에 둔다(기본 켜짐, 저장소를 못 쓰면 켜짐)
@@ -220,7 +219,6 @@ export function ConditionBar({ condition, chips, fields, typeCounts = {}, target
     <span className={styles.fixedRow}>
       <Switch on={fixed} onChange={() => writeFixed(!fixed)} />
       <span className={styles.fixedLabel}>조건 고정</span>
-      <span className={styles.tip} role="img" aria-label={FIXED_TIP} title={FIXED_TIP} tabIndex={0}>i</span>
     </span>
   );
   return (
