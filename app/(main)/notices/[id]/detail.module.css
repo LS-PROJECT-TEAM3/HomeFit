@@ -41,6 +41,9 @@
   font-size: 16px;
 }
 
+/* spec 023: 관심 없음 취소 · 팔로우로 바꾸기 */
+.bannerActions { display: flex; flex-wrap: wrap; gap: 0 24px; }
+
 .bannerAction {
   min-height: 44px;
   padding: 0;

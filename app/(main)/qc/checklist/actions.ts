@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { parseChecklistForm } from "@/incident/move-in-checklist";
+import { parseChecklistForm, toStored } from "@/incident/move-in-checklist";
+import type { Json } from "@/lib/supabase/database.types";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 
 export type ChecklistSaveState = { error?: string; savedAt?: string };
@@ -12,12 +13,13 @@ export async function saveMoveInChecklist(_prev: ChecklistSaveState, formData: F
   const userId = await currentUserId();
   if (!userId) redirect("/login");
   const homeId = String(formData.get("homeId") ?? "");
-  const parsed = parseChecklistForm({ checked: formData.getAll("checked").map(String), note: String(formData.get("note") ?? "") });
+  // spec 024: 화면이 체크·항목 메모·내 항목을 저장 모양 JSON 하나로 보낸다. 서버에서 다시 검사한다(E1~E5)
+  const parsed = parseChecklistForm({ checklist: String(formData.get("checklist") ?? ""), note: String(formData.get("note") ?? "") });
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("interest_homes")
-    .update({ move_in_checklist: parsed.checklist, move_in_note: parsed.note, updated_at: new Date().toISOString() })
+    .update({ move_in_checklist: toStored(parsed.checklist) as Json, move_in_note: parsed.note, updated_at: new Date().toISOString() })
     .eq("id", homeId)
     .eq("user_id", userId)
     .select("id");

@@ -1,0 +1,12 @@
+/* spec 025 3단계 리뷰: "이번 달(고지서 달)"과 "가장 많음"이 한 달에 같이 붙을 때. energy.module.css가 이미 길어 여기에 둔다 */
+.tags { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+
+/* 휴대폰 가로 막대: 글자는 막대 아래 줄로(막대 길이가 다른 달과 같은 폭에서 비교되게) */
+.hbarTags { grid-column: 2 / -1; justify-content: flex-start; }
+.hbarTags:empty { display: none; }
+
+/* PC 세로 막대: 좁은 열에서 두 글자는 위아래로 쌓고 줄 높이를 늘린다(옆 열로 넘치지 않게) */
+@media (min-width: 960px) {
+  .tags { flex-direction: column; align-items: center; }
+  .tagRow.tagRow { height: auto; min-height: 26px; }
+}
