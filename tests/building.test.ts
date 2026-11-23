@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseBuildingQuery, parseBuildingTitles, umdFromResponse } from "@/watch/building";
+import { parseBuildingQuery, parseBuildingTitles, umdFromResponse, yearsSinceApproval } from "@/watch/building";
 import sample from "@/watch/fixtures/building-sample.json";
 
 // spec 004 v0.4 FR-008, PRD v1.8 FR-34: 건축HUB 건축물대장 표제부 조회. 주소는 저장하지 않는다
@@ -42,5 +42,17 @@ describe("umdFromResponse", () => {
       { region_cd: "4182025021", umd_cd: "250", ri_cd: "21", locallow_nm: "어느리" },
     ] }] };
     expect(umdFromResponse(json)).toEqual([{ code: "10300", name: "태평로1가" }]);
+  });
+});
+
+// spec 022 FR-011(집 점검 건축물 정보 보드): "준공 후 N년 지났어요". 만 나이처럼 날짜가 지나야 한 해
+describe("yearsSinceApproval", () => {
+  it("사용승인일부터 오늘까지 만 년수", () => {
+    expect(yearsSinceApproval("2009-06-12", "2026-11-21")).toBe(17);
+    expect(yearsSinceApproval("2009-12-01", "2026-11-21")).toBe(16);
+    expect(yearsSinceApproval("2026-01-01", "2026-11-21")).toBe(0);
+  });
+  it("날짜가 없으면 null", () => {
+    expect(yearsSinceApproval(null, "2026-11-21")).toBe(null);
   });
 });

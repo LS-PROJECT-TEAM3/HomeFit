@@ -35,7 +35,7 @@
 | 용어·결정 기록 | `domain-modeling` | GLOSSARY.md, docs/adr/ |
 | 큰 변경 검토 | `code-review`, 정리는 `simplify` | |
 | 앱 실행해 확인 | `run` | |
-| 디자인 방향 정하기 | `design-styles`, `ui-ux-pro-max` | CLAUDE.md "디자인" 절 또는 plan |
+| 디자인 방향 정하기 | `ui-ux-pro-max`, `frontend-design` (`design-styles`는 있는 컴퓨터에서만) | CLAUDE.md "디자인" 절 또는 plan |
 | 긴 한국어 문구 다듬기 | `humanize-scan` → `humanize-korean` | |
 | hook·권한·설정 | `update-config` | |
 | 위 표에 맞는 스킬이 없음 | **없음** — 사용자에게 알리고, 스킬을 만들지는 사용자가 정한다 | |
@@ -63,9 +63,9 @@
 이 시점에만 부른다. 그 밖에서 자동으로 걸려도 쓰지 않는다. 사용자가 이름을 대면 언제든 쓴다.
 | 시점 | 스킬 | 쓰는 법 |
 |---|---|---|
-| 디자인 인터뷰 | `ui-ux-pro-max`(`--design-system`), `design-styles` | 근거를 뽑고 후보 2~3개를 보여 준다. 고른 토큰을 CLAUDE.md "디자인" 절(하네스 없으면 plan)에 옮기면 이후에는 그것만 따른다 |
+| 디자인 인터뷰 | `ui-ux-pro-max`(`--design-system`), `frontend-design`(분위기·글꼴 방향), `design-styles`(있는 컴퓨터에서만) | 근거를 뽑고 후보 2~3개를 보여 준다. 고른 토큰을 CLAUDE.md "디자인" 절(하네스 없으면 plan)에 옮기면 이후에는 그것만 따른다 |
 | plan 작성 | React/Next면 `react-best-practices`, `composition-patterns` | 구조·파일 결정의 근거로만 쓴다 |
-| 화면 구현 | `ui-ux-pro-max`(보조 검색), React면 `react-best-practices`, 전환 애니메이션이 plan에 있을 때만 `react-view-transitions` | 정해진 디자인 규칙이 우선 |
+| 화면 구현 | 새 화면·크게 바꾸는 화면은 `frontend-design`(배치·위계·세부 다듬기), `ui-ux-pro-max`(보조 검색, 스택 `nextjs`), React면 `react-best-practices`, 전환 애니메이션이 plan에 있을 때만 `react-view-transitions` | 정해진 디자인 규칙이 우선 |
 | 구현 중 단순화 | `ponytail` (사용자가 켤 때만, lite 권장) | 출처·Q번호 주석은 지우지 않는다. 승인된 FR·SC를 줄이지 않고 제안만 한다 |
 | 단계 끝 QA 직전 | `ponytail-review` | 고칠 것은 `harness-qa` B에서 처리 |
 | 화면 QA | `web-design-guidelines`, `ui-ux-pro-max` 납품 전 체크리스트 | 디자인 기본선 C 항목의 증거 |

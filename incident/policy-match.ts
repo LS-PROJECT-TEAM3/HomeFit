@@ -1,3 +1,4 @@
+import { TARGET_GROUPS, TARGET_WORDS, type TargetGroup } from "@/incident/match";
 import type { Policy } from "@/watch/youth-policy";
 
 /** 정책을 거르는 데 쓰는 조건 칸만. ERD policy_conditions */
@@ -21,6 +22,25 @@ export function policyKinds(policy: Pick<Policy, "title" | "supplyType" | "keywo
   if (middle.includes("주택 및 거주지")) found.add("housing");
   if (middle.includes("기숙사")) found.add("dormitory");
   return POLICY_KINDS.filter((kind) => found.has(kind));
+}
+
+// spec 022(v2-s3b-filter-pc): 대상 칩. 공고와 같은 대상 낱말(GLOSSARY 대상)을 정책 글에서 찾는다. 자격 판정이 아니라 목록 거르기다
+function policyText(policy: Pick<Policy, "title" | "keywords" | "extraQualification">): string {
+  return [policy.title, ...(policy.keywords ?? []), policy.extraQualification ?? ""].join(" ");
+}
+
+/** 대상을 고르지 않으면 모두 맞음. 고르면 그 대상 낱말이 하나라도 있는 정책만 */
+export function matchesPolicyTargets(policy: Pick<Policy, "title" | "keywords" | "extraQualification">, groups: readonly TargetGroup[]): boolean {
+  if (groups.length === 0) return true;
+  const text = policyText(policy);
+  return groups.some((group) => TARGET_WORDS[group].some((word) => text.includes(word)));
+}
+
+/** 대상 칸의 "N건" */
+export function policyTargetCounts(policies: readonly Pick<Policy, "title" | "keywords" | "extraQualification">[]): Record<TargetGroup, number> {
+  const counts = Object.fromEntries(TARGET_GROUPS.map((g) => [g, 0])) as Record<TargetGroup, number>;
+  for (const policy of policies) for (const group of TARGET_GROUPS) if (matchesPolicyTargets(policy, [group])) counts[group] += 1;
+  return counts;
 }
 
 // spec 006 FR-003: 지역 목록에 내 시군구가 있으면 맞음. 내 시군구가 없으면 시도만 본다. 목록이 비면 전국(E4)

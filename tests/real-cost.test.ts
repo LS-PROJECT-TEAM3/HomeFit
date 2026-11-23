@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareRealCosts, electricityBill, noticeRentDelta, realCost } from "@/incident/real-cost";
+import { compareRealCosts, electricityBill, monthlyTransit, noticeRentDelta, realCost } from "@/incident/real-cost";
 
 // spec 009 FR-003~006, 경계 E1~E7
 describe("electricityBill (한전 주택용 저압, 부가 요금 제외)", () => {
@@ -83,5 +83,16 @@ describe("realCost 추정 근거", () => {
   });
   it("입력값이면 근거 없음", () => {
     expect(realCost({ ...base, energyCost: 30_000, estimatedKwh: 250, estimateBasis: "kepco" }, 11).energy.basis).toBeUndefined();
+  });
+});
+
+// spec 022 FR-011: 등록 창 "한 달 교통비 계산"(realCost와 같은 규칙, E6 기본값)
+describe("monthlyTransit", () => {
+  it("편도 × 하루 횟수 × 출근 일수, 비면 2번·22일", () => {
+    expect(monthlyTransit(1600, 2, 22)).toBe(70400);
+    expect(monthlyTransit(1500, null, null)).toBe(66000);
+  });
+  it("편도 요금이 없으면 null", () => {
+    expect(monthlyTransit(null, 2, 22)).toBe(null);
   });
 });

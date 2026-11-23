@@ -6,7 +6,7 @@ import { HOUSING_LABELS, type HousingType } from "@/incident/home-form";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 import { fetchSigunguList } from "@/watch/region.server";
 import { AreaForm, DeleteAreaButton } from "./area-form";
-import styles from "../my.module.css";
+import { Fold } from "@/app/_components/fold";
 import local from "./areas.module.css";
 
 export const metadata = { title: "관심 지역 | HomeFit AI" };
@@ -43,7 +43,7 @@ async function AreaList() {
           <li key={row.id} className={local.item}>
             <div>
               <p className={local.text}><strong>{label}</strong></p>
-              <p className={local.meta}>{CONTRACT_LABELS[row.contract_type] ?? row.contract_type} · 기준 {Number(row.target_area_m2)}㎡(±20%)</p>
+              <p className={local.meta}>{CONTRACT_LABELS[row.contract_type] ?? row.contract_type} / 기준 {Number(row.target_area_m2)}㎡(±20%)</p>
             </div>
             <DeleteAreaButton id={row.id} label={label} />
           </li>
@@ -56,14 +56,17 @@ async function AreaList() {
 // IA MY_030300_TB 관심 지역 (spec 008 FR-001, PRD FR-05). 여러 개 등록 가능
 export default function AreasPage() {
   return (
-    <section className={styles.section} aria-labelledby="areas-title">
-      <h2 id="areas-title">관심 지역</h2>
-      <p className={local.meta}>집을 구하는 지역을 넣어 두면, 같은 유형·면적·계약 형태의 최근 3개월 실거래 중간값이 지난번보다 10% 이상 바뀔 때 알려 드립니다.</p>
-      <Suspense fallback={<p role="status">불러오는 중…</p>}>
-        <AreaList />
-      </Suspense>
-      <h3>관심 지역 추가</h3>
-      <AreaForm />
-    </section>
+    // spec 022(v2-set-region-pc): 바깥 카드 없이 "관심 지역" 칸(지금 지역과 빼기)과 "관심 지역 추가" 칸
+    <>
+      <Fold title="관심 지역" status="시세가 바뀌면 이 지역 기준으로 알려 드려요" open>
+        <p className={local.meta}>같은 유형/면적/계약 형태의 최근 3개월 실거래 중간값이 지난번보다 10% 이상 바뀌면 알려 드립니다.</p>
+        <Suspense fallback={<p role="status">불러오는 중…</p>}>
+          <AreaList />
+        </Suspense>
+      </Fold>
+      <Fold title="관심 지역 추가" open>
+        <AreaForm />
+      </Fold>
+    </>
   );
 }

@@ -66,3 +66,12 @@ export function environmentLine(input: { state: "none" | "stale" | "fresh"; last
   if (!input.lastCheckAt) return "아직 예보를 확인하지 않았습니다";
   return `앞으로 48시간 결로 위험 없음 · 예보 확인 ${input.lastCheckAt}`;
 }
+
+const WEEKDAYS = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"] as const;
+
+/** spec 022 FR-011: 홈 다가오는 일정 날짜 칸. "2026-12-05" → { date: "12.05", weekday: "토요일" } */
+export function scheduleDateParts(dueDate: string | null): { date: string; weekday: string } | null {
+  if (!dueDate) return null;
+  const [, month, day] = dueDate.split("-");
+  return { date: `${month}.${day}`, weekday: WEEKDAYS[new Date(utcDay(dueDate)).getUTCDay()] };
+}

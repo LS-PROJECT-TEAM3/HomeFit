@@ -1,12 +1,11 @@
-import { SectionTabs } from "@/app/_components/section-tabs";
+import { SideTabsPage } from "@/app/_components/side-tabs-page";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { LoadError, Loading } from "@/app/_components/states";
 import { requireAdmin } from "./guard";
-import styles from "@/app/_components/hub.module.css";
 
 const TABS = [
-  ["/admin", "개요"], ["/admin/users", "회원"], ["/admin/watch", "수집 현황·오류"], ["/admin/incidents", "사건 현황"],
+  ["/admin", "개요"], ["/admin/users", "회원"], ["/admin/watch", "수집 현황/오류"], ["/admin/incidents", "사건 현황"],
   ["/admin/flow", "흐름 화면"], ["/admin/sim", "시뮬레이터"], ["/admin/eval", "채점 결과"], ["/admin/chat", "위키 챗봇"],
 ] as const;
 
@@ -22,20 +21,13 @@ async function Gate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// IA AD_070000_PG 관리자 (spec 004 뼈대). 보조 네비게이션은 위쪽 탭 (IA 네비게이션 모델)
+// IA AD_070000_PG 관리자 (spec 004 뼈대). spec 022 FR-014(캔버스 v2-admin-*, H 4-7): 설정처럼 왼쪽 세로 탭, 휴대폰은 가운데 제목 + 3칸 밑줄 탭
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>관리자</h1>
-      {/* 회원 상세(/admin/users/[id])처럼 주소에 값이 있는 화면은 탭이 주소를 읽을 때까지 기다려야 한다(Cache Components 빌드 오류) */}
-      <Suspense fallback={<div className={styles.tabsFallback} aria-hidden="true" />}>
-        <SectionTabs label="관리자 메뉴" tabs={TABS.map(([href, label]) => ({ href, label }))} />
+    <SideTabsPage title="관리자" label="관리자 메뉴" columns={3} exactFirst centerPhoneHead tabs={TABS.map(([href, label]) => ({ href, label }))}>
+      <Suspense fallback={<Loading />}>
+        <Gate>{children}</Gate>
       </Suspense>
-      <div>
-        <Suspense fallback={<Loading />}>
-          <Gate>{children}</Gate>
-        </Suspense>
-      </div>
-    </main>
+    </SideTabsPage>
   );
 }

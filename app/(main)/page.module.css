@@ -1,205 +1,241 @@
-/* 홈 대시보드: 벤토 카드 (CLAUDE.md 디자인, spec 004 v0.2 FR-006). 색·간격은 app/tokens.css 변수만 */
-.main {
-  max-width: 1120px;
+/* spec 022 홈. PC는 캔버스 v2-home-pc, 휴대폰은 v2-s5-alert-phone·v2-home-phone 값. 색은 app/tokens.css 변수만 */
+
+.content {
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-3) var(--space-1);
-}
-
-.title {
-  margin: 0 0 var(--space-2);
-  font-size: var(--font-size-xl);
-}
-
-/* 휴대폰 1열, 태블릿 2열, PC 4열. 큰 카드는 2칸 */
-.bento {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-1);
-}
-
-@media (min-width: 640px) {
-  .bento {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1100px) {
-  .bento {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .span2 {
-    grid-column: span 2;
-  }
-}
-
-.card {
+  padding: 20px 20px 40px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-half);
-  min-width: 0;
-  padding: var(--space-2);
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  color: var(--color-text);
-  text-decoration: none;
-  transition: border-color var(--transition-hover);
+  gap: 16px;
 }
 
-a.card:hover {
-  border-color: var(--color-primary);
-}
-
-.callout {
-  border-color: var(--color-accent);
-}
-
-.cardLabel {
-  margin: 0;
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-muted-text);
-}
-
-.headline {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-}
-
-.number {
-  white-space: nowrap;
-  font-size: var(--font-size-number);
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--color-primary);
-}
-
-.muted {
-  margin: 0;
-  color: var(--color-muted-text);
-}
-
-.list {
-  margin: 0;
-  padding-left: 1.2em;
-  display: grid;
-  gap: var(--space-half);
-}
-
-.facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-half) var(--space-1);
-  margin: 0;
-}
-
-.facts dt {
-  font-size: var(--font-size-sm);
-  color: var(--color-muted-text);
-}
-
-.facts dd {
-  margin: 0;
-  font-weight: 600;
-}
-
-/* 월세·관리비 막대: 색과 함께 아래 글자(■ 월세 …)로도 구분 */
-.bar {
+.topRow,
+.side {
   display: flex;
-  height: 12px;
-  overflow: hidden;
-  border-radius: var(--radius-pill);
-  background: var(--color-muted-bg);
+  flex-direction: column;
+  gap: 16px;
 }
 
-.barRent,
-.keyRent {
-  background: var(--color-primary);
-  color: var(--color-primary);
+.mainCol {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.barFee,
-.keyFee {
-  background: var(--color-accent);
-  color: var(--color-accent);
+.pcOnly { display: none; }
+
+/* 휴대폰 머리말(기본형) */
+.phoneHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 8px;
 }
 
-.keyRent,
-.keyFee {
-  background: none;
+.phoneTitle {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
 }
 
-.envRow {
+.phoneSummary {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
-.riskChip {
-  align-self: flex-start;
-  padding: 4px 12px;
-  border: 1px solid var(--color-danger);
-  border-radius: var(--radius-pill);
-  background: var(--color-danger-bg);
-  color: var(--color-danger-text);
-  font-weight: 600;
-  text-decoration: none;
+.phoneSummary p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--label-neutral);
 }
 
-.pair {
-  display: flex;
-  gap: var(--space-2);
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-.cta {
-  align-self: flex-start;
+.editLink {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 0 var(--space-1);
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.editBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line-normal-alternative);
   border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-weight: 600;
-  text-decoration: none;
+  background: var(--background-elevated-normal);
+  color: var(--label-neutral);
 }
 
-.cta {
-  transition: background var(--transition-hover);
-}
+/* 카드마다 안쪽 여백·제목 크기 (Card의 CSS 변수) */
+.todoCard { --card-pad: 24px 20px 12px; --card-gap: 20px; --card-title-size: 22px; } /* v2-home-phone 기준(알림 있는 보드는 24px) */
+.costCard { --card-pad: 28px 20px; --card-gap: 20px; }
+.noticeCard { --card-pad: 24px 20px; --card-gap: 0; }
+.statusCard { --card-pad: 24px 20px; --card-title-size: 18px; }
 
-.cta:hover {
-  background: var(--color-primary-hover);
-}
-
-.timeline {
-  display: grid;
-  gap: var(--space-half);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.timeline li {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2px var(--space-half);
-  padding-left: var(--space-half);
-  border-left: 3px solid var(--color-border);
-}
-
-.kind {
-  font-size: var(--font-size-sm);
+/* DS heading-8 */
+.sectionHead {
+  margin: 0 0 2px;
+  font-family: var(--font-serif);
+  font-size: 17px;
   font-weight: 700;
-  color: var(--color-muted-text);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
-.timelineMeta {
-  grid-column: 1 / -1;
-  font-size: var(--font-size-sm);
-  color: var(--color-muted-text);
+.sectionCount {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--label-neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+.emptyLine {
+  margin: 0;
+  padding-bottom: 16px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.costTotal {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.costPending {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--label-neutral);
+}
+
+.costHelp {
+  margin: 4px 0 24px;
+  font-size: 16px;
+  color: var(--label-neutral);
+}
+
+/* DS Button(Primary, Medium) */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: var(--radius-control);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.button:active { background: var(--primary-strong); }
+
+.noticeTitle {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.noticeInline {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--label-neutral);
+}
+
+.noticeCount {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.noticeNote {
+  margin: 0;
+  font-size: 15px;
+  color: var(--label-neutral);
+}
+
+.noticeLink { margin-top: 12px; }
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* PC: 포스터 띠 아래 본문 (v2-home-pc) */
+@media (min-width: 960px) {
+  /* 카드 영역을 한 화면 높이 이상으로 잡아야 스크롤해 옮겼을 때 띠가 위에 남지 않는다 */
+  .snapArea {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .content {
+    padding: 40px var(--spacing-screen-padding-pc) 48px;
+    gap: var(--spacing-section-gap);
+  }
+
+  .phoneHeader,
+  .phoneOnly { display: none; }
+
+  .pcOnly { display: block; }
+
+  .topRow {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--spacing-section-gap);
+  }
+
+  .mainCol { flex: 1; }
+
+  .mainCol > section { flex: 1; }
+
+  .side {
+    width: 360px;
+    flex: none;
+    gap: var(--spacing-section-gap);
+  }
+
+  .todoCard { --card-pad: 36px 40px 28px; --card-gap: 36px; --card-title-size: 24px; }
+  .costCard { --card-pad: 28px 32px; --card-gap: 16px; }
+  .noticeCard { --card-pad: 28px 32px; --card-gap: 16px; }
+  .statusCard { --card-pad: 32px 40px; --card-title-size: 20px; }
+
+  .costTotal { margin-bottom: 8px; line-height: 1.2; }
+
+  .noticeTitle { font-family: var(--font-serif); font-size: 20px; line-height: 1.3; letter-spacing: -0.01em; }
+
+  .noticeNote { margin-top: 8px; }
+
+  .noticeLink { margin-top: 14px; }
+
+  .statusGrid { grid-template-columns: repeat(4, 1fr); }
 }

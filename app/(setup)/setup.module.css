@@ -1,0 +1,57 @@
+/* spec 022 첫 설정. PC 값은 캔버스 v2-s1-open-pc·v2-s2-open-pc(왼쪽 520px 안내 + 오른쪽 입력), 휴대폰은 v2-s1-phone. 색은 tokens 변수만 */
+.shell { min-height: 100dvh; display: flex; flex-direction: column; background: var(--background-normal-normal); }
+
+.head {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line-normal-neutral);
+  background: var(--background-normal-normal);
+}
+
+.logo { font-family: var(--font-logo); font-size: 24px; font-weight: 500; letter-spacing: 0.02em; color: var(--label-normal); text-decoration: none; }
+
+.body { flex: 1; display: flex; flex-direction: column; }
+
+.aside { display: flex; flex-direction: column; gap: 20px; padding: 28px 20px; background: var(--background-elevated-normal); border-bottom: 1px solid var(--line-normal-neutral); }
+
+.step { margin: 0; font-family: var(--font-logo); font-size: 20px; font-weight: 500; letter-spacing: 0.08em; color: var(--primary-normal); font-variant-numeric: tabular-nums; }
+.title { margin: 0; font-family: var(--font-serif); font-size: 28px; font-weight: 500; line-height: 1.4; letter-spacing: -0.01em; }
+.lead { margin: 0; font-size: 15px; }
+
+.steps { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.stepItem { display: flex; align-items: flex-start; gap: 14px; }
+.stepNum { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; border: 1px solid var(--line-solid-normal); border-radius: 50%; background: var(--background-elevated-normal); color: var(--label-alternative); font-size: 15px; font-weight: 700; }
+.stepDone { border-color: var(--primary-normal); color: var(--primary-normal); }
+.stepOn { border-color: var(--primary-normal); background: var(--primary-normal); color: var(--static-white); }
+.stepText { display: flex; flex-direction: column; padding-top: 3px; }
+.stepName { font-size: 17px; font-weight: 500; color: var(--label-alternative); }
+.stepItem[aria-current] .stepName { font-weight: 700; color: var(--label-normal); }
+.stepSub { font-size: 14px; color: var(--label-alternative); }
+.stepLine { width: 1px; height: 28px; margin-left: 16px; background: var(--line-solid-normal); }
+
+.progress { display: flex; align-items: center; gap: 12px; }
+.bars { display: flex; gap: 4px; }
+.bar { width: 12px; height: 6px; border-radius: 2px; background: var(--status-positive-tint); }
+.barOn { background: var(--primary-normal); }
+.progressText { white-space: nowrap; font-size: 14px; color: var(--label-neutral); font-variant-numeric: tabular-nums; }
+
+.skip { display: flex; flex-direction: column; gap: 4px; margin-top: auto; font-size: 14px; color: var(--label-neutral); }
+.skipLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--label-normal); font-size: 15px; font-weight: 600; text-decoration: underline; text-underline-offset: 5px; }
+.skipLink:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+
+.main { flex: 1; min-width: 0; padding: 24px 20px 0; }
+.formWrap { max-width: 720px; margin: 0 auto; }
+.note { display: flex; gap: 8px; margin: 16px 0 0; font-size: 14px; color: var(--label-neutral); }
+
+@media (min-width: 960px) {
+  .head { height: 68px; padding: 0 var(--spacing-screen-padding-pc); }
+  .logo { font-size: 26px; }
+  .body { flex-direction: row; align-items: stretch; min-height: calc(100dvh - 68px); }
+  .aside { position: sticky; top: 0; align-self: flex-start; width: 520px; flex: none; min-height: calc(100dvh - 68px); gap: 28px; padding: 64px 64px 96px; border-right: 1px solid var(--line-normal-neutral); border-bottom: 0; }
+  .step { font-size: 22px; }
+  .bar { width: 16px; }
+  .title { font-size: 38px; }
+  .main { padding: 48px 96px 0; }
+}

@@ -15,10 +15,11 @@ async function turnOffThisDevice(): Promise<void> {
   await subscription.unsubscribe();
 }
 
-export function SignOutButton() {
+/** className: 위쪽 메뉴의 이름 메뉴 안에서는 메뉴 줄 모양으로 쓴다 (spec 022 FR-010) */
+export function SignOutButton({ className = styles.primary }: { className?: string }) {
   const [busy, startTransition] = useTransition();
   return (
-    <button type="button" className={styles.primary} disabled={busy}
+    <button type="button" className={className} disabled={busy}
       onClick={() => startTransition(async () => {
         try {
           await turnOffThisDevice();

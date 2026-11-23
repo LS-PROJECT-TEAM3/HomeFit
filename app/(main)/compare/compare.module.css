@@ -1,0 +1,797 @@
+/* spec 022 집 비교(기본형). 값은 캔버스 v2-compare-* 보드 그대로(PC 1440px, 휴대폰 375px). 색은 app/tokens.css 변수만 */
+
+.main {
+  width: 100%;
+  max-width: 1240px; /* 안쪽 1128px + 좌우 56px */
+  margin: 0 auto;
+  padding: 36px 20px 72px;
+}
+
+/* 첫 화면: 목록 제목이 창 바로 아래(8px)에 오도록. 창 높이 - 위쪽 메뉴 60px - 위 여백 36px - 목록 위 여백 48px + 8px.
+   이렇게 빈 공간을 최소로 둬야 스크롤해 비교 현황으로 옮겼을 때 목록까지 한 화면에 들어온다 */
+.firstScreen {
+  min-height: calc(100vh - 136px);
+  min-height: calc(100dvh - 136px);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.25;
+}
+
+.titleLine {
+  display: block;
+  width: 1px;
+  height: 40px;
+  margin: 20px auto 0;
+  background: var(--label-normal);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* 비교 현황 */
+.tray {
+  margin-top: 32px;
+  padding: 16px 16px 20px;
+  background: var(--background-accent-soft);
+}
+
+.trayHead {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.trayGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.trayCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: var(--background-elevated-normal);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardNames {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trayName {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+.baseBadge {
+  padding: 2px 8px;
+  border-radius: var(--radius-2);
+  background: var(--label-normal);
+  color: var(--static-white);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.meta {
+  font-size: 15px;
+  color: var(--label-neutral);
+}
+
+.removeButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -10px -12px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--label-normal);
+  cursor: pointer;
+}
+
+.totalBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trayTotal {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.listTotal {
+  font-size: 22px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.totalUnit {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.listTotal .totalUnit { font-size: 15px; }
+
+.noTotal {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--status-cautionary);
+  white-space: nowrap;
+}
+
+.diff {
+  min-height: 22px;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.diff_lower { color: var(--primary-normal); }
+.diff_higher { color: var(--status-cautionary); }
+.diff_same { color: var(--label-neutral); }
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: -6px -10px;
+  padding: 6px 10px;
+}
+
+.rowBest { background: var(--status-positive-tint); }
+
+.rowKey {
+  font-size: 15px;
+  color: var(--label-neutral);
+}
+
+.rowValue {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--label-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.rowBest .rowValue {
+  font-weight: 700;
+  color: var(--primary-normal);
+}
+
+.rowMissing {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--status-cautionary);
+}
+
+/* 빈 칸: 안의 보이지 않는 카드 틀(.ghost)이 높이를 정하고, 글자는 위에 겹쳐 가운데 */
+.placeholder {
+  position: relative;
+  background: var(--fill-alternative);
+}
+
+.ghost { visibility: hidden; }
+
+.placeholderText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-size: 17px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--label-normal);
+  word-break: keep-all;
+}
+
+/* 관심 주택 목록 */
+.listHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 48px 0 16px;
+}
+
+.listHeadText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.listSub {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--label-neutral);
+}
+
+.notice {
+  margin: 0 0 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--status-cautionary);
+}
+
+.notice:empty { display: none; }
+
+.list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listCard {
+  scroll-margin: 24px; /* 펼쳐 화면이 따라갈 때 창 끝에 붙지 않게 */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: var(--background-elevated-normal);
+}
+
+.listCardOn {
+  background: var(--primary-tint-subtle);
+  box-shadow: inset 0 0 0 2px var(--primary-normal);
+}
+
+.listCard .cardHead { gap: 12px; }
+
+.listName {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+/* 고르기 칸: 보이는 네모는 26px, 누르는 곳은 44px */
+.checkWrap {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -9px -9px 0 0;
+  cursor: pointer;
+}
+
+.checkBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--line-link);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--static-white);
+}
+
+.listCardOn .checkBox {
+  border-color: var(--primary-normal);
+  background: var(--primary-normal);
+}
+
+.checkWrap input:focus-visible + .checkBox,
+.option:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--static-white);
+}
+
+.foldButton {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-normal-alternative);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chevron,
+.chevronUp { display: inline-flex; }
+.chevronUp { transform: rotate(180deg); }
+
+.cardLinks {
+  display: flex;
+  gap: 20px;
+}
+
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* 버튼 */
+.buttonPrimary,
+.buttonAssistive,
+.buttonHero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.buttonPrimary {
+  background: var(--primary-normal);
+  color: var(--static-white);
+}
+
+.buttonPrimary:active { background: var(--primary-strong); }
+.buttonPrimary:disabled { opacity: 0.7; cursor: wait; }
+
+.buttonAssistive {
+  padding: 0 28px;
+  background: var(--background-normal-alternative);
+  color: var(--label-normal);
+}
+
+.buttonHero {
+  min-height: 64px;
+  padding: 0 44px;
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font-size: 19px;
+}
+
+.removeButton:focus-visible,
+.foldButton:focus-visible,
+.textButton:focus-visible,
+.buttonPrimary:focus-visible,
+.buttonAssistive:focus-visible,
+.buttonHero:focus-visible,
+.foldSummary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--static-white);
+}
+
+/* 관심 주택 없음 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px 0 120px;
+  min-height: 420px;
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--label-normal);
+  word-break: keep-all;
+}
+
+.emptyAction { margin-top: 12px; }
+
+/* 등록·고치기 옆 창 */
+.drawer {
+  width: 560px;
+  max-width: 100%;
+  height: 100%;
+  max-height: none;
+  margin: 0 0 0 auto;
+  padding: 40px;
+  border: 0;
+  background: var(--background-normal-normal);
+  color: var(--label-normal);
+  box-shadow: 0 12px 36px var(--shadow-ink-large);
+  overflow-y: auto;
+}
+
+.drawer::backdrop { background: var(--material-dimmer); }
+
+.drawerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.drawerTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.requiredNote {
+  margin: 0;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.required {
+  margin-left: 3px;
+  font-weight: 700;
+  color: var(--status-negative);
+}
+
+.requiredNote .required { margin: 0; }
+
+.formAlert {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--status-negative-tint);
+  color: var(--status-negative);
+  font-weight: 700;
+}
+
+.folds {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fold {
+  border: 1px solid var(--line-normal-neutral);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+}
+
+.foldSummary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 8px 20px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.foldSummary::-webkit-details-marker { display: none; }
+
+.foldTitle {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.badgeOptional {
+  flex: none;
+  padding: 0 6px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-2);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: 0;
+  color: var(--label-neutral);
+}
+
+.foldStatus,
+.foldWarn {
+  margin-left: auto;
+  padding-right: 4px;
+  font-size: 14px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.foldStatus { color: var(--label-alternative); }
+
+.foldWarn {
+  font-weight: 700;
+  color: var(--status-cautionary);
+}
+
+.foldChevron {
+  display: inline-flex;
+  color: var(--label-alternative);
+}
+
+.fold[open] .foldChevron { transform: rotate(180deg); }
+
+.foldBody {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 20px 24px;
+  border-top: 1px solid var(--fill-alternative);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+
+.full { grid-column: 1 / -1; }
+.narrow { max-width: 180px; }
+
+.field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fieldset legend { margin-bottom: 8px; padding: 0; }
+
+.fieldLabel {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.optional {
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--label-neutral);
+}
+
+.inputBox { position: relative; }
+
+.input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.inputBox .input { padding-right: 56px; }
+
+.input::placeholder {
+  color: var(--label-alternative);
+  opacity: 1;
+}
+
+.input[aria-invalid="true"] { border: 2px solid var(--status-negative); }
+
+.input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.unitText {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--label-neutral);
+  pointer-events: none;
+}
+
+.help {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--label-neutral);
+}
+
+.help:empty { display: none; }
+
+.fieldError {
+  margin: 0;
+  font-size: 14px;
+  color: var(--status-negative);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.optionActive {
+  border-color: var(--primary-normal);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font-weight: 700;
+}
+
+.transitSum {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  align-self: end;
+}
+
+.transitLabel {
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.transitLabel strong {
+  font-weight: 700;
+  color: var(--primary-normal);
+}
+
+.transitValue {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.drawerActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* 휴대폰: 옆 창을 화면 가득 */
+@media (max-width: 559px) {
+  .drawer { padding: 24px 20px; }
+  .grid2 { grid-template-columns: 1fr; gap: 20px; }
+}
+
+/* PC (v2-compare-*-pc) */
+@media (min-width: 960px) {
+  .main { padding: 80px 56px 96px; }
+  /* 창 높이 - 위쪽 메뉴 72px - 위 여백 80px - 목록 위 여백 64px + 8px */
+  .firstScreen { min-height: calc(100vh - 208px); min-height: calc(100dvh - 208px); }
+  .title { font-size: 44px; }
+  .titleLine { height: 56px; margin-top: 28px; }
+  .tray { margin-top: 48px; padding: 32px; }
+  .trayHead { margin-bottom: 16px; }
+  .sectionTitle { font-size: 26px; }
+  .trayGrid { grid-template-columns: repeat(var(--tray-columns, 2), minmax(0, 1fr)); gap: 16px; }
+  .trayCard { padding: 28px; gap: 20px; }
+  .placeholderText { padding: 28px; }
+  .trayName { font-size: 22px; }
+  .rowValue { font-size: 17px; }
+  .listHead { margin-top: 64px; }
+  .buttonPrimary { padding: 0 28px; }
+  .list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .listCard { padding: 24px; }
+  .listName { font-size: 20px; }
+}
+
+/* 드롭다운 화살표를 보드처럼 오른쪽 16px 안쪽에(브라우저 기본 화살표는 끝에 붙음) */
+select.input {
+  appearance: none;
+  padding-right: 48px;
+  background-image: var(--icon-chevron-down);
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 20px;
+}

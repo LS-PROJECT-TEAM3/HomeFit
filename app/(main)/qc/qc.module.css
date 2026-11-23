@@ -1,0 +1,881 @@
+/* spec 022 집 점검 본문. 값은 캔버스 v2-qc-* 보드. 색은 app/tokens.css 변수만 */
+/* 스크롤해 내용 시작을 맨 위에 맞췄을 때 내용이 짧아도 아래가 비지 않게 한 화면 높이 */
+.main {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 20px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 960px) {
+  .main {
+    padding: 48px var(--spacing-screen-padding-pc) 96px;
+    gap: 28px;
+  }
+}
+
+/* 공통 카드(DS Card Block) */
+.card {
+  min-width: 0;
+  padding: 24px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.cardTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+/* 결로 위험 (v2-qc-sim-tab-pc) */
+.simGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.resetButton {
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--label-neutral);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+
+.field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.inputBox { position: relative; }
+
+.input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.inputBox .input { padding-right: 48px; }
+
+.unit {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--label-neutral);
+  pointer-events: none;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.levelLabel {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 44px;
+  margin-right: -44px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.levelWord {
+  font-family: var(--font-serif);
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.tone_low { color: var(--primary-normal); }
+.tone_caution { color: var(--status-cautionary); }
+.tone_high { color: var(--status-negative); }
+
+/* 휴대폰은 한 줄에 하나(좁은 칸에 이름 + 설명 버튼이 들어가지 않음), PC는 3칸 */
+.stats {
+  width: 100%;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  text-align: left;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  background: var(--background-normal-normal);
+}
+
+.statLabel {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--label-neutral);
+  white-space: nowrap;
+}
+
+.statValue {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.invalid {
+  margin: 0;
+  color: var(--label-neutral);
+}
+
+.resetButton:focus-visible,
+.input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (min-width: 960px) {
+  .card { padding: 32px 36px; }
+  .simGrid { grid-template-columns: 5fr 6fr; gap: 24px; }
+  .stats { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* 하자/환경 기록 (v2-qc-log-pc) */
+.logGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.logHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  margin-bottom: 14px;
+}
+
+.logTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.subLabel {
+  margin-left: 4px;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.arrowLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--label-normal);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.arrowLink span {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 16px;
+  color: var(--label-normal);
+}
+
+.bigRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.bigValue {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bigUnit {
+  margin-left: 4px;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.bigNote {
+  font-size: 15px;
+  color: var(--label-neutral);
+}
+
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timelineItem {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 22px;
+}
+
+.timelineDot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 6px;
+  border: 2px solid var(--primary-normal);
+  border-radius: var(--radius-full);
+  background: var(--background-elevated-normal);
+}
+
+.timelineLine {
+  position: absolute;
+  top: 18px;
+  bottom: -6px;
+  left: 5px;
+  width: 2px;
+  background: var(--line-normal-normal);
+}
+
+.timelineBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineButton {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0 28px 0 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.timelineMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--label-neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+.kindChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  background: var(--fill-alternative);
+  color: var(--label-normal);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.timelineMemo {
+  font-size: 16px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.timelineArrow {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  display: inline-flex;
+  transform: translateY(-50%);
+  color: var(--label-alternative);
+}
+
+.arrowDown { transform: translateY(-50%) rotate(90deg); }
+.arrowUp { display: inline-flex; transform: rotate(180deg); }
+
+.timelineMore {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.thumb {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border: 1px solid var(--line-normal-normal);
+  border-radius: var(--radius-control);
+}
+
+.moreButton {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  margin: 0 auto;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--label-neutral);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.buttonPrimary,
+.buttonAssistive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.buttonPrimary { background: var(--primary-normal); color: var(--static-white); }
+.buttonPrimary:active { background: var(--primary-strong); }
+.buttonAssistive { background: var(--background-normal-alternative); color: var(--label-normal); }
+
+/* 옆 창(+ 기록 추가) */
+.drawer {
+  width: 560px;
+  max-width: 100%;
+  height: 100%;
+  max-height: none;
+  margin: 0 0 0 auto;
+  padding: 40px;
+  border: 0;
+  background: var(--background-normal-normal);
+  color: var(--label-normal);
+  box-shadow: 0 12px 36px var(--shadow-ink-large);
+  overflow-y: auto;
+}
+
+.drawer::backdrop { background: var(--material-dimmer); }
+
+.drawerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.drawerTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.full { grid-column: 1 / -1; }
+
+.textarea {
+  min-height: 96px;
+  padding: 12px 16px;
+  resize: vertical;
+}
+
+.fileInput { font: inherit; font-size: 15px; }
+
+.fieldError {
+  font-size: 14px;
+  color: var(--status-negative);
+}
+
+.help {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--label-neutral);
+}
+
+.formAlert {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--status-negative-tint);
+  color: var(--status-negative);
+  font-weight: 700;
+}
+
+.drawerActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.timelineButton:focus-visible,
+.moreButton:focus-visible,
+.textButton:focus-visible,
+.buttonPrimary:focus-visible,
+.buttonAssistive:focus-visible,
+.arrowLink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--static-white);
+}
+
+@media (max-width: 559px) {
+  .drawer { padding: 24px 20px; }
+}
+
+@media (min-width: 960px) {
+  .logGrid { grid-template-columns: 5fr 6fr; gap: 24px; }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.arrowPlain { display: inline-flex; }
+
+/* 입주 전 점검 (v2-qc-check-pc) */
+.pickCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pickRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pickNames {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pickName {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.pickPlace {
+  font-size: 15px;
+  color: var(--label-neutral);
+}
+
+.pickButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pickList {
+  overflow: hidden;
+  border: 1px solid var(--line-normal-normal);
+  border-radius: var(--radius-control);
+}
+
+.pickList ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pickItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line-normal-normal);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  text-decoration: none;
+}
+
+.pickList li:first-child .pickItem { border-top: 0; }
+.pickItemOn { background: var(--primary-tint-subtle); }
+.pickItemName { font-size: 17px; font-weight: 700; }
+.pickItemPlace { font-size: 14px; color: var(--label-neutral); }
+
+.pickCount {
+  flex: none;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pickMore {
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.pickMoreButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  color: var(--primary-normal);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.checkForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.checkCount {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--label-neutral);
+}
+
+.checkNumber {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--label-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.checkTotal {
+  font-size: 18px;
+  color: var(--label-neutral);
+}
+
+.checkGrid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.checkItem {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--background-elevated-normal);
+}
+
+.checkNote { grid-column: 1 / -1; }
+
+.checkLabel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.checkBox {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--static-white);
+}
+
+.checkBoxOn {
+  border-color: var(--primary-normal);
+  background: var(--primary-normal);
+}
+
+.checkLabel input:focus-visible + .checkBox {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--static-white);
+}
+
+.checkTitle {
+  flex: 1;
+  min-width: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--label-normal);
+}
+
+.checkQuestion {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--label-neutral);
+  word-break: keep-all;
+}
+
+.saveBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.saveInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 14px;
+  text-align: right;
+  color: var(--label-neutral);
+}
+
+.saveWarn {
+  font-weight: 700;
+  color: var(--status-cautionary);
+}
+
+.pickButton:focus-visible,
+.pickItem:focus-visible,
+.pickMoreButton:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--static-white);
+}
+
+@media (min-width: 960px) {
+  .checkGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* 건축물 정보 (v2-qc-bldg-pc) */
+.required {
+  margin-left: 3px;
+  font-weight: 700;
+  color: var(--status-negative);
+}
+
+.optional {
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--label-neutral);
+}
+
+/* 칸은 위 기준으로 맞춘다(시군구 칸 아래 도움말이 있어도 줄이 어긋나지 않게) */
+.bForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.bSubmit { min-height: 52px; }
+
+.bResultTitle { margin: 0 0 16px; }
+
+.bGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.bCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px;
+  background: var(--background-elevated-normal);
+}
+
+.bName {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+.bAddress {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.bRows { margin: 0; }
+
+.bRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.bRow dt {
+  flex: none;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.bRow dd {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bNote {
+  font-size: 14px; /* FR-008: 14px 미만 쓰지 않음 */
+  color: var(--label-neutral);
+}
+
+@media (min-width: 960px) {
+  .bForm { grid-template-columns: 1fr 1fr 1fr 1fr 0.8fr auto; gap: 12px; }
+  .bSubmit { margin-top: 32px; } /* 이름표 높이(24px + 8px)만큼 내려 입력 칸과 줄을 맞춤 */
+  .bGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+}
+
+/* 드롭다운 화살표를 보드처럼 오른쪽 16px 안쪽에(브라우저 기본 화살표는 끝에 붙음) */
+select.input {
+  appearance: none;
+  padding-right: 48px;
+  background-image: var(--icon-chevron-down);
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 20px;
+}
