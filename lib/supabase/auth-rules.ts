@@ -49,3 +49,13 @@ export function safeNextPath(next: string | null): string {
 export function afterSignInPath(saved: { hasHome: boolean; hasCondition: boolean }): "/onboarding" | "/" {
   return saved.hasHome || saved.hasCondition ? "/" : "/onboarding";
 }
+
+/**
+ * 사용자 요청(2026-11-23, AI 해커톤 제출): 로그인 화면 오른쪽 아래 팝업에 가입 없이 써 볼 일반 계정을 적어 둔다.
+ * 값은 환경변수에 두고(저장소에 남기지 않음) 둘 다 있을 때만 팝업을 켠다. 공개해도 되는 체험 계정만 넣는다
+ */
+export function demoAccount(env: Record<string, string | undefined>): { email: string; password: string } | null {
+  const email = env.DEMO_USER_EMAIL?.trim() ?? "";
+  const password = env.DEMO_USER_PASSWORD ?? "";
+  return email && password ? { email, password } : null;
+}

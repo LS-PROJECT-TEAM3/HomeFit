@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { afterSignInPath, checkEmail, checkNewPassword, routeAccess, safeNextPath } from "@/lib/supabase/auth-rules";
+import { afterSignInPath, checkEmail, checkNewPassword, demoAccount, routeAccess, safeNextPath } from "@/lib/supabase/auth-rules";
 
 // spec 014 FR-001~003, 경계 E1·E4·E5·E7
 describe("routeAccess (주소별 로그인 규칙)", () => {
@@ -68,5 +68,14 @@ describe("afterSignInPath (로그인 뒤 갈 곳)", () => {
     expect(afterSignInPath({ hasHome: false, hasCondition: false })).toBe("/onboarding");
     expect(afterSignInPath({ hasHome: true, hasCondition: false })).toBe("/");
     expect(afterSignInPath({ hasHome: false, hasCondition: true })).toBe("/");
+  });
+});
+
+describe("demoAccount (가입 없이 써 볼 계정 팝업)", () => {
+  it("이메일과 비밀번호가 둘 다 있을 때만 켠다", () => {
+    expect(demoAccount({ DEMO_USER_EMAIL: " demo@example.test ", DEMO_USER_PASSWORD: "pw-123456" })).toEqual({ email: "demo@example.test", password: "pw-123456" });
+    expect(demoAccount({ DEMO_USER_EMAIL: "demo@example.test" })).toBeNull();
+    expect(demoAccount({ DEMO_USER_EMAIL: "  ", DEMO_USER_PASSWORD: "pw-123456" })).toBeNull();
+    expect(demoAccount({})).toBeNull();
   });
 });

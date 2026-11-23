@@ -75,3 +75,28 @@
   .main { flex: 1; display: flex; align-items: center; padding: 64px 96px; }
   .title { font-size: 34px; }
 }
+
+/* 사용자 요청(2026-11-23, AI 해커톤): 오른쪽 아래에 떠 있는 체험 계정 팝업(떠 있는 요소라 그림자를 쓴다) */
+.demo { position: fixed; right: 16px; bottom: 16px; z-index: 10; box-shadow: var(--shadow-floating-small); }
+.demoCard { display: flex; flex-direction: column; gap: 10px; width: min(320px, calc(100vw - 32px)); padding: 16px 16px 18px; border-radius: var(--radius-control); background: var(--background-elevated-normal); }
+.demoHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.demoTitle { margin: 0; font-family: var(--font-serif); font-size: 18px; font-weight: 500; }
+.demoClose { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -10px -10px -10px 0; border: 0; background: transparent; color: var(--label-neutral); cursor: pointer; }
+.demoClose:focus-visible, .demoReopen:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+.demoText { margin: 0; font-size: 14px; line-height: 1.6; color: var(--label-neutral); word-break: keep-all; }
+.demoRows { display: grid; gap: 6px; margin: 0; padding: 12px; border-radius: var(--radius-control); background: var(--background-normal-alternative); }
+.demoRows div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.demoRows dt { flex: none; width: 56px; font-size: 14px; color: var(--label-alternative); }
+.demoRows dd { flex: 1; min-width: 0; margin: 0; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; user-select: all; overflow-wrap: anywhere; }
+.demoCopy { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; margin: -6px -6px -6px 0; padding: 0; border: 0; background: none; color: var(--label-neutral); cursor: pointer; }
+.demoCopy:hover { color: var(--primary-normal); }
+.demoCopy:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+.demoCopyError { flex-basis: 100%; font-size: 13px; color: var(--status-negative); }
+.demoReopen { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--primary-normal); color: var(--static-white); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+.demoReopen:hover { background: var(--primary-strong); }
+@media (min-width: 960px) { .demo { right: 24px; bottom: 24px; } }
+/* 휴대폰에서 떠 있는 버튼이 소개 글 끝을 가리지 않게 */
+@media (max-width: 959px) { .aside { padding-bottom: 260px; } }
+
+/* 화면에는 숨기고 화면 읽기 프로그램에만 읽힌다(복사 결과 알림) */
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
