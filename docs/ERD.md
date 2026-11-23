@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-23 (v1.14, spec 024: move_in_checklist에 항목 메모·내 항목을 함께 담음(칸 추가 없음). v1.13 spec 023: notice_follows 본인 지우기, incident_actions에 `cancel_approve`·`cancel_reject`, 승인 취소 때 일정 지움. v1.12 spec 021: push_subscriptions 웹 푸시 기기, notifications.channel `web_push`. v1.11 spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
+- 최종 갱신: 2026-11-23 (v1.15, spec 025: homes에 도시가스 사용량·고지서 달·요금 지역. v1.14 spec 024: move_in_checklist에 항목 메모·내 항목을 함께 담음(칸 추가 없음). v1.13 spec 023: notice_follows 본인 지우기, incident_actions에 `cancel_approve`·`cancel_reject`, 승인 취소 때 일정 지움. v1.12 spec 021: push_subscriptions 웹 푸시 기기, notifications.channel `web_push`. v1.11 spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -83,6 +83,9 @@ erDiagram
 | transit_fare | integer (원) | | 출퇴근 편도 요금 (v1.9) | [PRD FR-28 v1.10] |
 | trips_per_day | integer | | 하루 탈 횟수. 비우면 2 (v1.9) | [PRD FR-28 v1.10] |
 | commute_days | integer | | 한 달 출근 일수. 비우면 22 (v1.9) | [PRD FR-28 v1.10] |
+| gas_usage_mj | integer | | 한 달 도시가스 사용량(MJ, 고지서 한 장). 1~100,000. 고지서 달과 함께 넣거나 함께 비운다 (v1.15) | [PRD FR-28 v1.24] [spec 025 FR-001] |
+| gas_bill_month | smallint (1~12) | | 그 사용량이 몇 월 고지서인지 (v1.15) | [spec 025 FR-001] |
+| gas_tariff_region | text | | 도시가스 요금 지역 이름(요금표 `watch/gas-tariff.json`의 지역). 요금 지역이 여러 개인 도에서만 고른다 (v1.15) | [spec 025 FR-005, Q1] |
 | updated_at | timestamptz | ✔ | | [평가항목 P3-10] |
 
 #### indoor_measurements — 측정값(실내 온습도)
@@ -498,6 +501,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-18 | v1.10 | spec 012(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-23 | v1.15 (승인 2026-11-23 "추천대로 승인", spec 025, 마이그레이션 0024) | homes에 gas_usage_mj·gas_bill_month·gas_tariff_region |
 | 2026-11-23 | v1.14 (승인 2026-11-23 "승인", spec 024, 마이그레이션 없음) | interest_homes.move_in_checklist 설명: 항목 메모와 내 항목을 같은 객체에 담음 |
 | 2026-11-23 | v1.13 (승인 2026-11-23 "추천대로 승인", spec 023) | notice_follows 본인 지우기 권한, incident_actions.action에 `cancel_approve`·`cancel_reject`, 승인 취소 때 승인으로 만든 schedule_items 지움 |
 | 2026-11-20 | v1.12 (승인 2026-11-20 "모두 승인", 마이그레이션 0022) | push_subscriptions 표와 접근 규칙, notifications.channel에 `web_push`. PRD v1.20 FR-35, spec 021 |
