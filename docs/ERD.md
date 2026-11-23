@@ -1,7 +1,7 @@
 # ERD: HomeFit AI
 
 근거: [docs/PRD.md](PRD.md) v1.0, [docs/IA.md](IA.md) v1.0, [docs/문제정의.md](문제정의.md)(사건 기준 표), [GLOSSARY.md](../GLOSSARY.md), [예외 경로](journeys/edge-cases/거절과-수집오류.md), [평가항목](프로젝트3-평가항목.md) P3-02·P3-08·P3-16·P3-21
-- 최종 갱신: 2026-11-23 (v1.15, spec 025: homes에 도시가스 사용량·고지서 달·요금 지역. v1.14 spec 024: move_in_checklist에 항목 메모·내 항목을 함께 담음(칸 추가 없음). v1.13 spec 023: notice_follows 본인 지우기, incident_actions에 `cancel_approve`·`cancel_reject`, 승인 취소 때 일정 지움. v1.12 spec 021: push_subscriptions 웹 푸시 기기, notifications.channel `web_push`. v1.11 spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
+- 최종 갱신: 2026-11-23 (v1.16, spec 026: notice_follows·schedule_items에 정책(`youth_policy`)도. v1.15 spec 025: homes에 도시가스 사용량·고지서 달·요금 지역. v1.14 spec 024: move_in_checklist에 항목 메모·내 항목을 함께 담음(칸 추가 없음). v1.13 spec 023: notice_follows 본인 지우기, incident_actions에 `cancel_approve`·`cancel_reject`, 승인 취소 때 일정 지움. v1.12 spec 021: push_subscriptions 웹 푸시 기기, notifications.channel `web_push`. v1.11 spec 019: interest_homes 입주 전 점검 칸, defect_records 하자 기록, 사진 저장소 defect-photos. v1.10 spec 012: wiki_chunks 미룸, chat_logs·llm_calls.purpose `wiki_answer`. v1.9는 interest_homes)
 - 저장소: Supabase(PostgreSQL). 로그인은 Supabase Auth의 `auth.users`를 쓰고, 모든 사용자 표는 행 단위 권한(RLS)을 켠다.
 - 범위: PRD Must(FR-01~27, 36, 37)에 필요한 표만. Should(FR-28~32)의 표는 2차 spec 때 더하고 변경 기록에 남긴다.
 
@@ -294,7 +294,7 @@ erDiagram
 | user_id | uuid (FK profiles) | ✔ | | [PRD FR-16] |
 | response_plan_id | uuid (FK response_plans, 유일) | | 두 번 승인해도 일정 하나. 알림에서 온 일정만 (v1.7) | [PRD FR-16] |
 | incident_id | uuid (FK incidents) | | 출처 사건 링크. 알림에서 온 일정만 (v1.7) | [IA SC_060100_PG] |
-| source_code | text (FK sources) | | 공고에서 온 일정의 출처 `myhome_notice` (v1.7) | [PRD FR-16 v1.9] [spec 007] |
+| source_code | text (FK sources) | | 공고·정책에서 온 일정의 출처(v1.16: 정책은 `youth_policy`, announcement_id에 정책 ID) `myhome_notice` (v1.7) | [PRD FR-16 v1.9] [spec 007] |
 | announcement_id | text | | 공고에서 온 일정의 공고 ID. (user_id, source_code, announcement_id) 유일 → 두 번 눌러도 하나 (v1.7) | [spec 007 FR-002] |
 | title | text | ✔ | | [IA SC_060000_PG] |
 | due_date | date | | 마감일. 지나면 "마감 지남" (계산 표시) | [PRD FR-16] |
@@ -358,7 +358,8 @@ erDiagram
 | duplicate_count | integer | ✔ | 중복 사건 수(KPI 3) | [PRD 3절 KPI] |
 | created_at | timestamptz | ✔ | | |
 
-#### notice_follows — 공고 팔로우 (H-006)
+#### notice_follows — 공고·정책 팔로우 (H-006, v1.16 정책도)
+출처가 `youth_policy`인 줄은 announcement_id에 정책 ID(`plcyNo`)를 두고 decision은 `follow`만 쓴다(정책 관심 없음 없음, spec 026).
 | 필드 | 타입 | 필수 | 설명 | 출처 |
 |---|---|---|---|---|
 | user_id | uuid (FK profiles) | ✔ | (user_id, source_code, announcement_id) 유일 | [PRD FR-38] |
@@ -501,6 +502,7 @@ DB를 만든 뒤 표·칸 이름이 이 문서와 같은지 확인하고 결과�
 | 날짜 | 버전 | 바뀐 내용 |
 |---|---|---|
 | 2026-11-18 | v1.10 | spec 012(조각 A): wiki_chunks를 "미룸"(위키 파일을 바로 읽음, Q3), 관계도에서 WIKI_CHUNKS–CHAT_LOGS 줄 뺌, 위키 챗봇 화면이 읽는 것을 `wiki/` 파일로, Q1에서 위키 챗봇을 뺌(knowledge_chunks는 그대로), chat_logs 질문 300자·답 600자, llm_calls.purpose에 `wiki_answer`(마이그레이션 0018) |
+| 2026-11-23 | v1.16 (승인 2026-11-23 "승인", spec 026, 마이그레이션 0025) | notice_follows·schedule_items에 정책(`youth_policy`) 줄, 정책을 일정에 넣는 DB 함수. 표 모양은 그대로 |
 | 2026-11-23 | v1.15 (승인 2026-11-23 "추천대로 승인", spec 025, 마이그레이션 0024) | homes에 gas_usage_mj·gas_bill_month·gas_tariff_region |
 | 2026-11-23 | v1.14 (승인 2026-11-23 "승인", spec 024, 마이그레이션 없음) | interest_homes.move_in_checklist 설명: 항목 메모와 내 항목을 같은 객체에 담음 |
 | 2026-11-23 | v1.13 (승인 2026-11-23 "추천대로 승인", spec 023) | notice_follows 본인 지우기 권한, incident_actions.action에 `cancel_approve`·`cancel_reject`, 승인 취소 때 승인으로 만든 schedule_items 지움 |
