@@ -11,6 +11,7 @@ import { FieldLabel, OptionGroup, UnitBox } from "@/app/_components/form-ui";
 import { SavedNotice } from "@/app/_components/saved-notice";
 import { SigunguField } from "../conditions/sigungu-field";
 import { saveHome, type HomeState } from "./actions";
+import { GasFold } from "./gas-fold";
 import type { MyHome } from "./load";
 import styles from "@/app/_components/form.module.css";
 
@@ -69,8 +70,8 @@ function AreaField({ value, unit, error }: { value: string; unit: string; error?
   );
 }
 
-function BasicFold({ values, errors }: { values: HomeFormInput; errors: Errors }) {
-  const [sidoCode, setSidoCode] = useState(values.sidoCode);
+// spec 025 2단계 리뷰: 고른 시도를 HomeFields가 들고 있어 도시가스 묶음의 요금 지역 칸이 바로 따라간다
+function BasicFold({ values, errors, sidoCode, setSidoCode }: { values: HomeFormInput; errors: Errors; sidoCode: string; setSidoCode: (code: string) => void }) {
   return (
     <Fold title="기본 정보" tip="내가 사는 집의 지역과 크기예요. 상세 주소는 받지 않아요." status={filledStatus([values.sigunguCode, values.housingType, values.exclusiveArea, values.windowType])} open>
       <div className={styles.field}>
@@ -165,19 +166,22 @@ function TransitFold({ costs, errors }: { costs: Costs; errors: Errors }) {
 /** settings: 설정 탭(취소/저장). onboarding: 첫 설정 1단계(아래에 붙는 "1 / 2 단계 · 다음" 줄, 저장되면 2단계로) */
 export type HomeFormMode = "settings" | "onboarding";
 
-type FieldsProps = { values: HomeFormInput; costs: Costs; state: HomeState; action: (formData: FormData) => void; pending: boolean; mode: HomeFormMode };
+type Gas = NonNullable<HomeState["gas"]>;
+type FieldsProps = { values: HomeFormInput; costs: Costs; gas: Gas; state: HomeState; action: (formData: FormData) => void; pending: boolean; mode: HomeFormMode };
 
-function HomeFields({ values, costs, state, action, pending, mode }: FieldsProps) {
+function HomeFields({ values, costs, gas, state, action, pending, mode }: FieldsProps) {
   const errors = state.errors ?? {};
+  const [sidoCode, setSidoCode] = useState(values.sidoCode);
   return (
     <form action={action} className={styles.form} noValidate>
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
       {state.saved && mode === "settings" ? <SavedNotice /> : null}
       {mode === "onboarding" ? <p className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</p> : null}
-      <BasicFold values={values} errors={errors} />
+      <BasicFold values={values} errors={errors} sidoCode={sidoCode} setSidoCode={setSidoCode} />
       <ContractFold values={values} errors={errors} />
       <ManagementFold values={values} costs={costs} errors={errors} />
       <TransitFold costs={costs} errors={errors} />
+      {mode === "settings" ? <GasFold sidoCode={sidoCode} values={gas} errors={errors} /> : null}
       {mode === "settings" ? (
         <div className={styles.actions}>
           <span className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</span>
@@ -199,11 +203,12 @@ export function HomeForm({ initial, mode = "settings" }: { initial: MyHome | nul
   const [state, action, pending] = useActionState<HomeState, FormData>(saveHome, {});
   const values = state.values ?? toInput(initial);
   const costs = state.costs ?? costInput(initial);
+  const gas = state.gas ?? { usage: initial?.gasUsageMj?.toString() ?? "", month: initial?.gasBillMonth?.toString() ?? "", region: initial?.gasTariffRegion ?? "" };
   // 첫 설정: 저장되면 2단계(공고/정책 조건)로
   useEffect(() => {
     if (mode === "onboarding" && state.saved) router.push("/onboarding?step=2");
   }, [mode, state.saved, router]);
-  return <HomeFields key={JSON.stringify([values, costs])} values={values} costs={costs} state={state} action={action} pending={pending} mode={mode} />;
+  return <HomeFields key={JSON.stringify([values, costs, gas])} values={values} costs={costs} gas={gas} state={state} action={action} pending={pending} mode={mode} />;
 }
 
 /** 첫 설정 왼쪽 "나중에 입력하기" */
