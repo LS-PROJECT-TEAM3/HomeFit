@@ -1,0 +1,468 @@
+/* spec 022 공고 상세. PC 값은 캔버스 v2-s4-pc·s4-alert-pc·s4-data-pc·s4-skip-pc, 휴대폰은 v2-s4-phone. 색은 app/tokens.css 변수만 */
+
+.main {
+  width: 100%;
+  max-width: 1128px;
+  margin: 0 auto;
+  padding: 20px 20px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 15px;
+}
+
+.crumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--label-neutral);
+  text-decoration: none;
+}
+
+.crumb a:hover { text-decoration: underline; }
+.crumb > span[aria-hidden] { padding: 0 10px; color: var(--interaction-inactive); }
+.crumb > span[aria-current] { color: var(--label-normal); font-weight: 700; }
+
+/* 관심 없음 안내 줄 */
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 16px 20px;
+  background: var(--background-normal-alternative);
+  font-size: 16px;
+}
+
+.bannerAction {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--label-normal);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+
+/* 머리 카드 */
+.headCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.headTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.badgeNew { background: var(--primary-normal); color: var(--static-white); }
+.badgeFollow { background: var(--status-positive-tint); color: var(--primary-normal); }
+.badgeIgnored { background: var(--background-normal-alternative); color: var(--label-neutral); }
+.badgeClosed { background: transparent; box-shadow: inset 0 0 0 1px var(--line-normal-alternative); color: var(--label-neutral); }
+.badgePending { background: var(--status-cautionary); color: var(--static-white); }
+
+.headActions { display: flex; gap: 8px; flex: none; }
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--background-normal-alternative);
+  color: var(--label-normal);
+  cursor: pointer;
+}
+
+.iconButton:disabled { cursor: default; }
+.iconOn { background: var(--primary-tint); color: var(--primary-normal); }
+.iconOn svg { fill: currentColor; }
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.headFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+
+.announced { font-size: 16px; color: var(--label-neutral); }
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  color: var(--label-normal);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.scheduleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-normal-normal);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.buttonPrimary,
+.buttonAssistive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.buttonAssistive { background: var(--background-normal-alternative); color: var(--label-normal); }
+.buttonPrimary:disabled { opacity: 0.6; cursor: progress; }
+
+.error { margin: 0; color: var(--status-negative); font-size: 15px; }
+
+.help {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--label-neutral);
+}
+
+/* 목차 탭 */
+/* 사용자 요청(2026-11-22): 탭 옆 스크롤 막대를 없앤다. 탭 3개는 휴대폰 폭에도 들어가므로 넘침 스크롤을 두지 않는다 */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line-normal-normal);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  margin-bottom: -1px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--label-neutral);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tabOn { border-bottom: 3px solid var(--primary-normal); color: var(--primary-normal); font-weight: 700; }
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-control);
+  background: var(--status-cautionary);
+  color: var(--static-white);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.panel { display: flex; flex-direction: column; gap: 20px; }
+.panel[hidden] { display: none; }
+
+/* 내용 카드 */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTitle { margin: 0; font-size: 22px; font-weight: 700; }
+.caution { color: var(--status-cautionary); }
+.source { font-size: 14px; color: var(--label-neutral); }
+.bar { margin: 0 8px; color: var(--line-normal-alternative); }
+
+.aiText {
+  margin: 8px 0 0;
+  font-size: 17px;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.mock { font-size: 14px; color: var(--label-neutral); }
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px 0 4px;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.blockQuestion { margin: 0; font-size: 17px; font-weight: 700; }
+
+.blockLead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--primary-normal);
+  word-break: keep-all;
+}
+
+.leadTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  background: var(--status-negative-tint);
+  color: var(--status-negative);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.blockRows { display: flex; flex-direction: column; margin-top: 10px; }
+
+.kv {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.kvKey { flex: none; width: 72px; font-size: 14px; color: var(--label-neutral); }
+.kvValue { flex: 1; min-width: 0; font-size: 16px; line-height: 1.6; word-break: keep-all; }
+
+.kvPre { white-space: pre-line; }
+
+.inlineLink { color: var(--label-normal); text-decoration: underline; text-underline-offset: 4px; }
+
+/* 단지 표 */
+.tableWrap { overflow-x: auto; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.table th,
+.table td {
+  padding: 16px 12px 16px 0;
+  border-top: 1px solid var(--line-normal-normal);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table thead th { border-top: 0; font-size: 14px; font-weight: 600; color: var(--label-neutral); }
+.table tbody th { font-weight: 700; }
+.table tbody th .badge { margin-left: 10px; }
+.num { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+/* 내 알림 */
+.empty { margin: 0; font-size: 16px; color: var(--label-neutral); }
+
+.alertCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 20px;
+  border: 1px solid var(--line-normal-neutral);
+  border-radius: var(--radius-control);
+}
+
+.alertTop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.alertTime { font-size: 14px; color: var(--label-neutral); font-variant-numeric: tabular-nums; }
+.alertTitle { margin: 0; font-family: inherit; font-size: 19px; font-weight: 700; line-height: 1.4; }
+
+.alertFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 32px;
+}
+
+.alertChange { margin: 0; font-size: 16px; color: var(--label-neutral); font-variant-numeric: tabular-nums; }
+
+.doneList { margin: 0; padding: 0; list-style: none; }
+
+.doneRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto 20px;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line-normal-normal);
+  color: var(--label-normal);
+  text-decoration: none;
+}
+
+.doneMain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.doneTitle { font-size: 17px; font-weight: 600; line-height: 1.5; }
+.doneChange { font-size: 15px; color: var(--label-neutral); font-variant-numeric: tabular-nums; }
+.doneDate { font-size: 15px; color: var(--label-neutral); font-variant-numeric: tabular-nums; }
+.approved { font-size: 15px; color: var(--primary-normal); }
+.rejected { font-size: 15px; color: var(--status-negative); }
+
+/* 관심 없는 이유 대화 상자(그림자 예외: 대화 상자) */
+.dialog {
+  width: min(480px, calc(100vw - 32px));
+  padding: 32px 28px 24px;
+  border: 0;
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  box-shadow: 0 12px 36px var(--shadow-ink-large);
+}
+
+.dialog::backdrop { background: var(--material-dimmer); }
+.dialogForm { display: flex; flex-direction: column; gap: 14px; }
+.dialogTitle { margin: 0; font-family: var(--font-serif); font-size: 22px; font-weight: 500; }
+.dialogActions { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; }
+
+.reasons { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; }
+
+.reason {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: var(--radius-control);
+  background: var(--background-normal-normal);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.reason input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary-normal); }
+.reasonOn { background: var(--primary-tint); font-weight: 700; }
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.crumb a:focus-visible,
+.bannerAction:focus-visible,
+.iconButton:focus-visible,
+.textLink:focus-visible,
+.buttonPrimary:focus-visible,
+.buttonAssistive:focus-visible,
+.tab:focus-visible,
+.inlineLink:focus-visible,
+.doneRow:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (min-width: 960px) {
+  .main { padding: 72px 0 120px; gap: 32px; }
+  .main { width: calc(100% - 2 * var(--spacing-screen-padding-pc)); }
+
+  .headCard { gap: 24px; padding: 48px 56px; }
+  .title { font-size: 44px; }
+  .announced { font-size: 17px; }
+
+  .tabs { margin-top: 24px; }
+  .tab { padding: 0 24px; }
+  .panel { gap: 32px; }
+
+  .card { padding: 48px 56px 40px; }
+  .cardTitle { font-size: 26px; }
+
+  .block {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    padding: 32px 0 4px;
+  }
+
+  .blockQuestion { padding-top: 8px; font-size: 19px; }
+  .blockLead { font-size: 28px; }
+
+  .alertCard { padding: 28px 32px; }
+  .alertTitle { font-size: 21px; }
+  .doneRow { grid-template-columns: 1fr 88px 64px 20px; gap: 20px; }
+  .doneDate { text-align: right; }
+}

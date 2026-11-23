@@ -74,3 +74,33 @@ export function barHeights(values: readonly number[], maxHeight: number): number
   const max = Math.max(0, ...values);
   return values.map((v) => (max === 0 ? 0 : (v / max) * maxHeight));
 }
+
+export type ElectricityBreakdown = {
+  bill: number; vat: number; total: number;
+  tier: 1 | 2 | 3; limits: readonly [number, number];
+  /** 다음 구간까지 남은 kWh. 3구간이면 null */
+  toNext: number | null;
+  /** 지금 구간의 kWh당 요금(원, 반올림) */
+  pricePerKwh: number;
+  /** 30kWh 줄이면 한 달 덜 나오는 돈(부가세 포함) */
+  save30: number;
+};
+
+const VAT = 0.1;
+const withVat = (bill: number) => bill + Math.round(bill * VAT);
+
+/**
+ * spec 022 FR-012(에너지 분석 보드): 이번 달 예상 전기요금(부가세 10% 포함, 기금·기후환경·연료비조정 요금 제외)과 누진 구간 정보.
+ * 요금은 spec 009 요금표(electricityBill) 그대로
+ */
+export function electricityBreakdown(kwh: number, month: number): ElectricityBreakdown {
+  const bill = electricityBill(kwh, month);
+  const vat = Math.round(bill * VAT);
+  const { tier, limits } = usageTier(kwh, month);
+  return {
+    bill, vat, total: bill + vat, tier, limits,
+    toNext: tier === 3 ? null : Math.round((limits[tier - 1] - kwh) * 10) / 10,
+    pricePerKwh: Math.round(RATE_TABLE.perKwh[tier - 1]),
+    save30: bill + vat - withVat(electricityBill(Math.max(0, kwh - 30), month)),
+  };
+}

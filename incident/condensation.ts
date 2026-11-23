@@ -41,6 +41,19 @@ export function dewPoint(temperatureC: number, humidityPct: number): number {
 }
 
 /** 창 안쪽 표면 온도 추정(정상 상태): Tsi = Ti − U·Rsi·(Ti − Te) */
+export type CondensationLevel = "low" | "caution" | "high";
+
+/**
+ * spec 022 FR-011(집 점검 결로 위험 계기판, 현경 결정 2026-11-21): 차이(창 표면 - 이슬점)로 3단계.
+ * 알림 기준(surfaceMarginC 이하 = 위험)은 그대로이고, 그 안을 주의(0 초과)와 높음(0 이하, 창이 이슬점보다 차가움)으로 나눈다.
+ * 화면에 0.1°C 단위로 보이므로 같은 단위로 반올림해 비교한다
+ */
+export function condensationLevel(surfaceC: number, dewPointC: number): CondensationLevel {
+  const margin = Math.round((surfaceC - dewPointC) * 10) / 10;
+  if (margin > RISK_RULES.surfaceMarginC) return "low";
+  return margin > 0 ? "caution" : "high";
+}
+
 export function surfaceTemperature(input: { indoorC: number; outdoorC: number; windowType: WindowType }): number {
   const factor = RISK_RULES.uValue[input.windowType] * RISK_RULES.insideSurfaceResistance;
   return input.indoorC - factor * (input.indoorC - input.outdoorC);

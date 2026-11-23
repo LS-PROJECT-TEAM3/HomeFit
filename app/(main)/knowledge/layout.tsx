@@ -1,19 +1,4 @@
-import { SectionTabs, type Tab } from "@/app/_components/section-tabs";
-import styles from "@/app/_components/hub.module.css";
-
-// 기획안 9절 AI Assistant = IA KN_050000_PG 기록 찾기 (PRD FR-18, spec 004 v0.2)
-const TABS: Tab[] = [
-  { href: "/knowledge", label: "기록 찾기" },
-  { href: "/knowledge/history", label: "처리 기록" },
-  { href: "/knowledge/sources", label: "공공데이터 출처" },
-];
-
+// spec 022 FR-011: 띠(포스터형 머리)는 탭마다 다르다(기록 찾기만 검색창). 각 화면이 SectionBand를 그린다
 export default function KnowledgeLayout({ children }: LayoutProps<"/knowledge">) {
-  return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>AI 도우미</h1>
-      <SectionTabs tabs={TABS} label="AI 도우미 메뉴" />
-      {children}
-    </main>
-  );
+  return children;
 }

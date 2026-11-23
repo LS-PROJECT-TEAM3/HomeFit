@@ -2,13 +2,14 @@ import { callLlm, newCallContext } from "@/lib/llm/call.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { buildChatPrompt, CHAT_JSON_SCHEMA, parseChatAnswer } from "@/knowledge/chat";
-import { findRecords, HISTORY_NOT_FOUND, HISTORY_SYSTEM_PROMPT, toHistoryRecords, type ClosedIncidentRow } from "@/knowledge/history";
+import { findRecords, HISTORY_NOT_FOUND, HISTORY_SYSTEM_PROMPT, numberCitations, toHistoryRecords, type ClosedIncidentRow, type HistoryResult } from "@/knowledge/history";
 
 // spec 005 FR-006 (PRD FR-18): 기록 찾기. 내 끝난 알림은 로그인 사용자 권한(RLS)으로 읽는다. AI에는 이메일·회원 ID를 보내지 않는다
 
 const MAX_CLOSED = 50;
 
-export type HistoryHit = { title: string; text: string; href?: string };
+/** n: 화면 번호 [1][2](AI 답의 근거 번호와 같음) */
+export type HistoryHit = { n: number; title: string; summary: string; result: HistoryResult; date: string | null; href?: string };
 export type HistoryAnswer = { hits: HistoryHit[]; answer: string | null; aiFailed: boolean };
 
 /** 내 끝난 알림(최근 50건). 비슷한 지난 알림(spec 010 FR-002)도 쓴다 */
@@ -40,12 +41,12 @@ export async function loadClosedRows(userId: string): Promise<ClosedIncidentRow[
 /** 찾은 기록은 늘 보이고, 찾은 것이 있을 때만 AI 답을 붙인다(E6). AI가 실패해도 찾은 기록은 보인다 */
 export async function searchHistory(userId: string, question: string): Promise<HistoryAnswer> {
   const picked = findRecords(question, toHistoryRecords(await loadClosedRows(userId)));
-  const hits = picked.map((r) => ({ title: r.title, text: r.text, href: r.href }));
+  const hits = picked.map((r, i) => ({ n: i + 1, title: r.title, summary: r.summary, result: r.result, date: r.date, href: r.href }));
   if (picked.length === 0) return { hits, answer: HISTORY_NOT_FOUND, aiFailed: false };
   const result = await callLlm(createAdminClient(), {
     request: { purpose: "chat_answer", system: HISTORY_SYSTEM_PROMPT, prompt: buildChatPrompt(question, picked), schema: CHAT_JSON_SCHEMA as unknown as Record<string, unknown>, maxOutputTokens: 2000 },
     parse: (raw) => parseChatAnswer(raw, new Set(picked.map((s) => s.id))),
     ctx: newCallContext(null),
   });
-  return result.ok ? { hits, answer: result.data.answer, aiFailed: false } : { hits, answer: null, aiFailed: true };
+  return result.ok ? { hits, answer: numberCitations(result.data.answer, picked.map((r) => r.id)), aiFailed: false } : { hits, answer: null, aiFailed: true };
 }

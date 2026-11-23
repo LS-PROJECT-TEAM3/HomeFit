@@ -1,55 +1,45 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Empty, LoadError, Loading } from "@/app/_components/states";
-import { HOUSING_LABELS } from "@/incident/home-form";
-import { withEstimate } from "@/incident/energy-estimate";
-import { loadEstimateBasis, type EstimateBasis } from "@/incident/energy-estimate.server";
-import { listMyInterestHomes, type InterestHome } from "@/incident/interest-homes.server";
-import { realCost } from "@/incident/real-cost";
+import { LoadError, Loading } from "@/app/_components/states";
 import { currentUserId } from "@/lib/supabase/server";
-import { EstimateNote, kstMonth, TotalText } from "./cost-view";
-import styles from "@/app/_components/hub.module.css";
+import { CompareBoard } from "./compare-board";
+import { loadCompare, type LoadedCompare } from "./load-compare";
+import styles from "./compare.module.css";
 
-export const metadata = { title: "관심 주택 | 집 비교 | HomeFit AI" };
+export const metadata = { title: "집 비교 | HomeFit AI" };
 
-async function HomeList() {
-  await connection();
-  const userId = await currentUserId();
-  if (!userId) redirect("/login");
-  let homes: InterestHome[];
-  let basis: EstimateBasis;
-  try {
-    homes = await listMyInterestHomes(userId);
-    basis = await loadEstimateBasis(homes, new Date()); // spec 011 FR-002
-  } catch {
-    return <LoadError>관심 주택을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
-  }
-  if (homes.length === 0) return <Empty>아직 등록한 관심 주택이 없습니다. 보고 있는 집을 넣으면 내 집과 한 달 실질 주거비를 비교합니다.</Empty>;
-  const month = kstMonth(new Date());
+function PageHeader() {
   return (
-    <>
-    <ul className={styles.list}>
-      {homes.map((home) => (
-        <li key={home.id}>
-          <Link href={`/compare/${home.id}`}><strong>{home.name}</strong></Link> · {HOUSING_LABELS[home.housingType]} · 한 달 <TotalText cost={realCost(withEstimate(home, basis.averages, basis.aptAverages), month)} />
-        </li>
-      ))}
-    </ul>
-    <EstimateNote basis={basis} />
-    </>
+    <header className={styles.header}>
+      <h1 className={styles.title}>집 비교</h1>
+      <span aria-hidden="true" className={styles.titleLine} />
+    </header>
   );
 }
 
-// IA CP_040000_PG 관심 주택 목록 (spec 009 FR-001, PRD FR-28 v1.10)
-export default function CompareListPage() {
+async function Board() {
+  await connection();
+  const userId = await currentUserId();
+  if (!userId) redirect("/login");
+  let data: LoadedCompare;
+  try {
+    data = await loadCompare(userId);
+  } catch {
+    // "관심 주택 없음"과 다른 문구 (P3-12)
+    return <><PageHeader /><LoadError>관심 주택을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError></>;
+  }
+  // 추정값 근거 문단은 화면에 두지 않는다(현경 결정 2026-11-21). 추정 에너지비는 카드에 "(예상)"으로 표시
+  return <CompareBoard data={data} header={<PageHeader />} />;
+}
+
+// IA CP_040000_PG 집 비교 (IA v1.17 한 화면, spec 022 FR-011, spec 009 FR-001·005, spec 015 FR-001). 기본형(현경 결정 2026-11-21)
+export default function ComparePage() {
   return (
-    <>
-      <p><Link href="/compare/new" className={styles.primaryButton}>+ 관심 주택 등록</Link> <Link href="/compare/cost">실질 비용 비교 보기</Link></p>
-      <Suspense fallback={<Loading />}>
-        <HomeList />
+    <main className={styles.main}>
+      <Suspense fallback={<><PageHeader /><Loading /></>}>
+        <Board />
       </Suspense>
-    </>
+    </main>
   );
 }

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { WIKI_DAILY_LIMIT, WIKI_QUESTION_MAX, checkQuestion, readWikiReply, type WikiChatView } from "@/chat/wiki-answer";
-import styles from "@/app/_components/hub.module.css";
+import { InfoTip } from "@/app/_components/info-tip";
+import hub from "@/app/_components/hub.module.css";
+import styles from "../admin.module.css";
 import own from "./wiki-chat.module.css";
 import type { WikiGraph } from "@/chat/wiki-graph";
 import { WikiGraphView, type GraphFocus } from "./wiki-graph";
@@ -44,18 +46,21 @@ export function WikiChatForm({ initialRemaining, graph }: { initialRemaining: nu
 
   return (
     <>
+    <div className={styles.stack}>
     <section className={styles.card} aria-labelledby="wiki-chat-title">
-      <h2 id="wiki-chat-title">위키에 묻기</h2>
-      <p className={styles.muted}>팀 위키(wiki/) 쪽만 근거로 답합니다. 위키에 없으면 &ldquo;위키에 없습니다&rdquo;라고 답합니다.</p>
+      <div className={styles.head}>
+        <h2 id="wiki-chat-title" className={styles.title}>위키에 묻기</h2>
+        <InfoTip icon text={'팀 위키(wiki/) 쪽만 근거로 답해요. 위키에 없으면 "위키에 없습니다"라고 답해요.'} label="위키에 묻기 설명 보기" />
+      </div>
       <form className={own.form} onSubmit={(e) => { e.preventDefault(); void send(); }}>
         <div className={styles.field}>
-          <label htmlFor="wiki-ask">질문</label>
-          <textarea id="wiki-ask" className={`${styles.input} ${own.textarea}`} rows={3} maxLength={WIKI_QUESTION_MAX} value={text} onChange={(e) => setText(e.target.value)} placeholder="예: 결로 기준은 어디서 왔어?" aria-describedby="wiki-ask-help" />
-          <span id="wiki-ask-help" className={styles.muted}>
-            {text.trim().length}/{WIKI_QUESTION_MAX}자 · {remaining === null ? `하루 ${WIKI_DAILY_LIMIT}번까지` : `오늘 남은 질문 ${remaining}번`}
+          <label htmlFor="wiki-ask" className={styles.label}>질문</label>
+          <textarea id="wiki-ask" className={`${styles.select} ${own.textarea}`} rows={3} maxLength={WIKI_QUESTION_MAX} value={text} onChange={(e) => setText(e.target.value)} placeholder="예: 결로 기준은 어디서 왔어?" aria-describedby="wiki-ask-help" />
+          <span id="wiki-ask-help" className={styles.help}>
+            {text.trim().length}/{WIKI_QUESTION_MAX}자, {remaining === null ? `하루 ${WIKI_DAILY_LIMIT}번까지` : `오늘 남은 질문 ${remaining}번`}
           </span>
         </div>
-        <button type="submit" className={styles.primaryButton} disabled={pending || remaining === 0}>{pending ? "찾는 중…" : "묻기"}</button>
+        <button type="submit" className={hub.primaryButton} disabled={pending || remaining === 0}>{pending ? "찾는 중…" : "묻기"}</button>
       </form>
       <div aria-live="polite">
         {pending ? <p role="status">위키를 찾는 중…</p> : null}
@@ -64,6 +69,7 @@ export function WikiChatForm({ initialRemaining, graph }: { initialRemaining: nu
       </div>
     </section>
     <WikiGraphView graph={graph} focus={focus} onFocus={setFocus} />
+    </div>
     </>
   );
 }
@@ -72,17 +78,17 @@ export function WikiChatForm({ initialRemaining, graph }: { initialRemaining: nu
 function WikiAnswer({ view, asked }: { view: Extract<WikiChatView, { ok: true }>; asked: string }) {
   return (
     <div className={own.answer}>
-      <p className={styles.muted}>질문: {asked}</p>
-      {view.isMock ? <p className={`${styles.badge} ${own.mock}`}>모의 답 · 실제 AI 답이 아닙니다</p> : null}
+      <p className={styles.help}>질문: {asked}</p>
+      {view.isMock ? <p className={`${hub.badge} ${own.mock}`}>모의 답 / 실제 AI 답이 아닙니다</p> : null}
       <p className={own.answerText}>{view.answer}</p>
-      {view.sources.length === 0 ? <p className={styles.muted}>출처 없음</p> : (
+      {view.sources.length === 0 ? <p className={styles.help}>출처 없음</p> : (
         <>
           <h3 className={own.sourcesTitle}>출처 {view.sources.length}개</h3>
           <ul className={own.sources}>
             {view.sources.map((s) => (
               <li key={s.id}>
                 <details>
-                  <summary>[{s.id}] {s.page} · {s.heading}</summary>
+                  <summary>[{s.id}] {s.page} / {s.heading}</summary>
                   <p className={own.sourceText}>{s.text}</p>
                 </details>
               </li>

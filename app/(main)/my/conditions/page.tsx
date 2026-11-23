@@ -4,9 +4,8 @@ import { LoadError, Loading } from "@/app/_components/states";
 import { currentUserId } from "@/lib/supabase/server";
 import { ConditionForm } from "./condition-form";
 import { loadMyCondition } from "./load";
-import styles from "../my.module.css";
 
-export const metadata = { title: "공고·정책 조건 | HomeFit AI" };
+export const metadata = { title: "공고/정책 조건 | 설정 | HomeFit AI" };
 
 async function ConditionsSection() {
   const userId = await currentUserId();
@@ -23,11 +22,9 @@ async function ConditionsSection() {
 // IA MY_030100_TB 공고·정책 조건 (FR-002, spec 001)
 export default function ConditionsPage() {
   return (
-    <section className={styles.section} aria-labelledby="conditions-title">
-      <h2 id="conditions-title">공고·정책 조건</h2>
-      <Suspense fallback={<Loading />}>
-        <ConditionsSection />
-      </Suspense>
-    </section>
+    // spec 022(v2-set-cond-pc): 바깥 카드·제목 없이 접는 칸만(왼쪽 탭이 제목 역할)
+    <Suspense fallback={<Loading />}>
+      <ConditionsSection />
+    </Suspense>
   );
 }
