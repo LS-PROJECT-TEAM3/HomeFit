@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GAS_TARIFF, gasBill, type GasRegion } from "@/incident/gas-bill";
-import { GAS_SHARES, monthlyShares, parseGasFields, sidoOfSigungu, tariffRegionsFor, yearlyGas } from "@/incident/gas-year";
+import { GAS_SHARES, monthlyShares, parseGasFields, shareSido, sidoOfSigungu, tariffRegionsFor, yearlyGas } from "@/incident/gas-year";
 
 // spec 025 FR-001~005, E1~E5 (qa C-2501~2505)
 const gyeonggi = GAS_TARIFF.regions.find((r) => r.name === "경기도") as GasRegion;
@@ -107,5 +107,24 @@ describe("parseGasFields (내 집 입력, E1·E2·FR-005, C-2505)", () => {
     expect(parseGasFields({ usage: "2800", month: "1", region: "" }, "강원")).toEqual({ ok: false, errors: { gasRegion: "도시가스 요금 지역을 골라 주세요. 고지서의 공급사를 보면 알 수 있어요." } });
     expect(parseGasFields({ usage: "2800", month: "1", region: "경기도" }, "강원")).toEqual({ ok: false, errors: { gasRegion: "도시가스 요금 지역을 골라 주세요. 고지서의 공급사를 보면 알 수 있어요." } });
     expect(parseGasFields({ usage: "2800", month: "1", region: "강원 원주시" }, "강원")).toEqual({ ok: true, value: { mj: 2800, month: 1, region: "강원 원주시" } });
+  });
+});
+
+// 1단계 리뷰: 이 앱은 광주(29)·전남(46)을 "12"(전남광주통합특별시)로 쓴다(watch/sido.ts)
+describe("광주·전남(12)", () => {
+  it("12는 광주·전남 묶음, 요금 지역은 광주시와 전남 4곳에서 고름", () => {
+    expect(sidoOfSigungu("12110")).toBe("광주전남");
+    expect(tariffRegionsFor("광주전남")).toEqual(["광주시", "전남 목포시", "전남 순천시", "전남 여수시", "전남 나주시"]);
+  });
+  it("비율은 고른 지역이 광주시면 광주, 아니면 전남", () => {
+    expect(shareSido("광주전남", "광주시")).toBe("광주");
+    expect(shareSido("광주전남", "전남 여수시")).toBe("전남");
+    expect(shareSido("광주전남", null)).toBeNull();
+    expect(shareSido("경기", null)).toBe("경기");
+  });
+  it("12 집도 지역을 골라야 하고, 시도를 모르는 집은 저장하지 않는다", () => {
+    expect(parseGasFields({ usage: "2800", month: "1", region: "" }, "광주전남")).toMatchObject({ ok: false });
+    expect(parseGasFields({ usage: "2800", month: "1", region: "광주시" }, "광주전남")).toEqual({ ok: true, value: { mj: 2800, month: 1, region: "광주시" } });
+    expect(parseGasFields({ usage: "2800", month: "1", region: "" }, null)).toEqual({ ok: false, errors: { gasRegion: "내 집 지역으로 도시가스 요금표를 찾지 못했어요. 기본 정보의 시/도를 확인해 주세요." } });
   });
 });

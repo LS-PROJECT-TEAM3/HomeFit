@@ -14,7 +14,8 @@ export const GAS_TARIFF: GasTariff = tariff;
 
 /** 요금표 각주: 취사난방 겸용은 516MJ까지 취사요금, 넘는 만큼 난방요금(지역별로 다소 상이할 수 있음) */
 export const COOKING_MJ_LIMIT = 516;
-const MAX_MJ = 100_000;
+/** 계산기·내 집 도시가스 칸이 같이 쓰는 상한(spec 016 E1, spec 025 E1) */
+export const MAX_MJ = 100_000;
 const VAT = 0.1;
 
 export type UsageCheck = { ok: true; mj: number } | { ok: false; message: string };

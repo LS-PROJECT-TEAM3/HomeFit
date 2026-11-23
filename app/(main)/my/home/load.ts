@@ -7,6 +7,8 @@ export type MyHome = {
   contractType: ContractType | null; deposit: number | null; monthlyRent: number | null; maintenanceFee: number | null; contractEndDate: string | null;
   /** spec 009 FR-002 실질 주거비 칸 */
   energyCost: number | null; electricityKwh: number | null; transitFare: number | null; tripsPerDay: number | null; commuteDays: number | null;
+  /** spec 025 FR-001: 고지서 한 장 */
+  gasUsageMj: number | null; gasBillMonth: number | null; gasTariffRegion: string | null;
 };
 export type MyMeasurement = { id: string; temperatureC: number; humidityPct: number; measuredAt: string };
 
@@ -18,7 +20,7 @@ export async function loadMyHome(userId: string): Promise<{ home: MyHome | null;
   const supabase = await createClient();
   const { data: home, error } = await supabase
     .from("homes")
-    .select("id, sigungu_code, housing_type, exclusive_area_m2, window_type, updated_at, contract_type, deposit, monthly_rent, maintenance_fee, contract_end_date, energy_cost, electricity_kwh, transit_fare, trips_per_day, commute_days")
+    .select("id, sigungu_code, housing_type, exclusive_area_m2, window_type, updated_at, contract_type, deposit, monthly_rent, maintenance_fee, contract_end_date, energy_cost, electricity_kwh, transit_fare, trips_per_day, commute_days, gas_usage_mj, gas_bill_month, gas_tariff_region")
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error("내 집 정보를 불러오지 못했습니다.");
@@ -38,6 +40,7 @@ export async function loadMyHome(userId: string): Promise<{ home: MyHome | null;
       contractType: home.contract_type as ContractType | null, deposit: home.deposit, monthlyRent: home.monthly_rent,
       maintenanceFee: home.maintenance_fee, contractEndDate: home.contract_end_date,
       energyCost: home.energy_cost, electricityKwh: home.electricity_kwh, transitFare: home.transit_fare, tripsPerDay: home.trips_per_day, commuteDays: home.commute_days,
+      gasUsageMj: home.gas_usage_mj, gasBillMonth: home.gas_bill_month, gasTariffRegion: home.gas_tariff_region,
     },
     measurements: (rows ?? []).map((row) => ({
       id: row.id, temperatureC: Number(row.temperature_c), humidityPct: Number(row.humidity_pct), measuredAt: row.measured_at,
