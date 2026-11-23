@@ -62,7 +62,7 @@
 | harness-spec-plan | `docs/specs/NNN-기능/spec.md`, `plan.md` 8묶음 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
 | harness-qa | `docs/specs/NNN-기능/qa.md` 8묶음. plan 001의 단계표에 "`harness-qa` B·C"가 적혀 있음 | 예림 (harness 계열을 모두 썼다고 답함, 2026-11-18). 건별 입력은 확인 필요 |
 | ui-ux-pro-max, frontend-design | 디자인 전체 수정(spec 022): 새 색·글꼴 토큰, 포스터형·기본형 화면, qa 022의 점검 체크리스트. 출처는 ui-ux-pro-max가 MIT(nextlevelbuilder/ui-ux-pro-max-skill `2de1134`), frontend-design이 Apache-2.0(Anthropic) | 현경 (조각 D, 2026-11-21 넣음). 건별 입력은 확인 필요 |
-| wiki-ingest (넣기), wiki-query (묻기), wiki-lint (점검) | `wiki/`의 주제 쪽 64개(목차·기록·연결지도·규칙 파일 제외, 2026-11-23 main에서 셈. 2026-11-19에는 56개)와 `wiki/log.md`(넣기 기록), 점검 스크립트 `scripts/wiki-lint.mjs`. 수업 참고본의 스킬 3개를 우리 경로에 맞게 옮긴 것이라고 plan 012에 적혀 있음 | 현경 (조각 A, plan 012 1단계). 건별 입력은 확인 필요 |
+| wiki-ingest (넣기), wiki-query (묻기), wiki-lint (점검) | `wiki/`의 주제 쪽 64개(`wiki/`의 md 68개에서 목차 `index.md`·기록 `log.md`·연결지도·위키 규칙 파일 `wiki/CLAUDE.md` 4개를 뺌. "규칙-"으로 시작하는 주제 쪽 6개는 셈에 들어감. 위키 그래프가 세는 방식(qa 012 C-913)과 같고, 위키 챗봇 화면에도 "쪽 64개"로 나옴. 2026-11-23 main에서 셈, 2026-11-19에는 같은 방식으로 56개)와 `wiki/log.md`(넣기 기록), 점검 스크립트 `scripts/wiki-lint.mjs`. 수업 참고본의 스킬 3개를 우리 경로에 맞게 옮긴 것이라고 plan 012에 적혀 있음 | 현경 (조각 A, plan 012 1단계). 건별 입력은 확인 필요 |
 
 위 표의 "8묶음"은 2026-11-18 기준이다. 지금 `docs/specs/`에는 001~020이 있고, 009~020을 어느 스킬로 만들었는지는 확인하지 않았다.
 
