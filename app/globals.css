@@ -12,6 +12,11 @@ body {
   padding: 0;
 }
 
+/* 사용자 요청(2026-11-23): 접는 칸을 펼쳐 세로 스크롤바가 생길 때 화면이 옆으로 밀리지 않게 자리를 미리 둔다 */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);

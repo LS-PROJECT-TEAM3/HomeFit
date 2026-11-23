@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { appBaseUrl } from "@/incident/notify.server";
-import { MIN_PASSWORD, checkEmail, checkNewPassword } from "@/lib/supabase/auth-rules";
+import { MIN_PASSWORD, afterSignInPath, checkEmail, checkNewPassword } from "@/lib/supabase/auth-rules";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = { error?: string; notice?: string };
@@ -19,9 +19,21 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   const { email, password } = readCredentials(formData);
   if (!email || !password) return { error: "이메일과 비밀번호를 모두 입력해 주세요." };
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: "이메일 또는 비밀번호가 맞지 않습니다. 다시 입력해 주세요." };
-  redirect("/");
+  redirect(await firstPath(supabase, data.user.id));
+}
+
+type Client = Awaited<ReturnType<typeof createClient>>;
+
+// 사용자 요청(2026-11-23): 처음 계정(이메일 확인 뒤 첫 로그인 포함)은 첫 설정 → 홈. 읽기에 실패하면 로그인은 막지 않고 홈으로
+async function firstPath(supabase: Client, userId: string): Promise<"/onboarding" | "/"> {
+  const [home, condition] = await Promise.all([
+    supabase.from("homes").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("policy_conditions").select("user_id", { count: "exact", head: true }).eq("user_id", userId),
+  ]);
+  if (home.error || condition.error) return "/";
+  return afterSignInPath({ hasHome: (home.count ?? 0) > 0, hasCondition: (condition.count ?? 0) > 0 });
 }
 
 // FR-001 (spec 001) 가입. 이메일 확인이 켜져 있으면 세션이 없어 안내만 한다

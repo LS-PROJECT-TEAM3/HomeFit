@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { buildChatPrompt, CHAT_JSON_SCHEMA, parseChatAnswer } from "@/knowledge/chat";
 import { findRecords, HISTORY_NOT_FOUND, HISTORY_SYSTEM_PROMPT, numberCitations, toHistoryRecords, type ClosedIncidentRow, type HistoryResult } from "@/knowledge/history";
+import { rejectReasonByIncident } from "@/incident/actions-history";
 
 // spec 005 FR-006 (PRD FR-18): 기록 찾기. 내 끝난 알림은 로그인 사용자 권한(RLS)으로 읽는다. AI에는 이메일·회원 ID를 보내지 않는다
 
@@ -27,11 +28,11 @@ export async function loadClosedRows(userId: string): Promise<ClosedIncidentRow[
   const ids = data.map((row) => row.id);
   const [plans, actions] = await Promise.all([
     supabase.from("response_plans").select("incident_id, checklist").in("incident_id", ids),
-    supabase.from("incident_actions").select("incident_id, action, reason").in("incident_id", ids),
+    supabase.from("incident_actions").select("incident_id, action, reason").in("incident_id", ids).order("created_at"),
   ]);
   if (plans.error || actions.error) throw new Error("처리 기록을 읽지 못했습니다.");
   const todoOf = new Map(plans.data.map((p) => [p.incident_id, (p.checklist as { label: string }[]).map((c) => c.label)]));
-  const reasonOf = new Map(actions.data.filter((a) => a.action === "reject").map((a) => [a.incident_id, a.reason]));
+  const reasonOf = rejectReasonByIncident(actions.data); // spec 023: 거절 취소 뒤 다시 거절하면 마지막 사유
   return data.map((row) => ({
     id: row.id, status: row.status, incidentType: row.incident_type, closedAt: row.closed_at,
     title: (row.facts as { title?: string }).title ?? "알림", reason: reasonOf.get(row.id) ?? null, todo: todoOf.get(row.id) ?? [],

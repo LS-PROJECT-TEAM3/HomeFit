@@ -7,7 +7,7 @@ import { about } from "../energy-figure";
 import styles from "../energy.module.css";
 
 // IA EN_110200_TB, spec 016 FR-001~003 → spec 022 FR-012(캔버스 v2-energy-merged-heat): 지역·사용량을 넣으면 바로 계산(저장하지 않음).
-// 현경 결정(2026-11-21): 지금 계산기를 보드 모양으로. 12개월 난방비 막대·가스 사용량 저장은 추후 기능(plan.md)
+// 현경 결정(2026-11-21): 지금 계산기를 보드 모양으로. 12개월 난방비 막대는 위의 내 집 카드(spec 025, gas-year-card.tsx). 이 계산기는 그대로
 
 function Result({ region, mj }: { region: GasRegion; mj: number }) {
   const bill = gasBill(region, mj);
@@ -44,8 +44,9 @@ export function HeatingCalculator() {
   return (
     <section className={styles.card} aria-labelledby="heating-title">
       <span className={styles.cardTitleRow}>
-        <h2 id="heating-title" className={styles.cardTitle}>이번 달 예상 난방비</h2>
-        <InfoTip icon text={tip} label="이번 달 예상 난방비 설명 보기" />
+        {/* 사용자 요청(2026-11-23): 위 띠가 "이번 달 예상 난방비"라 이 카드는 직접 계산으로 이름을 나눈다 */}
+        <h2 id="heating-title" className={styles.cardTitle}>사용량으로 직접 계산</h2>
+        <InfoTip icon text={tip} label="사용량으로 직접 계산 설명 보기" />
       </span>
       <div className={styles.heatInputs}>
         <div className={styles.field}>

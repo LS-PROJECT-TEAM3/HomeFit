@@ -9,12 +9,11 @@ import { loadMyHome, type MyHome } from "@/app/(main)/my/home/load";
 import type { PolicyCondition } from "@/incident/match";
 import { currentUserId } from "@/lib/supabase/server";
 import styles from "../setup.module.css";
+import { LiveProgress } from "./live-progress";
 
 export const metadata = { title: "첫 설정 | HomeFit AI" };
 
-const BAR_COUNT = 15;
-
-/** 왼쪽 진행 막대 "입력함 n/15"(1단계는 내 집 칸, 2단계는 조건 칸 기준) */
+/** 왼쪽 진행 막대의 첫 값(저장된 값 기준). 입력하면 LiveProgress가 폼 값으로 다시 센다 */
 function homeFilled(home: MyHome | null): number {
   if (!home) return 0;
   const values = [home.sigunguCode, home.housingType, home.exclusiveAreaM2, home.windowType, home.contractType, home.deposit, home.monthlyRent, home.maintenanceFee, home.contractEndDate];
@@ -26,8 +25,7 @@ function conditionFilled(c: PolicyCondition | null): [number, number] {
   return [[c.sidoCode, c.sigunguCode, c.supplyTypes.length ? "y" : null, c.maxMonthlyRent, c.age, c.targetGroups.length ? "y" : null].filter((v) => v !== null && v !== "").length, 6];
 }
 
-function Aside({ step, skipped, filled, total }: { step: 1 | 2; skipped: boolean; filled: number; total: number }) {
-  const on = Math.round((filled / total) * BAR_COUNT);
+function Aside({ step, skipped, filled }: { step: 1 | 2; skipped: boolean; filled: number }) {
   return (
     <aside className={styles.aside}>
       <p className={styles.step}>Step {step} / 2</p>
@@ -44,10 +42,7 @@ function Aside({ step, skipped, filled, total }: { step: 1 | 2; skipped: boolean
           <span className={styles.stepText}><span className={styles.stepName}>공고/정책 조건</span></span>
         </li>
       </ol>
-      <div className={styles.progress}>
-        <span className={styles.bars} aria-hidden="true">{Array.from({ length: BAR_COUNT }, (_, i) => <span key={i} className={`${styles.bar} ${i < on ? styles.barOn : ""}`} />)}</span>
-        <span className={styles.progressText}>입력함 {filled}/{total}</span>
-      </div>
+      <LiveProgress step={step} initial={filled} />
       {step === 1 ? (
         <div className={styles.skip}>
           <span>내 집이 아직 없어도 괜찮아요</span>
@@ -75,15 +70,15 @@ async function Onboarding({ searchParams }: { searchParams: PageProps<"/onboardi
   if (step === 1) {
     return (
       <div className={styles.body}>
-        <Aside step={1} skipped={false} filled={homeFilled(home)} total={9} />
+        <Aside step={1} skipped={false} filled={homeFilled(home)} />
         <main className={styles.main}><div className={styles.formWrap}><HomeForm initial={home} mode="onboarding" /></div></main>
       </div>
     );
   }
-  const [filled, total] = conditionFilled(condition);
+  const [filled] = conditionFilled(condition);
   return (
     <div className={styles.body}>
-      <Aside step={2} skipped={params.skipped === "1"} filled={filled} total={total} />
+      <Aside step={2} skipped={params.skipped === "1"} filled={filled} />
       <main className={styles.main}>
         <div className={styles.formWrap}>
           <ConditionForm initial={condition} next="/" submitLabel="다음 →" />

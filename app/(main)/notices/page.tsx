@@ -40,12 +40,13 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/notices">["
   if (!result.hasCondition) {
     return (
       <>
-        <ListingHead active="notices" counts={{ notices: null, policy: policyCount }} />
+        <ListingHead active="notices" counts={{ notices: null, policy: policyCount }}>
         <section className={styles.emptyCard}>
           <h2 className={styles.emptyTitle}>아직 내 조건이 없어요</h2>
           <p className={styles.emptyText}>지역과 공급 유형을 정하면 맞는 공고를 골라 보여 드려요.</p>
           <Link href="/my/conditions" className={styles.emptyLink}>조건 입력하기</Link>
         </section>
+        </ListingHead>
       </>
     );
   }
@@ -57,7 +58,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/notices">["
   }));
   return (
     <>
-      <ListingHead active="notices" counts={{ notices: rows.length, policy: policyCount }} />
+      <ListingHead active="notices" counts={{ notices: rows.length, policy: policyCount }}>
       <ConditionBar condition={result.condition} chips={conditionChips(result.condition, region)} fields={NOTICE_FIELDS} typeCounts={result.typeCounts} />
       {rows.length === 0 ? (
         <section className={styles.emptyCard}>
@@ -65,6 +66,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/notices">["
           <p className={styles.emptyText}>위 칩에서 지역이나 공급 유형을 넓혀 보세요. 새 공고가 올라오면 여기에 보여 드려요.</p>
         </section>
       ) : <NoticeList rows={rows} counts={groupCounts(result.items)} />}
+      </ListingHead>
     </>
   );
 }

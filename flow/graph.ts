@@ -93,3 +93,20 @@ export function sourceStarts(runs: readonly { source_code: string; status: strin
     return { code, label, state, stateLabel: STATE_LABEL[state] };
   });
 }
+
+/**
+ * 사용자 요청(2026-11-23): 흐름 화면 오류는 쉬운 문장을 먼저, 원문은 접어서 보여 준다.
+ * 원문 패턴으로만 고르고, 모르는 오류는 일반 문장(원문은 그대로 남김)
+ */
+export function friendlyRunError(message: string): string {
+  const text = message.toLowerCase();
+  if (text.includes("fetch failed") || text.includes("econn") || text.includes("enotfound") || text.includes("timeout") || text.includes("aborted")) {
+    return "외부 API에 연결하지 못했어요. 잠시 뒤 다시 돌려 보고, 계속되면 API 상태와 인증키를 확인해 주세요.";
+  }
+  if (/\b(401|403)\b/.test(text) || text.includes("unauthorized") || text.includes("forbidden") || text.includes("service key")) {
+    return "인증키가 거절됐어요. 공공데이터포털에서 활용신청과 키 값을 확인해 주세요.";
+  }
+  if (/\b429\b/.test(text) || text.includes("limit")) return "호출 한도를 넘었어요. 다음 정기 수집 때 다시 시도해요.";
+  if (text.includes("json") || text.includes("parse") || text.includes("xml")) return "응답 모양이 예상과 달라 읽지 못했어요. 원문을 확인해 주세요.";
+  return "실행 중 오류가 났어요. 아래 원문을 확인해 주세요.";
+}

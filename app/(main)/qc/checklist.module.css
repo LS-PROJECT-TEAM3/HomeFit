@@ -1,0 +1,33 @@
+/* spec 024: 입주 전 점검의 항목 메모·내 항목. 기본 칸·버튼 모양은 qc.module.css를 같이 쓴다 */
+.itemActions { display: flex; flex-wrap: wrap; gap: 0 20px; margin-top: -4px; }
+
+.textButton {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+
+.memo { display: flex; flex-direction: column; }
+.memo[hidden] { display: none; }
+.memoInput { min-height: 72px; padding: 12px 16px; resize: vertical; }
+
+.inlineForm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.inlineForm input { flex: 1 1 220px; }
+
+.addRow { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.addRow button[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+.help { font-size: 15px; color: var(--label-neutral); }
+.error { flex-basis: 100%; margin: 0; font-size: 15px; color: var(--status-negative); }
+
+.textButton:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}

@@ -40,6 +40,24 @@ export async function ignoreNotice(announcementId: string, reason: string): Prom
   return decide(announcementId, "ignore", trimmed === "" ? null : trimmed);
 }
 
+export type ClearState = { cleared?: true; error?: string };
+
+/**
+ * spec 023 FR-001·FR-002 (PRD FR-38 v1.21): 팔로우·관심 없음을 지워 "새 공고"(정하지 않음)로. 본인 줄만(RLS notice_follows_delete_own).
+ * 이미 없는 줄이면 그냥 "새 공고"(E1). 이미 생긴 알림과 일정은 그대로(FR-003, E4)
+ */
+export async function clearNoticeDecision(announcementId: string): Promise<ClearState> {
+  const userId = await currentUserId();
+  if (!userId) redirect("/login");
+  if (!announcementId) return { error: "공고를 찾을 수 없습니다." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("notice_follows").delete()
+    .eq("user_id", userId).eq("source_code", "myhome_notice").eq("announcement_id", announcementId);
+  if (error) return { error: "되돌리지 못했습니다. 잠시 뒤 다시 해 주세요." };
+  revalidatePath("/notices");
+  return { cleared: true };
+}
+
 const MAX_BULK = 100;
 
 /**

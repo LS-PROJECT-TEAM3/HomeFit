@@ -79,12 +79,11 @@ function Count({ n, phone }: { n: number; phone?: boolean }) {
   );
 }
 
-function MenuLink({ item, current, onPick, note }: { item: Item; current: boolean; onPick: () => void; note?: string }) {
+function MenuLink({ item, current, onPick }: { item: Item; current: boolean; onPick: () => void }) {
   return (
     <li>
       <Link href={item.href} className={styles.menuItem} aria-current={current ? "page" : undefined} onClick={onPick}>
         <span className={styles.menuLabel}><span className={styles.bar} aria-hidden="true" />{item.label}</span>
-        {note ? <span className={styles.note}>{note}</span> : null}
       </Link>
     </li>
   );
@@ -114,7 +113,7 @@ function AccountItems({ pathname, isAdmin, email, onPick, phone }: { pathname: s
       </div>
       <ul className={styles.menuList}>
         <MenuLink item={SETTINGS} current={isActivePath(pathname, "/my")} onPick={onPick} />
-        {isAdmin ? <MenuLink item={ADMIN} current={isActivePath(pathname, ADMIN.href)} onPick={onPick} note="관리자만" /> : null}
+        {isAdmin ? <MenuLink item={ADMIN} current={isActivePath(pathname, ADMIN.href)} onPick={onPick} /> : null}
       </ul>
       {phone ? null : <div className={styles.rule} />}
       <SignOutButton className={`${styles.menuItem} ${styles.signOut}`} />
