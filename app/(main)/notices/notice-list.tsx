@@ -22,6 +22,8 @@ const FILTERS: [NoticeGroup | "all", string][] = [["all", "전체"], ["new", "�
 const SORTS: [NoticeSort, string][] = [["deadline", "마감이 가까운 순"], ["recent", "최근 공고 순"]];
 const BADGE: Record<NoticeGroup, [string, string]> = { new: ["새 공고", styles.badgeNew], follow: ["팔로우", styles.badgeFollow], ignore: ["관심 없음", styles.badgeIgnored], closed: ["마감", styles.badgeClosed] };
 
+// 사용자 요청(2026-11-23): 이미 팔로우·관심 없음인 공고도 골라서 서로 바꿀 수 있다. 마감 공고만 고르지 않는다
+const selectableRow = (row: NoticeRow) => row.group !== "closed";
 const imminent = (row: NoticeRow) => row.group !== "closed" && row.days !== null && row.days <= IMMINENT_DAYS;
 function dday(row: NoticeRow): string {
   if (row.group === "closed") return "접수 종료";
@@ -33,7 +35,7 @@ function Row({ row, selecting, checked, onCheck, onDecide }: { row: NoticeRow; s
   const [badge, badgeClass] = BADGE[row.group];
   return (
     <li className={`${styles.row} ${checked ? styles.rowChecked : ""}`}>
-      {selecting && row.group === "new" ? (
+      {selecting && selectableRow(row) ? (
         <button type="button" role="checkbox" aria-checked={checked} aria-label={`${row.title} 고르기`} className={`${styles.rowCheck} ${checked ? styles.checkOn : ""}`} onClick={onCheck}>
           <span className={styles.checkBox} aria-hidden="true">{checked ? <Icon name="tick" size={16} /> : null}</span>
         </button>
@@ -80,7 +82,7 @@ export function NoticeList({ rows, counts }: { rows: NoticeRow[]; counts: Record
   const visible = rows.filter((r) => filter === "all" || r.group === filter);
   const ordered = sortNotices(visible, sort);
   const page = ordered.slice(0, shown);
-  const selectable = page.filter((r) => r.group === "new");
+  const selectable = page.filter(selectableRow);
 
   const run = (ids: string[], decision: FollowDecision, why = "") => startTransition(async () => {
     const result = await decideNotices(ids, decision, why);
@@ -128,7 +130,7 @@ export function NoticeList({ rows, counts }: { rows: NoticeRow[]; counts: Record
         </div>
       </div>
       {selecting ? (
-        <div className={styles.selectBar} role="region" aria-label="고른 공고 바꾸기">
+        <div className={styles.selectBar} role="region" aria-label="고른 공고 바꾸기" data-no-snap>
           <b className={styles.selectCount}>{picked.length}개 선택됨</b>
           <button type="button" className={styles.selectAction} disabled={busy || picked.length === 0} onClick={() => decide(picked, "follow")}>팔로우로 바꾸기</button>
           <button type="button" className={styles.selectAction} disabled={busy || picked.length === 0} onClick={() => decide(picked, "ignore")}>관심 없음으로 바꾸기</button>
@@ -137,7 +139,7 @@ export function NoticeList({ rows, counts }: { rows: NoticeRow[]; counts: Record
       ) : null}
       {message ? <p role="status" className={styles.message}>{message}</p> : null}
       {page.length === 0 ? <p className={styles.emptyRow}>이 칸에 해당하는 공고가 없어요.</p> : (
-        <ul className={styles.rows} aria-busy={busy}>
+        <ul className={styles.rows} aria-busy={busy} data-no-snap>
           {page.map((row) => <Row key={row.id} row={row} selecting={selecting} checked={picked.includes(row.id)} onCheck={() => toggle(row.id)} onDecide={(d) => decide([row.id], d)} />)}
         </ul>
       )}
