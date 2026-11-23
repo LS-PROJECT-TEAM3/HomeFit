@@ -108,3 +108,21 @@ export function parseGasFields(input: GasFieldsInput, sido: string | null): GasF
   if (!choices.includes(input.region)) return { ok: false, errors: { gasRegion: REGION_ERROR } };
   return { ok: true, value: { mj, month, region: input.region } };
 }
+
+export type GasYearView =
+  | { kind: "none" }
+  | { kind: "needRegion" }
+  | { kind: "ready"; year: GasYear; region: GasRegion; national: boolean; month: number; mj: number };
+
+/** spec 025 3단계: 내 집 값 → 난방비 탭에 보일 것. 사용량 없음(FR-006), 지역을 못 정함(FR-005), 12개월(FR-002·FR-003, E3 전국 비율) */
+export function gasYearFor(home: { sigunguCode: string; gasUsageMj: number | null; gasBillMonth: number | null; gasTariffRegion: string | null } | null): GasYearView {
+  if (!home || home.gasUsageMj === null || home.gasBillMonth === null) return { kind: "none" };
+  const sido = sidoOfSigungu(home.sigunguCode);
+  const choices = tariffRegionsFor(sido);
+  const regionName = choices.length === 1 ? choices[0] : choices.includes(home.gasTariffRegion ?? "") ? home.gasTariffRegion : null;
+  const region = findTariffRegion(regionName);
+  if (!region) return { kind: "needRegion" };
+  const { shares, national } = monthlyShares(shareSido(sido, regionName));
+  const year = yearlyGas({ mj: home.gasUsageMj, month: home.gasBillMonth, region, shares });
+  return { kind: "ready", year, region, national, month: home.gasBillMonth, mj: home.gasUsageMj };
+}

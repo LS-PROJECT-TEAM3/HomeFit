@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GAS_TARIFF, gasBill, type GasRegion } from "@/incident/gas-bill";
-import { GAS_SHARES, monthlyShares, parseGasFields, shareSido, sidoOfSigungu, tariffRegionsFor, yearlyGas } from "@/incident/gas-year";
+import { GAS_SHARES, gasYearFor, monthlyShares, parseGasFields, shareSido, sidoOfSigungu, tariffRegionsFor, yearlyGas } from "@/incident/gas-year";
 
 // spec 025 FR-001~005, E1~E5 (qa C-2501~2505)
 const gyeonggi = GAS_TARIFF.regions.find((r) => r.name === "경기도") as GasRegion;
@@ -126,5 +126,34 @@ describe("광주·전남(12)", () => {
     expect(parseGasFields({ usage: "2800", month: "1", region: "" }, "광주전남")).toMatchObject({ ok: false });
     expect(parseGasFields({ usage: "2800", month: "1", region: "광주시" }, "광주전남")).toEqual({ ok: true, value: { mj: 2800, month: 1, region: "광주시" } });
     expect(parseGasFields({ usage: "2800", month: "1", region: "" }, null)).toEqual({ ok: false, errors: { gasRegion: "내 집 지역으로 도시가스 요금표를 찾지 못했어요. 기본 정보의 시/도를 확인해 주세요." } });
+  });
+});
+
+// spec 025 3단계: 난방비 탭이 보일 것 고르기 (FR-002·FR-005·FR-006, E3)
+describe("gasYearFor (내 집 → 난방비 탭)", () => {
+  const home = { sigunguCode: "41390", gasUsageMj: 2800, gasBillMonth: 1, gasTariffRegion: null };
+  it("FR-006: 사용량이 없으면 none", () => {
+    expect(gasYearFor({ ...home, gasUsageMj: null, gasBillMonth: null })).toEqual({ kind: "none" });
+    expect(gasYearFor(null)).toEqual({ kind: "none" });
+  });
+  it("경기: 지역 자동(경기도), 경기 비율, 1월 = 계산기 값", () => {
+    const view = gasYearFor(home);
+    expect(view.kind).toBe("ready");
+    if (view.kind !== "ready") return;
+    expect(view.region.name).toBe("경기도");
+    expect(view.national).toBe(false);
+    expect(view.year.months[0].bill).toEqual(gasBill(gyeonggi, 2800));
+  });
+  it("FR-005: 도인데 지역을 안 골랐으면 needRegion, 고르면 ready", () => {
+    expect(gasYearFor({ ...home, sigunguCode: "51110" })).toEqual({ kind: "needRegion" });
+    const view = gasYearFor({ ...home, sigunguCode: "51110", gasTariffRegion: "강원 원주시" });
+    expect(view.kind === "ready" && view.region.name).toBe("강원 원주시");
+  });
+  it("광주전남은 고른 지역으로 비율(광주시 → 광주)", () => {
+    const view = gasYearFor({ ...home, sigunguCode: "12110", gasTariffRegion: "광주시" });
+    expect(view.kind === "ready" && view.year.annualMj).toBeCloseTo(2800 / GAS_SHARES.sido["광주"][0], 6);
+  });
+  it("E3: 시도를 모르면 지역을 못 찾아 needRegion(막대를 지어내지 않음)", () => {
+    expect(gasYearFor({ ...home, sigunguCode: "99999" })).toEqual({ kind: "needRegion" });
   });
 });
