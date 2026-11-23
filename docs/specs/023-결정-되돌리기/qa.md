@@ -2,7 +2,7 @@
 
 - 근거: spec v0.2, plan v0.1, docs/journeys/(CUJ-01 2·4단계, 예외 경로 E1)
 - 상태: Claude QA 진행 중
-- 요약: C 1/12 (부분 1), H 0/2
+- 요약: C 7/12 (부분 1), H 0/2
 - 최종 갱신: 2026-11-23
 
 ## 1. Claude QA
@@ -10,12 +10,12 @@
 |---|---|---|---|---|---|---|---|---|
 | C-2301 | FR-005, FR-008, E7 | 1 | 함수 시험 | `latestRejectReason`: 이력 없음 / 거절 하나 / 거절→거절 취소→거절 / 거절 취소만 | 없음 / 그 사유 / 마지막 사유 / 없음 | 통과 | `tests/actions-history.test.ts` 6개 통과(실패 먼저 확인: 모듈 없음). 거절→취소 뒤 null 사례 추가 | 2026-11-23 |
 | C-2302 | FR-005 | 1 | 코드 점검 + 미리보기 | 알림 상세·처리 기록·기록 찾기 자료가 이력을 시각 순으로 읽고 `latestRejectReason`을 쓴다. 거절한 알림 상세가 전과 같다 | 세 곳 모두 같은 함수, 화면 변화 없음 | 부분 통과(코드 점검 통과, 미리보기 확인 못 함: 로컬 로그인 필요, 3단계에서 확인) | 세 곳 모두 `created_at` 순 + `latestRejectReason`/`rejectReasonByIncident`(page.tsx, history.server.ts, chat.server.ts). 전체 83파일 782개 통과, tsc 0, lint 0, build 성공. ponytail-review: 고칠 것 없음, 있으면 좋은 것 1(묶기 줄이기) 반영 | 2026-11-23 |
-| C-2303 | FR-004, FR-005, SC-002 | 2 | SQL(되돌림) | 승인한 시험 사건에 `cancel_approval` | 이력에 approve·cancel_approve 두 줄, 일정 0개, 상태 pending, closed_at 비어 있음 | | | |
-| C-2304 | FR-006, SC-003 | 2 | SQL(되돌림) | 취소 뒤 `approve_incident` 두 번 | 일정 정확히 1개, 상태 approved | | | |
-| C-2305 | FR-008 | 2 | SQL(되돌림) | 거절한 사건에 `cancel_rejection` 뒤 승인 | cancel_reject 한 줄, pending → approved, 일정 1개 | | | |
-| C-2306 | E2, E3 | 2 | SQL(되돌림) | 승인 대기 사건에 `cancel_approval`, 새 사건에 `cancel_rejection` | `incident_not_approved` / `incident_not_rejected` 오류, 아무것도 바뀌지 않음 | | | |
-| C-2307 | FR-007, SC-004 | 2 | SQL(되돌림) | 다른 사람 사건에 두 함수, 다른 사람 notice_follows 줄 지우기, 로그인 없이(anon) 실행 | 사건 함수는 오류, 지우기는 0줄, anon은 권한 없음 | | | |
-| C-2308 | FR-007 | 2 | 보안 점검 | 마이그레이션 뒤 Supabase advisors | 0023 때문에 새로 생긴 경고 없음 | | | |
+| C-2303 | FR-004, FR-005, SC-002 | 2 | SQL(되돌림) | 승인한 시험 사건에 `cancel_approval` | 이력에 approve·cancel_approve 두 줄, 일정 0개, 상태 pending, closed_at 비어 있음 | 통과 | 공유 DB에서 DO 블록 끝에 예외로 되돌림(ROLLBACK), 시뮬레이터 사건(사용자 A)으로 authenticated 역할·JWT sub 설정. cancel_approval 뒤 일정 1→0, 상태 pending, closed_at 비어 있음, 이력 [approve, cancel_approve] | 2026-11-23 |
+| C-2304 | FR-006, SC-003 | 2 | SQL(되돌림) | 취소 뒤 `approve_incident` 두 번 | 일정 정확히 1개, 상태 approved | 통과 | 공유 DB에서 DO 블록 끝에 예외로 되돌림(ROLLBACK), 시뮬레이터 사건(사용자 A)으로 authenticated 역할·JWT sub 설정. 취소 뒤 approve_incident 두 번 → 상태 approved, 일정 1개 | 2026-11-23 |
+| C-2305 | FR-008 | 2 | SQL(되돌림) | 거절한 사건에 `cancel_rejection` 뒤 승인 | cancel_reject 한 줄, pending → approved, 일정 1개 | 통과 | 공유 DB에서 DO 블록 끝에 예외로 되돌림(ROLLBACK), 시뮬레이터 사건(사용자 A)으로 authenticated 역할·JWT sub 설정. cancel_rejection 뒤 pending, 승인 뒤 approved·일정 1개, 이력 [reject, cancel_reject, approve] | 2026-11-23 |
+| C-2306 | E2, E3 | 2 | SQL(되돌림) | 승인 대기 사건에 `cancel_approval`, 새 사건에 `cancel_rejection` | `incident_not_approved` / `incident_not_rejected` 오류, 아무것도 바뀌지 않음 | 통과 | 공유 DB에서 DO 블록 끝에 예외로 되돌림(ROLLBACK), 시뮬레이터 사건(사용자 A)으로 authenticated 역할·JWT sub 설정. 승인 대기에 cancel_approval → incident_not_approved, 새 사건에 cancel_rejection → incident_not_rejected, 연달아 두 번 취소 → 두 번째 incident_not_approved(E2) | 2026-11-23 |
+| C-2307 | FR-007, SC-004 | 2 | SQL(되돌림) | 다른 사람 사건에 두 함수, 다른 사람 notice_follows 줄 지우기, 로그인 없이(anon) 실행 | 사건 함수는 오류, 지우기는 0줄, anon은 권한 없음 | 통과 | 공유 DB에서 DO 블록 끝에 예외로 되돌림(ROLLBACK), 시뮬레이터 사건(사용자 A)으로 authenticated 역할·JWT sub 설정. 사용자 B가 A의 사건 취소 → incident_not_approved / incident_not_rejected, A의 notice_follows 지우기 0줄. anon: 함수 permission denied, 지우기 0줄. 되돌린 뒤 사건 상태·취소 줄 수·notice_follows 12줄 그대로 확인 | 2026-11-23 |
+| C-2308 | FR-007 | 2 | 보안 점검 | 마이그레이션 뒤 Supabase advisors | 0023 때문에 새로 생긴 경고 없음 | 통과 | advisors(security): 새 종류 경고 없음. cancel_approval·cancel_rejection이 기존 approve_incident·reject_incident와 같은 'authenticated가 SECURITY DEFINER 함수 실행' WARN에 들어감(의도: 사용자가 부르고 함수 안에서 auth.uid()로 본인 사건만). anon은 실행 권한 없음 | 2026-11-23 |
 | C-2309 | FR-001, FR-002, FR-003, E1, E6, SC-001 | 3 | SQL(되돌림) + 코드 점검 | 본인 notice_follows 줄 지우기, 없는 줄 지우기 | 지우면 "새 공고"(결정 없음), 없는 줄은 오류 없이 0줄. 다시 팔로우하면 decided_at 새로 | | | |
 | C-2310 | FR-001, FR-002, E5 | 3 | 미리보기 | 공고 상세 버튼 모양·이름·키보드(Tab·Enter), 저장 실패 때 문구 | 팔로우 중엔 "팔로우 풀기", 관심 없음엔 "관심 없음 취소", 실패하면 상태 그대로 + 안내 | | | |
 | C-2311 | FR-004, FR-008, E2 | 4 | 미리보기 | 승인한·거절한 알림 상세의 취소 버튼, 승인 취소 확인 창 문구, 키보드·Esc | 승인함엔 "승인 취소"(확인 창에 일정·체크 지워짐 안내), 거절함엔 "거절 취소" | | | |
@@ -36,3 +36,4 @@
 |---|---|
 | 2026-11-23 | 절차 A: C 12개, H 2개 등록 |
 | 2026-11-23 | 1단계: C-2301 통과, C-2302 부분 통과 |
+| 2026-11-23 | 2단계: 0023 공유 DB 적용, C-2303~2308 통과 |

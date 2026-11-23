@@ -217,6 +217,9 @@ export type Database = {
       is_admin: { Args: Record<never, never>; Returns: boolean };
       mark_incident_viewed: { Args: { p_incident_id: string }; Returns: undefined };
       reject_incident: { Args: { p_incident_id: string; p_reason: string }; Returns: undefined };
+      // spec 023 (0023): 승인 취소·거절 취소. 본인 사건만, 이력은 새 줄로
+      cancel_approval: { Args: { p_incident_id: string }; Returns: undefined };
+      cancel_rejection: { Args: { p_incident_id: string }; Returns: undefined };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
