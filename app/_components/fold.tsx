@@ -17,9 +17,17 @@ import styles from "@/app/_components/form.module.css";
 export function Fold({ title, status, open, tip, mark, children }: { title: string; status?: string; open?: boolean; tip?: string; mark?: "required" | "optional"; children: React.ReactNode }) {
   const memory = useContext(FoldMemory);
   const remembered = memory?.current.get(title) ?? false;
+  // 사용자 요청(2026-11-23): 머리를 눌러 펼치면 그 묶음이 화면 위쪽에 오게 옮긴다(저장 뒤 다시 그리거나 오류로 펼칠 때는 옮기지 않음)
+  const clicked = useRef(false);
+  const toggled = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    const details = e.currentTarget;
+    memory?.current.set(title, details.open);
+    if (details.open && clicked.current) details.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    clicked.current = false;
+  };
   return (
-    <details className={styles.fold} open={Boolean(open) || remembered} onToggle={(e) => memory?.current.set(title, e.currentTarget.open)}>
-      <summary className={styles.foldSummary}>
+    <details className={styles.fold} open={Boolean(open) || remembered} onToggle={toggled}>
+      <summary className={styles.foldSummary} onClick={(e) => { clicked.current = !e.defaultPrevented; }}>
         <span className={styles.foldHead}>
           <span className={styles.foldTitle}>{title}</span>
           {mark === "required" ? <><span className={styles.foldReq} aria-hidden="true">*</span><span className={styles.srOnly}>필수</span></> : null}
