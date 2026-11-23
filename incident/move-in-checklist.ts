@@ -1,4 +1,6 @@
 // spec 019 FR-001 (PRD FR-29): 입주 전 점검 항목과 저장 값 검사. 순수 함수. 안전·적합 판정은 하지 않는다
+// spec 024 (PRD FR-29 v1.22): 항목별 메모와 관심 주택마다 내 항목. 저장 칸(interest_homes.move_in_checklist)은 그대로,
+// 예전 값({키: true})도 그대로 읽힌다(FR-005). 저장 모양: { 키: true, notes: {키: 메모}, custom: [내 항목] }
 
 /** 키는 DB(interest_homes.move_in_checklist)에 남는다. 글은 spec 004 뼈대 때와 같다 */
 export const MOVE_IN_ITEMS = [
@@ -12,28 +14,120 @@ export const MOVE_IN_ITEMS = [
 ] as const;
 
 export type MoveInKey = (typeof MOVE_IN_ITEMS)[number]["key"];
-export type MoveInChecklist = Partial<Record<MoveInKey, true>>;
+export type CustomItem = { id: string; label: string; checked: boolean; note: string };
+export type MoveInChecklist = { checked: Partial<Record<MoveInKey, true>>; notes: Partial<Record<MoveInKey, string>>; custom: CustomItem[] };
+
+export const CUSTOM_MAX = 10;
+export const LABEL_MAX = 40;
+export const ITEM_NOTE_MAX = 200;
+const NOTE_MAX = 500;
+const ID_PATTERN = /^[a-z0-9]{6,12}$/;
 
 const KEYS = new Set<string>(MOVE_IN_ITEMS.map((item) => item.key));
-const NOTE_MAX = 500;
+/** "채광: …"의 앞부분. 화면·AI 도우미·같은 이름 검사가 같이 쓴다 */
+export const itemTitle = (label: string) => label.split(":")[0];
+const TITLES = new Set(MOVE_IN_ITEMS.map((item) => itemTitle(item.label)));
 
-/** E2: 목록에 있는 키의 true만 남긴다(목록이 바뀌어도 옛 키가 남지 않게) */
-export function parseChecklist(raw: unknown): MoveInChecklist {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return {};
-  const entries = Object.entries(raw).filter(([key, value]) => KEYS.has(key) && value === true);
-  return Object.fromEntries(entries.map(([key]) => [key, true])) as MoveInChecklist;
+export function emptyChecklist(): MoveInChecklist {
+  return { checked: {}, notes: {}, custom: [] };
 }
 
-export function checkedCount(checklist: MoveInChecklist): number {
-  return Object.keys(checklist).length;
+const isObject = (raw: unknown): raw is Record<string, unknown> => typeof raw === "object" && raw !== null && !Array.isArray(raw);
+
+function readNotes(raw: unknown): MoveInChecklist["notes"] {
+  if (!isObject(raw)) return {};
+  const entries = Object.entries(raw).filter(([key, value]) => KEYS.has(key) && typeof value === "string" && value.length <= ITEM_NOTE_MAX);
+  return Object.fromEntries(entries) as MoveInChecklist["notes"];
+}
+
+function readCustom(raw: unknown): CustomItem[] {
+  if (!Array.isArray(raw)) return [];
+  const items: CustomItem[] = [];
+  for (const value of raw) {
+    if (!isObject(value)) continue;
+    const { id, label, checked, note } = value;
+    if (typeof id !== "string" || !ID_PATTERN.test(id) || items.some((item) => item.id === id)) continue;
+    if (typeof label !== "string" || label.trim() === "" || label.trim().length > LABEL_MAX) continue;
+    const memo = typeof note === "string" && note.length <= ITEM_NOTE_MAX ? note : "";
+    items.push({ id, label, checked: checked === true, note: memo });
+  }
+  return items.slice(0, CUSTOM_MAX);
+}
+
+/** DB 값 → 점검. E5(spec 024)·E2(spec 019): 모르는 키·틀린 모양은 버린다 */
+export function parseChecklist(raw: unknown): MoveInChecklist {
+  if (!isObject(raw)) return emptyChecklist();
+  const checked = Object.fromEntries(Object.entries(raw).filter(([key, value]) => KEYS.has(key) && value === true)) as MoveInChecklist["checked"];
+  return { checked, notes: readNotes(raw.notes), custom: readCustom(raw.custom) };
+}
+
+/** 점검 → 저장 값. 메모·내 항목이 없으면 예전과 같은 모양({키: true}) */
+export function toStored(list: MoveInChecklist): Record<string, unknown> {
+  const notes = Object.fromEntries(Object.entries(list.notes).filter(([, note]) => typeof note === "string" && note.trim() !== ""));
+  return {
+    ...list.checked,
+    ...(Object.keys(notes).length ? { notes } : {}),
+    ...(list.custom.length ? { custom: list.custom } : {}),
+  };
+}
+
+/** FR-006: 확인한 수와 전체 수에 내 항목도 센다 */
+export function checkedCount(list: MoveInChecklist): number {
+  return Object.keys(list.checked).length + list.custom.filter((item) => item.checked).length;
+}
+
+export function totalCount(list: MoveInChecklist): number {
+  return MOVE_IN_ITEMS.length + list.custom.length;
+}
+
+/** E1~E3: 새 내 항목 이름 검사. existing은 이 집에 이미 있는 내 항목 이름 */
+export function checkCustomLabel(label: string, existing: readonly string[]): string | null {
+  const name = label.trim();
+  if (name === "") return "항목 이름을 적어 주세요.";
+  if (name.length > LABEL_MAX) return `항목 이름은 ${LABEL_MAX}자 안으로 줄여 주세요.`;
+  if (existing.length >= CUSTOM_MAX) return `내 항목은 집마다 ${CUSTOM_MAX}개까지 더할 수 있어요.`;
+  if (TITLES.has(name) || existing.some((other) => other.trim() === name)) return "이미 있는 항목이에요. 다른 이름을 적어 주세요.";
+  return null;
 }
 
 export type ChecklistFormResult = { ok: true; checklist: MoveInChecklist; note: string | null } | { ok: false; error: string };
 
-/** 저장할 값: 체크한 키 중 목록에 있는 것만, 메모는 500자 안(E2) */
-export function parseChecklistForm(input: { checked: readonly string[]; note: string }): ChecklistFormResult {
+const READ_FAILED = "점검 내용을 읽지 못했습니다. 페이지를 새로고침한 뒤 다시 저장해 주세요.";
+const tooLong = (title: string) => `"${title}" 메모는 ${ITEM_NOTE_MAX}자 안으로 줄여 주세요.`;
+
+/** 서버에서 다시 하는 검사(E1~E4). 문제가 있으면 첫 문구, 없으면 null */
+function formError(raw: Record<string, unknown>): string | null {
+  const notes = isObject(raw.notes) ? raw.notes : {};
+  const long = MOVE_IN_ITEMS.find((item) => typeof notes[item.key] === "string" && (notes[item.key] as string).length > ITEM_NOTE_MAX);
+  if (long) return tooLong(itemTitle(long.label));
+  const custom = Array.isArray(raw.custom) ? raw.custom.filter(isObject) : [];
+  if (custom.length > CUSTOM_MAX) return `내 항목은 집마다 ${CUSTOM_MAX}개까지 더할 수 있어요.`;
+  // 읽을 때 버려질 id(형식이 틀리거나 겹침)는 여기서 거절한다. 조용히 사라지지 않게(1단계 리뷰)
+  const ids = custom.map((item) => item.id);
+  if (ids.some((id, i) => typeof id !== "string" || !ID_PATTERN.test(id) || ids.indexOf(id) !== i)) return READ_FAILED;
+  for (let i = 0; i < custom.length; i += 1) {
+    const label = typeof custom[i].label === "string" ? (custom[i].label as string) : "";
+    const others = custom.slice(0, i).map((item) => String(item.label ?? ""));
+    const error = checkCustomLabel(label, others);
+    if (error) return error;
+    if (typeof custom[i].note === "string" && (custom[i].note as string).length > ITEM_NOTE_MAX) return tooLong(label.trim());
+  }
+  return null;
+}
+
+/** 화면이 보낸 저장 모양 JSON과 집 메모를 검사해 저장할 값으로 */
+export function parseChecklistForm(input: { checklist: string; note: string }): ChecklistFormResult {
   const note = input.note.trim();
   if (note.length > NOTE_MAX) return { ok: false, error: "메모는 500자 안으로 줄여 주세요." };
-  const checklist = Object.fromEntries(input.checked.filter((key) => KEYS.has(key)).map((key) => [key, true])) as MoveInChecklist;
-  return { ok: true, checklist, note: note === "" ? null : note };
+  let raw: unknown;
+  try {
+    raw = JSON.parse(input.checklist);
+  } catch {
+    return { ok: false, error: READ_FAILED };
+  }
+  if (!isObject(raw)) return { ok: false, error: READ_FAILED };
+  const error = formError(raw);
+  if (error) return { ok: false, error };
+  const parsed = parseChecklist(raw);
+  return { ok: true, checklist: { ...parsed, custom: parsed.custom.map((item) => ({ ...item, label: item.label.trim() })) }, note: note === "" ? null : note };
 }

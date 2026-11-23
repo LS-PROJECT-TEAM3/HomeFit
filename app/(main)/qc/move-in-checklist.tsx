@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Icon } from "@/app/_components/icons";
 import { InfoTip } from "@/app/_components/info-tip";
-import { checkedCount, MOVE_IN_ITEMS, type MoveInChecklist as Checklist } from "@/incident/move-in-checklist";
+import { checkedCount, MOVE_IN_ITEMS, toStored, totalCount, type MoveInChecklist as Checklist } from "@/incident/move-in-checklist";
 import { saveMoveInChecklist } from "./checklist/actions";
 import styles from "./qc.module.css";
 
@@ -49,7 +49,7 @@ function HomePicker({ homes, current }: { homes: CheckHome[]; current: CheckHome
               <li key={h.id}>
                 <Link href={`/qc/checklist?home=${h.id}`} className={`${styles.pickItem} ${h.id === current.id ? styles.pickItemOn : ""}`} aria-current={h.id === current.id ? "page" : undefined}>
                   <span className={styles.pickNames}><span className={styles.pickItemName}>{h.name}</span>{h.place ? <span className={styles.pickItemPlace}>{h.place}</span> : null}</span>
-                  <span className={styles.pickCount}>{checkedCount(h.checklist)} / {MOVE_IN_ITEMS.length} 확인</span>
+                  <span className={styles.pickCount}>{checkedCount(h.checklist)} / {totalCount(h.checklist)} 확인</span>
                 </Link>
               </li>
             ))}
@@ -69,7 +69,7 @@ function HomePicker({ homes, current }: { homes: CheckHome[]; current: CheckHome
 
 export function MoveInChecklist({ homes, current }: { homes: CheckHome[]; current: CheckHome }) {
   const [state, formAction, pending] = useActionState(saveMoveInChecklist, {});
-  const [checked, setChecked] = useState<Set<string>>(() => new Set(Object.keys(current.checklist)));
+  const [checked, setChecked] = useState<Set<string>>(() => new Set(Object.keys(current.checklist.checked)));
   const [note, setNote] = useState(current.note);
   const [savedKeys, setSavedKeys] = useState(() => [...checked].sort().join() + "|" + current.note);
   const dirty = [...checked].sort().join() + "|" + note !== savedKeys;
@@ -90,9 +90,11 @@ export function MoveInChecklist({ homes, current }: { homes: CheckHome[]; curren
       {/* data-snap-section: 항목을 누르면 "점검 항목" 영역이 메뉴·탭 아래에 맞춰진다(focus-scroll.tsx) */}
       <form action={formAction} className={styles.checkForm} aria-label={`${current.name} 입주 전 점검`} data-snap-section>
         <input type="hidden" name="homeId" value={current.id} />
+        {/* spec 024: 저장 모양 JSON 하나로 보낸다. 항목 메모·내 항목은 2단계 화면 전까지 읽은 값을 그대로 돌려준다 */}
+        <input type="hidden" name="checklist" value={JSON.stringify(toStored({ ...current.checklist, checked: Object.fromEntries([...checked].map((key) => [key, true])) }))} />
         <div className={styles.checkHead}>
           <h2 className={styles.cardTitle}>점검 항목</h2>
-          <span className={styles.checkCount}>확인한 항목<span className={styles.checkNumber}>{checked.size}<span className={styles.checkTotal}> / {MOVE_IN_ITEMS.length}</span></span></span>
+          <span className={styles.checkCount}>확인한 항목<span className={styles.checkNumber}>{checked.size + current.checklist.custom.filter((item) => item.checked).length}<span className={styles.checkTotal}> / {totalCount(current.checklist)}</span></span></span>
         </div>
         <ul className={styles.checkGrid}>
           {MOVE_IN_ITEMS.map((item) => {

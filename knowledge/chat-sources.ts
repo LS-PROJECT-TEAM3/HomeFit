@@ -1,6 +1,6 @@
 // spec 004 v0.5 FR-007 (사용자 결정 2026-11-19): 챗봇 자료 중 청년 주거 정책·관심 주택·하자 기록을 글로 만든다. 순수 함수
 import { DEFECT_KINDS, type DefectKind } from "@/incident/defect-form";
-import { MOVE_IN_ITEMS, type MoveInChecklist } from "@/incident/move-in-checklist";
+import { MOVE_IN_ITEMS, checkedCount, itemTitle, totalCount, type MoveInChecklist } from "@/incident/move-in-checklist";
 import { realCost, type CostInput } from "@/incident/real-cost";
 import type { ChatSource } from "@/knowledge/chat";
 import type { Policy } from "@/watch/youth-policy";
@@ -30,12 +30,10 @@ export type InterestHomeFacts = Omit<CostInput, "estimatedKwh" | "estimatedEnerg
   id: string; name: string; housingType: string; deposit: number | null; checklist: MoveInChecklist; note: string | null;
 };
 
-/** 점검 항목 이름은 "채광: …"의 앞부분만 */
-const shortLabel = (label: string) => label.split(":")[0];
-
 function checklistText(checklist: MoveInChecklist, note: string | null): string {
-  const done = MOVE_IN_ITEMS.filter((item) => checklist[item.key]).map((item) => shortLabel(item.label));
-  const head = `입주 전 점검 ${done.length}/${MOVE_IN_ITEMS.length} 확인${done.length ? `(${done.join(", ")})` : ""}`;
+  // spec 024 FR-006: 확인 수와 이름에 내 항목도 넣는다
+  const done = [...MOVE_IN_ITEMS.filter((item) => checklist.checked[item.key]).map((item) => itemTitle(item.label)), ...checklist.custom.filter((item) => item.checked).map((item) => item.label)];
+  const head = `입주 전 점검 ${checkedCount(checklist)}/${totalCount(checklist)} 확인${done.length ? `(${done.join(", ")})` : ""}`;
   return note ? `${head} · 메모: ${note}` : head;
 }
 
