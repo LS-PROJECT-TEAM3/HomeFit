@@ -27,10 +27,13 @@
   background: var(--label-normal);
 }
 
+/* 큰 탭부터 목록까지 한 영역(스크롤·누름 맞춤 기준, listing-head.tsx) */
+.snapOuter { margin-top: 32px; }
+.snapArea { display: flex; flex-direction: column; }
+
 .segments {
   display: flex;
   gap: 8px;
-  margin-top: 32px;
 }
 
 .segment {
@@ -422,20 +425,28 @@ select.popInput {
 }
 
 /* 알림 목록(spec 022, 보드 없음: 맞춤 공고 목록과 같은 모양) */
-.statusNav { margin-top: 32px; }
-.statusNav .filter { text-decoration: none; }
-
-.periodForm {
+/* 알림 목록 도구 줄: 왼쪽 상태 칩, 오른쪽 기간 글자 탭(덜 눈에 띄게) */
+.alertTools {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin: 16px 0 24px;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin: 32px 0 24px;
 }
+.alertTools .filter { text-decoration: none; }
+.alertTools + .emptyCard { margin-top: 0; }
 
-.periodForm + .emptyCard { margin-top: 0; }
-
-.periodSelect { width: auto; min-width: 160px; }
+.periodBox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.periodQuick { display: inline-flex; border: 1px solid var(--line-solid-normal); border-radius: var(--radius-control); overflow: hidden; }
+.periodSeg { display: inline-flex; align-items: center; justify-content: center; min-width: 56px; min-height: 42px; padding: 0 12px; background: var(--background-elevated-normal); color: var(--label-normal); font-size: 15px; text-decoration: none; }
+.periodSeg + .periodSeg { border-left: 1px solid var(--line-solid-normal); }
+.periodSeg:hover { background: var(--background-normal-alternative); }
+.periodSeg[aria-current="page"] { background: var(--primary-normal); color: var(--static-white); font-weight: 700; }
+.periodSeg:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: -3px; }
+.periodDates { display: inline-flex; align-items: center; gap: 8px; color: var(--label-alternative); }
+.dateInput { min-height: 44px; padding: 0 10px; border: 1px solid var(--line-solid-normal); border-radius: var(--radius-control); background: var(--background-elevated-normal); color: var(--label-normal); font: inherit; font-size: 15px; font-variant-numeric: tabular-nums; }
+.dateInput:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
 
 /* 공고 목록 */
 .listSection {
@@ -872,7 +883,8 @@ select.popInput {
   .title { font-size: 44px; }
   .titleLine { height: 56px; margin-top: 28px; }
 
-  .segments { gap: 12px; margin-top: 48px; }
+  .snapOuter { margin-top: 48px; }
+  .segments { gap: 12px; }
   .segment { min-height: 60px; font-size: 18px; }
   .segmentCount { font-size: 15px; }
 

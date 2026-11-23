@@ -5,6 +5,7 @@ import { EDITABLE_FIELDS, type EditTable, type EditValue } from "@/incident/admi
 import { saveMemberEdit, type EditState } from "./edit-actions";
 import formStyles from "@/app/_components/form.module.css";
 import dialogStyles from "@/app/(main)/incidents/[id]/detail.module.css";
+import adminStyles from "../../admin.module.css";
 
 type Props = { table: EditTable; targetId: string; memberId: string; title: string; values: Record<string, EditValue> };
 
@@ -17,7 +18,7 @@ export function EditDialog({ table, targetId, memberId, title, values }: Props) 
   const shown = (name: string) => state.values?.[name] ?? (values[name] === null || values[name] === undefined ? "" : String(values[name]));
   return (
     <>
-      <button type="button" className={dialogStyles.cancel} onClick={() => dialog.current?.showModal()}>{title} 고치기</button>
+      <button type="button" className={adminStyles.textButton} onClick={() => dialog.current?.showModal()} aria-label={`${title} 고치기`}>고치기</button>
       <dialog ref={dialog} className={dialogStyles.dialog} aria-labelledby={id("title")}>
         <h2 id={id("title")}>{title} 고치기</h2>
         {state.saved ? <p className={formStyles.notice} role="status">고쳤습니다. 회원 상세의 수정 기록에 남았습니다.</p> : null}

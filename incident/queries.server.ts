@@ -1,5 +1,5 @@
 import type { ChecklistItem } from "@/incident/checklist";
-import { periodStart, type IncidentFilter } from "@/incident/filter";
+import { dateRangeBounds, type IncidentFilter } from "@/incident/filter";
 import { createClient, requireUserId } from "@/lib/supabase/server";
 import type { IncidentFacts } from "@/incident/detect";
 import type { HumidityFacts } from "@/incident/humidity-detect";
@@ -31,7 +31,7 @@ function toSummary(row: SummaryRow): IncidentSummary {
   };
 }
 
-export async function listIncidents(filter: IncidentFilter, now: Date): Promise<IncidentSummary[]> {
+export async function listIncidents(filter: IncidentFilter): Promise<IncidentSummary[]> {
   const [supabase, userId] = await Promise.all([createClient(), requireUserId()]);
   let query = supabase
     .from("incidents")
@@ -40,8 +40,9 @@ export async function listIncidents(filter: IncidentFilter, now: Date): Promise<
     .order("detected_at", { ascending: false })
     .limit(PAGE_SIZE);
   if (filter.status !== "all") query = query.eq("status", filter.status);
-  const since = periodStart(filter.period, now);
+  const { since, until } = dateRangeBounds(filter.from, filter.to);
   if (since) query = query.gte("detected_at", since);
+  if (until) query = query.lt("detected_at", until);
   const { data, error } = await query;
   if (error) throw new Error("사건을 불러오지 못했습니다.");
   return data.map(toSummary);
