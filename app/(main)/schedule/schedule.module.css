@@ -94,3 +94,6 @@
   margin: 0;
   color: var(--color-danger-text);
 }
+
+/* spec 026: 정책 원문 제출 서류는 원문 줄바꿈 그대로 */
+.preLine { white-space: pre-line; }

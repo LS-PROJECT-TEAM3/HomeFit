@@ -6,6 +6,9 @@ import { conditionChips, daysLeft } from "@/incident/notice-list";
 import { listMyMatchedNotices } from "@/incident/notices.server";
 import { policyKinds } from "@/incident/policy-match";
 import { listMyPolicies, type PolicyListResult } from "@/incident/policies.server";
+import { listMyPolicyFollows } from "@/incident/policy-follows.server";
+import { followedRowIds } from "@/incident/policy-schedule";
+import { currentUserId } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import type { Policy } from "@/watch/youth-policy";
 import { ConditionBar } from "../notices/condition-bar";
@@ -29,9 +32,15 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/policy">["s
   const override = readOverride(await searchParams);
   let result: PolicyListResult;
   let noticeCount: number | null = null;
+  // 3단계 리뷰: 팔로우 표시는 덧붙는 정보라, 못 읽으면 목록은 보이고 표시만 숨긴다(null)
+  let follows: string[] | null;
   try {
-    const [policies, notices] = await Promise.all([listMyPolicies(today, override), listMyMatchedNotices(today, override).catch(() => null)]);
+    const userId = await currentUserId();
+    const [policies, notices, myFollows] = await Promise.all([
+      listMyPolicies(today, override), listMyMatchedNotices(today, override).catch(() => null), userId ? listMyPolicyFollows(userId).catch(() => null) : [],
+    ]);
     result = policies;
+    follows = myFollows;
     noticeCount = notices?.hasCondition ? notices.items.length : null;
   } catch {
     return <LoadError>청년 주거 정책을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
@@ -49,9 +58,11 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/policy">["s
     );
   }
   const names = await sigunguNames(result.condition.sidoCode);
+  // spec 026 FR-002, E5: 상세와 같게 정책 ID가 같은 줄만 팔로우 중
+  const followed = followedRowIds(result.items.map(({ policy }) => ({ id: policy.externalId })), follows ?? []);
   const rows: PolicyRow[] = result.items.map(({ policy }) => ({
     id: policy.externalId, title: policy.title, kinds: policyKinds(policy), agency: policy.agency ?? "운영 기관 공고문 확인", ages: ages(policy),
-    periodKind: policy.periodKind, days: daysLeft(policy.applyEnd, today), deadline: policy.applyEnd,
+    periodKind: policy.periodKind, days: daysLeft(policy.applyEnd, today), deadline: policy.applyEnd, followed: followed.has(policy.externalId),
   }));
   return (
     <>
@@ -62,7 +73,7 @@ async function Listing({ searchParams }: { searchParams: PageProps<"/policy">["s
           <h2 className={styles.emptyTitle}>조건에 맞는 정책이 아직 없어요</h2>
           <p className={styles.emptyText}>위 칩에서 지역이나 대상을 넓혀 보세요. 정책은 하루 한 번 새로 받아 와요.</p>
         </section>
-      ) : <PolicyList rows={rows} />}
+      ) : <PolicyList rows={rows} followsFailed={follows === null} />}
     </>
   );
 }

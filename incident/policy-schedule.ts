@@ -28,9 +28,10 @@ export function policyDueText(dueDate: string | null, periodKind: Policy["period
   return periodKind === "always" ? "상시 신청, 공고문 확인" : "신청 기간 공고문 확인";
 }
 
-/** FR-002: "팔로우 중"만 보기 */
-export function filterFollowed<T extends { id: string }>(rows: readonly T[], followed: ReadonlySet<string>): T[] {
-  return rows.filter((row) => followed.has(row.id));
+/** FR-002, E5: 목록에서 "팔로우 중"인 줄. 상세와 같게 정책 ID가 같을 때만(같은 이름 묶음의 다른 지역 건은 아님, 사용자 결정 2026-11-23) */
+export function followedRowIds(rows: readonly { id: string }[], followedIds: readonly string[]): Set<string> {
+  const ids = new Set(followedIds);
+  return new Set(rows.filter((row) => ids.has(row.id)).map((row) => row.id));
 }
 
 // DB 함수 add_policy_to_schedule이 던지는 이유(마이그레이션 0025) → 무엇이 안 됐는지 + 할 일 (E2·E4)

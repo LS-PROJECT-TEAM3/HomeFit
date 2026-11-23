@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addPolicyToScheduleError, buildPolicyChecklist, filterFollowed, policyDueText, POLICY_SOURCE } from "@/incident/policy-schedule";
+import { addPolicyToScheduleError, buildPolicyChecklist, followedRowIds, policyDueText, POLICY_SOURCE } from "@/incident/policy-schedule";
 import { scheduleOrigin } from "@/incident/schedule-origin";
 
 // spec 026 FR-002~005, E2·E4 (qa C-2601~2604)
@@ -33,11 +33,14 @@ describe("policyDueText (C-2602)", () => {
   });
 });
 
-describe("filterFollowed (C-2603)", () => {
+describe("followedRowIds (C-2603, E5)", () => {
   const rows = [{ id: "P1" }, { id: "P2" }, { id: "P3" }];
-  it("팔로우한 정책 ID만, 순서 그대로", () => {
-    expect(filterFollowed(rows, new Set(["P3", "P1"]))).toEqual([{ id: "P1" }, { id: "P3" }]);
-    expect(filterFollowed(rows, new Set())).toEqual([]);
+  it("팔로우한 정책 ID의 줄만", () => {
+    expect(followedRowIds(rows, ["P3"])).toEqual(new Set(["P3"]));
+    expect(followedRowIds(rows, [])).toEqual(new Set());
+  });
+  it("E5(사용자 결정 \"ID가 같을 때만\"): 같은 이름 묶음의 다른 지역 건(P9)을 팔로우해도 대표 줄은 팔로우 중이 아님", () => {
+    expect(followedRowIds(rows, ["P9"])).toEqual(new Set());
   });
 });
 

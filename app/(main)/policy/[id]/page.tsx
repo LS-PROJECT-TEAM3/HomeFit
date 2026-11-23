@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
-import { Icon } from "@/app/_components/icons";
 import { LoadError, Loading } from "@/app/_components/states";
 import { describeDeadline } from "@/incident/checklist";
 import { policyKinds, type PolicyKind } from "@/incident/policy-match";
 import { getOrCreatePolicySummary } from "@/incident/policy-summary.server";
 import { getPolicy } from "@/incident/policies.server";
+import { policyFollowState } from "@/incident/policy-follows.server";
+import { currentUserId } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { PolicyHead } from "./policy-follow";
 import { toKstDate } from "@/watch/kst";
 import type { Policy } from "@/watch/youth-policy";
 import styles from "../../notices/[id]/detail.module.css";
@@ -57,9 +60,13 @@ async function AiSummary({ policy }: { policy: Policy }) {
 async function Detail({ params }: { params: PageProps<"/policy/[id]">["params"] }) {
   await connection();
   const { id } = await params;
+  const userId = await currentUserId();
+  if (!userId) redirect("/login");
+  const policyId = decodeURIComponent(id);
   let policy: Policy | null;
+  let follow: { followed: boolean; scheduleId: string | null };
   try {
-    policy = await getPolicy(decodeURIComponent(id));
+    [policy, follow] = await Promise.all([getPolicy(policyId), policyFollowState(userId, policyId)]);
   } catch {
     return <LoadError>정책을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
@@ -69,14 +76,9 @@ async function Detail({ params }: { params: PageProps<"/policy/[id]">["params"] 
   const ages = policy.minAge === null && policy.maxAge === null ? "나이 조건은 원문 확인" : `만 ${policy.minAge ?? "?"}~${policy.maxAge ?? "?"}세`;
   return (
     <>
-      <section className={styles.headCard} aria-labelledby="policy-title">
-        {kind ? <span className={styles.badges}><span className={`${styles.badge} ${styles.badgeIgnored}`}>{KIND_LABELS[kind]}</span></span> : null}
-        <h1 id="policy-title" className={styles.title}>{policy.title}</h1>
-        <div className={styles.headFoot}>
-          <span className={styles.announced}>{policy.agency ?? "운영 기관 원문 확인"}</span>
-          {policy.url ? <a href={policy.url} target="_blank" rel="noopener noreferrer" className={styles.textLink}>정책 원문 보기<span className={styles.srOnly}> (새 창)</span><Icon name="chevron-right" size={18} /></a> : <span className={styles.help}>원문 링크가 없어요. 운영 기관에 문의해 주세요.</span>}
-        </div>
-      </section>
+      {/* spec 026: 공고 상세와 같은 머리(배지 + 북마크, 팔로우하면 내 일정에 추가) */}
+      <PolicyHead policyId={policy.externalId} title={policy.title} kindLabel={kind ? KIND_LABELS[kind] : null} agency={policy.agency ?? "운영 기관 원문 확인"}
+        url={policy.url} initialFollowed={follow.followed} initialScheduleId={follow.scheduleId} />
       <section className={styles.card} aria-labelledby="policy-sum-title">
         <div className={styles.cardHead}>
           <h2 id="policy-sum-title" className={styles.cardTitle}>정책 핵심 요약</h2>
