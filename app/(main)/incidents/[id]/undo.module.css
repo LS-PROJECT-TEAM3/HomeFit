@@ -1,0 +1,23 @@
+/* spec 023: 승인함·거절함 줄의 되돌리기 버튼. 글자 링크와 같은 모양(alert.module.css .textLink) */
+.undoGroup { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+
+.undoButton {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+
+.undoButton:disabled { opacity: 0.6; cursor: progress; }
+
+.undoButton:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}

@@ -12,6 +12,7 @@ import { SavedNotice } from "@/app/_components/saved-notice";
 import { useFirstError } from "@/app/_components/use-first-error";
 import { SigunguField } from "../conditions/sigungu-field";
 import { saveHome, type HomeState } from "./actions";
+import { GasFold } from "./gas-fold";
 import type { MyHome } from "./load";
 import styles from "@/app/_components/form.module.css";
 
@@ -74,8 +75,8 @@ function AreaField({ value, unit, error }: { value: string; unit: string; error?
   );
 }
 
-function BasicFold({ values, errors, expand }: { values: HomeFormInput; errors: Errors } & FoldOpen) {
-  const [sidoCode, setSidoCode] = useState(values.sidoCode);
+// spec 025 2단계 리뷰: 고른 시도를 HomeFields가 들고 있어 도시가스 묶음의 요금 지역 칸이 바로 따라간다
+function BasicFold({ values, errors, expand, sidoCode, setSidoCode }: { values: HomeFormInput; errors: Errors; sidoCode: string; setSidoCode: (code: string) => void } & FoldOpen) {
   return (
     <Fold title="기본 정보" status={filledStatus([values.sigunguCode, values.housingType, values.exclusiveArea, values.windowType])} open={expand || anyError(errors, ["sidoCode", "sigunguCode", "housingType", "exclusiveArea", "windowType"])}>
       <div className={styles.field}>
@@ -170,11 +171,13 @@ function TransitFold({ costs, errors, expand }: { costs: Costs; errors: Errors }
 /** settings: 설정 탭(취소/저장). onboarding: 첫 설정 1단계(아래에 붙는 "1 / 2 단계 · 다음" 줄, 저장되면 2단계로) */
 export type HomeFormMode = "settings" | "onboarding";
 
-type FieldsProps = { values: HomeFormInput; costs: Costs; state: HomeState; action: (formData: FormData) => void; pending: boolean; mode: HomeFormMode; extra?: ReactNode };
+type Gas = NonNullable<HomeState["gas"]>;
+type FieldsProps = { values: HomeFormInput; costs: Costs; gas: Gas; state: HomeState; action: (formData: FormData) => void; pending: boolean; mode: HomeFormMode; extra?: ReactNode };
 
-function HomeFields({ values, costs, state, action, pending, mode, extra }: FieldsProps) {
+function HomeFields({ values, costs, gas, state, action, pending, mode, extra }: FieldsProps) {
   const errors = state.errors ?? {};
   const expand = mode === "onboarding";
+  const [sidoCode, setSidoCode] = useState(values.sidoCode);
   const formRef = useRef<HTMLFormElement>(null);
   useFirstError(formRef, state.errors);
   return (
@@ -182,10 +185,11 @@ function HomeFields({ values, costs, state, action, pending, mode, extra }: Fiel
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
       {state.saved && mode === "settings" ? <SavedNotice /> : null}
       {mode === "onboarding" ? <p className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</p> : null}
-      <BasicFold values={values} errors={errors} expand={expand} />
+      <BasicFold values={values} errors={errors} expand={expand} sidoCode={sidoCode} setSidoCode={setSidoCode} />
       <ContractFold values={values} errors={errors} expand={expand} />
       <ManagementFold values={values} costs={costs} errors={errors} expand={expand} />
       <TransitFold costs={costs} errors={errors} expand={expand} />
+      {mode === "settings" ? <GasFold sidoCode={sidoCode} values={gas} errors={errors} /> : null}
       {extra}
       {mode === "settings" ? (
         <div className={styles.actions}>
@@ -209,13 +213,14 @@ export function HomeForm({ initial, mode = "settings", extra }: { initial: MyHom
   const [state, action, pending] = useActionState<HomeState, FormData>(saveHome, {});
   const values = state.values ?? toInput(initial);
   const costs = state.costs ?? costInput(initial);
+  const gas = state.gas ?? { usage: initial?.gasUsageMj?.toString() ?? "", month: initial?.gasBillMonth?.toString() ?? "", region: initial?.gasTariffRegion ?? "" };
   // 첫 설정: 저장되면 2단계(공고/정책 조건)로
   useEffect(() => {
     if (mode === "onboarding" && state.saved) router.push("/onboarding?step=2");
   }, [mode, state.saved, router]);
   return (
     <FoldMemoryProvider>
-      <HomeFields key={JSON.stringify([values, costs])} values={values} costs={costs} state={state} action={action} pending={pending} mode={mode} extra={extra} />
+      <HomeFields key={JSON.stringify([values, costs, gas])} values={values} costs={costs} gas={gas} state={state} action={action} pending={pending} mode={mode} extra={extra} />
     </FoldMemoryProvider>
   );
 }

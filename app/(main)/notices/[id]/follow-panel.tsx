@@ -5,7 +5,7 @@ import { useRef, useState, useTransition } from "react";
 import { Icon } from "@/app/_components/icons";
 import type { FollowDecision } from "@/incident/matched";
 import { IGNORE_REASONS } from "@/incident/notice-list";
-import { addNoticeToSchedule, followNotice, ignoreNotice } from "./actions";
+import { addNoticeToSchedule, clearNoticeDecision, followNotice, ignoreNotice } from "./actions";
 import styles from "./detail.module.css";
 
 // IA NT_080100_PG 공고 상세 머리 (FR-020, spec 001 v0.5 → spec 022 캔버스 v2-s4-pc·s4-follow·s4-skip): 상태 배지, 팔로우·관심 없음 버튼,
@@ -30,6 +30,13 @@ export function FollowPanel({ announcementId, title, announcedOn, url, initial, 
       setError(result.error ?? null);
       if (result.decision) setDecision(result.decision);
     });
+  // spec 023 FR-001·FR-002: 결정을 지워 "새 공고"로. 실패하면 상태는 그대로 두고 문구만(E5)
+  const clear = () =>
+    startTransition(async () => {
+      const result = await clearNoticeDecision(announcementId);
+      setError(result.error ?? null);
+      if (result.cleared) setDecision("new");
+    });
   const [badge, badgeClass] = BADGE[decision];
 
   return (
@@ -37,7 +44,17 @@ export function FollowPanel({ announcementId, title, announcedOn, url, initial, 
       {decision === "ignore" ? (
         <div className={styles.banner} role="status">
           <span>관심 없음으로 표시한 공고예요. 목록 맨 아래에 모아 둬요.</span>
-          <button type="button" className={styles.bannerAction} disabled={pending} onClick={() => run(() => followNotice(announcementId))}>팔로우로 바꾸기</button>
+          <span className={styles.bannerActions}>
+            <button type="button" className={styles.bannerAction} disabled={pending} onClick={clear}>관심 없음 취소</button>
+            <button type="button" className={styles.bannerAction} disabled={pending} onClick={() => run(() => followNotice(announcementId))}>팔로우로 바꾸기</button>
+          </span>
+        </div>
+      ) : null}
+      {/* spec 023 FR-001: 휴대폰은 아이콘 설명이 안 보이니 글자 버튼으로도 둔다 */}
+      {decision === "follow" ? (
+        <div className={styles.banner} role="status">
+          <span>팔로우 중인 공고예요. 이 공고가 바뀌면 알림을 받아요.</span>
+          <button type="button" className={styles.bannerAction} disabled={pending} onClick={clear}>팔로우 풀기</button>
         </div>
       ) : null}
       <section className={styles.headCard} aria-labelledby="notice-title">
@@ -48,10 +65,11 @@ export function FollowPanel({ announcementId, title, announcedOn, url, initial, 
             {simulated ? <span className={`${styles.badge} ${styles.badgeIgnored}`}>가짜 공고</span> : null}
           </span>
           <span className={styles.headActions}>
-            <button type="button" className={`${styles.iconButton} ${decision === "follow" ? styles.iconOn : ""}`} aria-pressed={decision === "follow"} aria-label={decision === "follow" ? "팔로우 중" : "팔로우"} title={decision === "follow" ? "팔로우 중" : "팔로우"}
-              disabled={pending || decision === "follow"} onClick={() => run(() => followNotice(announcementId))}><Icon name="bookmark" size={22} /></button>
-            <button type="button" className={`${styles.iconButton} ${decision === "ignore" ? styles.iconOn : ""}`} aria-pressed={decision === "ignore"} aria-label={decision === "ignore" ? "관심 없음으로 표시함" : "관심 없음"} title={decision === "ignore" ? "관심 없음으로 표시함" : "관심 없음"}
-              disabled={pending || decision === "ignore"} onClick={() => { setReason(IGNORE_REASONS[0]); dialog.current?.showModal(); }}><Icon name="ban" size={22} /></button>
+            {/* spec 023: 눌린 버튼을 다시 누르면 결정을 지운다(팔로우 풀기·관심 없음 취소). 이름은 그대로 두고 눌림 상태로 알린다 */}
+            <button type="button" className={`${styles.iconButton} ${decision === "follow" ? styles.iconOn : ""}`} aria-pressed={decision === "follow"} aria-label="팔로우" title={decision === "follow" ? "팔로우 풀기" : "팔로우"}
+              disabled={pending} onClick={() => (decision === "follow" ? clear() : run(() => followNotice(announcementId)))}><Icon name="bookmark" size={22} /></button>
+            <button type="button" className={`${styles.iconButton} ${decision === "ignore" ? styles.iconOn : ""}`} aria-pressed={decision === "ignore"} aria-label="관심 없음" title={decision === "ignore" ? "관심 없음 취소" : "관심 없음"}
+              disabled={pending} onClick={() => { if (decision === "ignore") { clear(); return; } setReason(IGNORE_REASONS[0]); dialog.current?.showModal(); }}><Icon name="ban" size={22} /></button>
           </span>
         </div>
         <h1 id="notice-title" className={styles.title}>{title}</h1>

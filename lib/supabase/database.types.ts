@@ -23,6 +23,8 @@ type HomeRow = {
   window_type: string; created_by: string; updated_at: string;
   // 0020 (spec 009): 실질 주거비 칸(모두 선택)
   energy_cost: number | null; electricity_kwh: number | null; transit_fare: number | null; trips_per_day: number | null; commute_days: number | null;
+  // 0024 (spec 025): 고지서 한 장(사용량·달은 함께), 도에서만 요금 지역
+  gas_usage_mj: number | null; gas_bill_month: number | null; gas_tariff_region: string | null;
 };
 
 // ERD interest_homes (마이그레이션 0020, spec 009)
@@ -145,7 +147,7 @@ export type Database = {
       >;
       interest_homes: Table<InterestHomeRow, Optional<InterestHomeRow, "id" | "exclusive_area_m2" | "deposit" | "maintenance_fee" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days" | "created_at" | "updated_at" | "move_in_checklist" | "move_in_note">>;
       interest_areas: Table<InterestAreaRow, Optional<InterestAreaRow, "id" | "last_median_value" | "last_median_deposit" | "created_at">>;
-      homes: Table<HomeRow, Optional<HomeRow, "id" | "contract_type" | "deposit" | "monthly_rent" | "maintenance_fee" | "contract_end_date" | "updated_at" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days">>;
+      homes: Table<HomeRow, Optional<HomeRow, "id" | "contract_type" | "deposit" | "monthly_rent" | "maintenance_fee" | "contract_end_date" | "updated_at" | "energy_cost" | "electricity_kwh" | "transit_fare" | "trips_per_day" | "commute_days" | "gas_usage_mj" | "gas_bill_month" | "gas_tariff_region">>;
       indoor_measurements: Table<IndoorMeasurementRow, Optional<IndoorMeasurementRow, "id" | "created_at">>;
       sources: Table<SourceRow, Optional<SourceRow, "enabled">>;
       runs: Table<RunRow, Optional<RunRow, "id" | "triggered_by" | "status" | "error_message" | "started_at" | "finished_at">>;
@@ -217,6 +219,9 @@ export type Database = {
       is_admin: { Args: Record<never, never>; Returns: boolean };
       mark_incident_viewed: { Args: { p_incident_id: string }; Returns: undefined };
       reject_incident: { Args: { p_incident_id: string; p_reason: string }; Returns: undefined };
+      // spec 023 (0023): 승인 취소·거절 취소. 본인 사건만, 이력은 새 줄로
+      cancel_approval: { Args: { p_incident_id: string }; Returns: undefined };
+      cancel_rejection: { Args: { p_incident_id: string }; Returns: undefined };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
