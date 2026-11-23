@@ -18,7 +18,7 @@ export const TARGET_GROUPS = ["youth", "newlywed", "multichild", "elderly"] as c
 export type TargetGroup = (typeof TARGET_GROUPS)[number];
 
 // 마이홈 공고는 대상을 제목에만 적는다. 제목 낱말로 대상을 읽는다(자격 판정이 아니다, GLOSSARY 대상)
-const TARGET_WORDS: Record<TargetGroup, readonly string[]> = {
+export const TARGET_WORDS: Record<TargetGroup, readonly string[]> = {
   youth: ["청년", "대학생", "사회초년생", "취업준비생"],
   newlywed: ["신혼", "신생아"],
   multichild: ["다자녀"],

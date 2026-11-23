@@ -1,0 +1,68 @@
+/* spec 022 FR-014 관리자 개요. 값은 캔버스 v2-admin-overview-pc·phone. 색은 app/tokens.css 변수만 */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-width: 0;
+  padding: 24px 20px;
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  text-decoration: none;
+}
+
+.card:hover .openText { text-decoration-thickness: 2px; }
+
+.card:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.text {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--label-neutral);
+  word-break: keep-all;
+}
+
+.open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.openText {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+@media (min-width: 960px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .card { padding: 28px 32px; }
+}

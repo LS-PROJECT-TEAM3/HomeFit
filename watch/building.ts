@@ -89,3 +89,10 @@ export function umdFromResponse(json: unknown): { code: string; name: string }[]
     .map((row) => ({ code: text(row.region_cd).slice(5), name: text(row.locallow_nm) }))
     .sort((a, b) => a.name.localeCompare(b.name, "ko"));
 }
+
+/** spec 022 FR-011: 사용승인일부터 오늘까지 만 년수("준공 후 17년 지났어요"). 날짜가 없으면 null */
+export function yearsSinceApproval(approvedOn: string | null, today: string): number | null {
+  if (!approvedOn) return null;
+  const years = Number(today.slice(0, 4)) - Number(approvedOn.slice(0, 4));
+  return today.slice(5) < approvedOn.slice(5) ? years - 1 : years;
+}

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore, useTransition } from "react";
-import styles from "@/app/_components/form.module.css";
+import { Toggle } from "../account/toggle";
+import styles from "../account/account.module.css";
 import { PUSH_DENIED } from "@/incident/web-push";
 import { isMyPushDevice, removePushDevice, savePushDevice, sendTestPush, type PushState } from "./actions";
 
-// IA MY_030400_TB 계정·알림 > 웹 푸시 (spec 021 FR-001·FR-002·FR-006)
+// IA MY_030400_TB 알림 설정 > 웹 푸시 (spec 021 FR-001·FR-002·FR-006, spec 022 FR-014 v2-settings-alert-pc)
 
 const UNSUPPORTED = "이 브라우저는 웹 푸시를 지원하지 않습니다.";
 const IOS_HINT = "아이폰·아이패드는 사파리에서 공유 → 홈 화면에 추가를 한 뒤, 홈 화면의 HomeFit 아이콘으로 열면 켤 수 있습니다.";
@@ -92,22 +93,18 @@ export function PushSettings({ publicKey }: { publicKey: string }) {
     return sendTestPush(subscription.endpoint);
   };
 
-  if (support === null) return <p role="status">불러오는 중…</p>;
+  if (support === null) return <p role="status" className={styles.help}>불러오는 중…</p>;
   if (!support) {
-    return <p role="status">{UNSUPPORTED}{isAppleMobile() ? ` ${IOS_HINT}` : ""}</p>;
+    return <p role="status" className={styles.help}>{UNSUPPORTED}{isAppleMobile() ? ` ${IOS_HINT}` : ""}</p>;
   }
   return (
-    <div className={styles.form}>
+    <>
+      <Toggle label="이 기기 웹 푸시" on={enabled} disabled={busy} onClick={() => run(enabled ? turnOff : turnOn)} />
+      <p className={styles.sub}>이 기기 브라우저로 알림을 받아요. 기기마다 따로 켜요.</p>
       <Message state={state} />
-      <p>이 기기 웹 푸시: <strong>{enabled ? "켜짐" : "꺼짐"}</strong>{enabled ? null : " (켜야 이 기기로 위험·기회 알림을 보냅니다)"}</p>
-      <div className={styles.checks}>
-        <button type="button" className={styles.primary} disabled={busy} onClick={() => run(enabled ? turnOff : turnOn)}>
-          {enabled ? "이 기기 알림 끄기" : "이 기기 웹 푸시 켜기"}
-        </button>
-        <button type="button" className={styles.primary} disabled={busy || !enabled} onClick={() => run(test)}>
-          시험 알림 보내기
-        </button>
+      <div className={styles.actions}>
+        <button type="button" className={styles.assistive} disabled={busy || !enabled} onClick={() => run(test)}>시험 알림 보내기</button>
       </div>
-    </div>
+    </>
   );
 }

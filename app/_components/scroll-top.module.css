@@ -1,0 +1,35 @@
+/* 맨 위로 버튼: 챗봇 버튼(휴대폰 오른쪽·아래 16px, PC 32px, 높이 60px) 바로 위 12px. 색은 app/tokens.css 변수만 */
+.button {
+  position: fixed;
+  right: 16px;
+  bottom: 88px;
+  z-index: 40; /* 챗봇 창(50)이 열리면 그 아래로 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--line-normal-neutral);
+  border-radius: var(--radius-full);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  box-shadow: var(--shadow-floating-small);
+  cursor: pointer;
+}
+
+.button:hover { background: var(--background-normal-alternative); }
+
+.button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.arrow {
+  display: inline-flex;
+  transform: rotate(180deg);
+}
+
+@media (min-width: 960px) {
+  .button { right: 32px; bottom: 104px; }
+}

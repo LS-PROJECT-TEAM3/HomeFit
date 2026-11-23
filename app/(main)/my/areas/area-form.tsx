@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
+import { FieldLabel, OptionGroup, UnitBox } from "@/app/_components/form-ui";
+import { SavedNotice } from "@/app/_components/saved-notice";
 import type { AreaFormInput } from "@/incident/area-form";
 import { HOUSING_LABELS } from "@/incident/home-form";
 import { SIDO_OPTIONS } from "@/watch/sido";
@@ -30,46 +32,37 @@ function AreaFields({ values, state, action, pending }: FieldsProps) {
   return (
     <form action={action} className={styles.form} noValidate>
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
-      {state.saved ? <p className={styles.notice} role="status">관심 지역 {state.saved}곳을 저장했습니다.</p> : null}
+      {state.saved ? <SavedNotice message={`관심 지역 ${state.saved}곳을 저장했습니다`} /> : null}
       <div className={styles.field}>
-        <label className={styles.label} htmlFor="sidoCode">시도 (필수)</label>
+        <FieldLabel htmlFor="sidoCode" label="시도" required />
         <select id="sidoCode" name="sidoCode" value={sidoCode} onChange={(e) => setSidoCode(e.target.value)} className={styles.input}>
-          <option value="">고르세요</option>
+          <option value="">선택해 주세요</option>
           {SIDO_OPTIONS.map((sido) => <option key={sido.code} value={sido.code}>{sido.name}</option>)}
         </select>
       </div>
       <SigunguChecks key={sidoCode} sidoCode={sidoCode} initial={values.sidoCode === sidoCode ? values.sigunguCodes : []} error={errors.sigunguCodes} />
+      {/* spec 022(v2-set-region-pc "비교할 집"): 주택 유형·계약 형태는 고르기 버튼, 기준 면적은 칸 안 단위 */}
+      <OptionGroup name="housingType" label="주택 유형" required value={values.housingType} error={errors.housingType}
+        options={Object.entries(HOUSING_LABELS).map(([value, label]) => ({ value, label: label.replaceAll("·", "/") }))} />
       <div className={styles.field}>
-        <label className={styles.label} htmlFor="housingType">주택 유형 (필수)</label>
-        <select id="housingType" name="housingType" defaultValue={values.housingType} className={styles.input} aria-invalid={Boolean(errors.housingType)} aria-describedby="housingType-error">
-          <option value="">고르세요</option>
-          {Object.entries(HOUSING_LABELS).map(([code, label]) => <option key={code} value={code}>{label}</option>)}
-        </select>
-        <FieldError id="housingType-error" message={errors.housingType} />
-      </div>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="targetArea">기준 면적 (필수)</label>
-        <div className={styles.inline}>
-          <input id="targetArea" name="targetArea" inputMode="decimal" placeholder="예: 20" defaultValue={values.targetArea} className={styles.input}
-            aria-invalid={Boolean(errors.targetArea)} aria-describedby="targetArea-help targetArea-error" />
-          <select name="areaUnit" aria-label="면적 단위" defaultValue={values.areaUnit} className={styles.unit}>
+        <FieldLabel htmlFor="targetArea" label="기준 면적" required />
+        <UnitBox unit={(
+          <select name="areaUnit" aria-label="면적 단위" defaultValue={values.areaUnit}>
             <option value="m2">㎡</option>
             <option value="pyeong">평</option>
           </select>
-        </div>
-        <p id="targetArea-help" className={styles.help}>이 면적의 ±20% 거래만 비교합니다. 단독·다가구는 연면적으로 비교합니다.</p>
+        )}>
+          <input id="targetArea" name="targetArea" inputMode="decimal" placeholder="예: 33" defaultValue={values.targetArea} className={styles.input}
+            aria-invalid={Boolean(errors.targetArea)} aria-describedby="targetArea-help targetArea-error" />
+        </UnitBox>
+        <p id="targetArea-help" className={styles.help}>기준 면적의 ±20% 거래만 비교해요. 단독/다가구는 연면적으로 비교해요.</p>
         <FieldError id="targetArea-error" message={errors.targetArea} />
       </div>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="contractType">계약 형태 (필수)</label>
-        <select id="contractType" name="contractType" defaultValue={values.contractType} className={styles.input} aria-invalid={Boolean(errors.contractType)} aria-describedby="contractType-error">
-          <option value="">고르세요</option>
-          <option value="monthly">월세</option>
-          <option value="jeonse">전세</option>
-        </select>
-        <FieldError id="contractType-error" message={errors.contractType} />
+      <OptionGroup name="contractType" label="계약 형태" required fill value={values.contractType} error={errors.contractType}
+        options={[{ value: "jeonse", label: "전세" }, { value: "monthly", label: "월세" }]} />
+      <div className={styles.actions}>
+        <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : "+ 지역 추가"}</button>
       </div>
-      <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : "관심 지역 추가"}</button>
     </form>
   );
 }

@@ -1,63 +1,81 @@
-import { PolicyTabs } from "@/app/_components/policy-tabs";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Empty, LoadError, Loading } from "@/app/_components/states";
-import { NoticeBadge, SimulatedBadge } from "@/app/_components/status";
-import { describeDeadline } from "@/incident/checklist";
+import { LoadError, Loading } from "@/app/_components/states";
+import { conditionChips, daysLeft, groupCounts, noticeGroup } from "@/incident/notice-list";
 import { listMyMatchedNotices, type MatchedResult } from "@/incident/notices.server";
+import { listMyPolicies } from "@/incident/policies.server";
 import { toKstDate } from "@/watch/kst";
-import styles from "../incidents/incidents.module.css";
+import type { Notice } from "@/watch/notice";
+import { ConditionBar } from "./condition-bar";
+import { readOverride, regionLabel, sidoName, sigunguNames } from "./listing-data";
+import { ListingHead } from "./listing-head";
+import { NoticeList, type NoticeRow } from "./notice-list";
+import styles from "./notices.module.css";
 
 export const metadata = { title: "맞춤 공고 | HomeFit AI" };
 
-async function MatchedList() {
+const NOTICE_FIELDS = ["region", "types", "rent", "age"] as const;
+
+function regionOf(notice: Notice, names: Map<string, string>): string {
+  // spec 001 v0.6: 전세임대는 전국 수시모집
+  if (notice.supplyType === "전세임대" && notice.sigunguCode === null) return "전국";
+  const sigungu = notice.sigunguCode ? names.get(notice.sigunguCode) : undefined;
+  return [sidoName(notice.sidoCode), sigungu].filter(Boolean).join(" ") || "지역 공고문 확인";
+}
+
+async function Listing({ searchParams }: { searchParams: PageProps<"/notices">["searchParams"] }) {
   await connection(); // 오늘 날짜로 마감을 나누므로 요청 때 그린다
   const today = toKstDate(new Date());
+  const override = readOverride(await searchParams);
   let result: MatchedResult;
+  let policyCount: number | null = null;
   try {
-    result = await listMyMatchedNotices(today);
+    const [notices, policies] = await Promise.all([listMyMatchedNotices(today, override), listMyPolicies(today, override).catch(() => null)]);
+    result = notices;
+    policyCount = policies?.hasCondition ? policies.items.length : null;
   } catch {
     return <LoadError>맞춤 공고를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
   if (!result.hasCondition) {
-    return <Empty>조건을 입력하면 맞춤 공고가 여기에 보입니다. <Link href="/my/conditions">조건 입력하기</Link></Empty>;
+    return (
+      <>
+        <ListingHead active="notices" counts={{ notices: null, policy: policyCount }} />
+        <section className={styles.emptyCard}>
+          <h2 className={styles.emptyTitle}>아직 내 조건이 없어요</h2>
+          <p className={styles.emptyText}>지역과 공급 유형을 정하면 맞는 공고를 골라 보여 드려요.</p>
+          <Link href="/my/conditions" className={styles.emptyLink}>조건 입력하기</Link>
+        </section>
+      </>
+    );
   }
-  if (result.items.length === 0) {
-    return <Empty>조건에 맞는 공고가 아직 없습니다. <Link href="/my/conditions">조건 수정하기</Link></Empty>;
-  }
+  const names = await sigunguNames(result.condition.sidoCode);
+  const region = regionLabel(result.condition.sidoCode, result.condition.sigunguCode, names);
+  const rows: NoticeRow[] = result.items.map((item) => ({
+    id: item.notice.announcementId, title: item.notice.title, supplyType: item.notice.supplyType ?? "공급 유형 공고문 확인", region: regionOf(item.notice, names),
+    group: noticeGroup(item), days: daysLeft(item.notice.applyEnd, today), deadline: item.notice.applyEnd, announcedOn: item.notice.announcedOn, simulated: item.isSimulated,
+  }));
   return (
-    <ul className={styles.list}>
-      {result.items.map(({ notice, expired, isSimulated, decision }) => (
-        <li key={notice.announcementId}>
-          {/* H-006: 박스 전체를 눌러 공고 상세로. 상태는 사건 목록처럼 배지 */}
-          <Link href={`/notices/${encodeURIComponent(notice.announcementId)}`} className={styles.item}>
-            <span className={styles.badges}>
-              <NoticeBadge status={decision} />
-              {expired ? <NoticeBadge status="closed" /> : null}
-              {isSimulated ? <SimulatedBadge /> : null}
-            </span>
-            <span className={styles.itemTitle}>{notice.title}</span>
-            <span className={styles.meta}>
-              {notice.supplyType ?? "공급 유형 공고문 확인"} · {expired ? `마감 ${notice.applyEnd}` : (describeDeadline(notice.applyEnd, today) ?? "마감일: 공고문 확인")}
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <>
+      <ListingHead active="notices" counts={{ notices: rows.length, policy: policyCount }} />
+      <ConditionBar condition={result.condition} chips={conditionChips(result.condition, region)} fields={NOTICE_FIELDS} typeCounts={result.typeCounts} />
+      {rows.length === 0 ? (
+        <section className={styles.emptyCard}>
+          <h2 className={styles.emptyTitle}>조건에 맞는 공고가 아직 없어요</h2>
+          <p className={styles.emptyText}>위 칩에서 지역이나 공급 유형을 넓혀 보세요. 새 공고가 올라오면 여기에 보여 드려요.</p>
+        </section>
+      ) : <NoticeList rows={rows} counts={groupCounts(result.items)} />}
+    </>
   );
 }
 
-// IA NT_080000_PG 맞는 공고 (FR-015, FR-017, spec 001 v0.2). 사건이 아니고 승인할 것도 없다
-export default function NoticesPage() {
+// IA NT_080000_PG 맞춤 공고 (FR-015, FR-017, spec 001 v0.2, spec 022 캔버스 v2-s3-pc). 사건이 아니고 승인할 것도 없다
+export default function NoticesPage({ searchParams }: PageProps<"/notices">) {
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>맞춤 공고</h1>
-      {/* spec 004 v0.2: 기획안 Work & Policy 탭 */}
-      <PolicyTabs />
-      <p className={styles.meta}>내 조건에 맞는 공고입니다. 눌러서 요약을 보고 팔로우할지 정하세요. 팔로우한 공고의 접수 기간·임대료가 바뀌거나 정정공고가 올라오면 주거 기회 알림으로 알려 드립니다.</p>
+      {/* 주소 값(잠깐 바꾼 조건)은 Suspense 안에서 읽는다(cacheComponents) */}
       <Suspense fallback={<Loading />}>
-        <MatchedList />
+        <Listing searchParams={searchParams} />
       </Suspense>
     </main>
   );

@@ -1,51 +1,57 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
+import { Icon } from "@/app/_components/icons";
 import { LoadError, Loading } from "@/app/_components/states";
 import { describeDeadline } from "@/incident/checklist";
-import { POLICY_KIND_LABELS, policyKinds } from "@/incident/policy-match";
+import { policyKinds, type PolicyKind } from "@/incident/policy-match";
 import { getOrCreatePolicySummary } from "@/incident/policy-summary.server";
 import { getPolicy } from "@/incident/policies.server";
 import { toKstDate } from "@/watch/kst";
 import type { Policy } from "@/watch/youth-policy";
-import hub from "@/app/_components/hub.module.css";
-import styles from "../policy.module.css";
+import styles from "../../notices/[id]/detail.module.css";
 
 export const metadata = { title: "정책 상세 | 청년 주거지원 정책 | HomeFit AI" };
 
-// FR-007 (spec 006 v0.3): 처음 열 때 AI가 한 번 만들고 저장, 그 뒤로는 저장된 요약
-async function Summary({ policy }: { policy: Policy }) {
-  const result = await getOrCreatePolicySummary(policy).catch(() => null);
-  return (
-    <section className={hub.card} aria-labelledby="summary-title">
-      <h2 id="summary-title">한눈에 보기</h2>
-      {result ? (
-        <>
-          <p>{result.summary}</p>
-          <p className={styles.meta}>{result.isMock ? "시험용 요약(mock, 실제 AI가 쓴 글이 아님)" : "AI 요약"} · 근거: 아래 정책 원문 값 · 자격은 원문에서 확인 필요</p>
-        </>
-      ) : (
-        <p className={styles.meta}>요약을 만들지 못했습니다. 아래 원문 값을 확인해 주세요.</p>
-      )}
-    </section>
-  );
+const KIND_LABELS: Record<PolicyKind, string> = { loan: "대출/이자", rent: "월세/전세 지원", housing: "주택/거주", dormitory: "기숙사" };
+const LEAD_MAX = 60;
+
+/** 큰 글자 한 줄: 원문 첫 줄을 짧게 */
+function lead(text: string | null | undefined, fallback: string): string {
+  const first = text?.split("\n").map((s) => s.trim()).find(Boolean);
+  if (!first) return fallback;
+  return first.length > LEAD_MAX ? `${first.slice(0, LEAD_MAX)}…` : first;
 }
 
 function period(policy: Policy, today: string): string {
   if (policy.periodKind === "always") return "상시 신청";
-  if (policy.periodKind === "unknown" || !policy.applyEnd) return "원문 확인";
-  return `${policy.applyStart ?? "?"} ~ ${policy.applyEnd} (${describeDeadline(policy.applyEnd, today)})`;
+  if (policy.periodKind === "unknown" || !policy.applyEnd) return "신청 기간은 원문 확인";
+  const deadline = describeDeadline(policy.applyEnd, today);
+  return `${(policy.applyStart ?? "?").replaceAll("-", ".")} ~ ${policy.applyEnd.slice(5).replace("-", ".")} 접수${deadline ? ` (${deadline})` : ""}`;
 }
 
-// 원문 칸. 비어 있는 칸은 보이지 않는다(정책마다 채운 칸이 다르다)
-function rows(policy: Policy, today: string): [string, string | null | undefined][] {
-  const ages = policy.minAge === null && policy.maxAge === null ? "원문 확인" : `만 ${policy.minAge ?? "?"}~${policy.maxAge ?? "?"}세`;
-  return [
-    ["정책 설명", policy.description], ["지원 내용", policy.support], ["신청 기간", period(policy, today)],
-    ["사업 기간", policy.periodNote], ["나이", ages], ["신청 방법", policy.applyMethod], ["심사 방법", policy.screening],
-    ["제출 서류", policy.documents], ["추가 자격 조건", policy.extraQualification], ["참여 제한 대상", policy.excluded],
-    ["운영 기관", policy.agency],
-  ];
+function Kv({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null;
+  return <div className={styles.kv}><span className={styles.kvKey}>{label}</span><span className={`${styles.kvValue} ${styles.kvPre}`}>{value}</span></div>;
+}
+
+function Block({ question, leadText, children }: { question: string; leadText: string; children?: ReactNode }) {
+  return (
+    <div className={styles.block}>
+      <h3 className={styles.blockQuestion}>{question}</h3>
+      <div>
+        <p className={styles.blockLead}>{leadText}</p>
+        <div className={styles.blockRows}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+// FR-007 (spec 006 v0.3): 처음 열 때 AI가 한 번 만들고 저장, 그 뒤로는 저장된 요약
+async function AiSummary({ policy }: { policy: Policy }) {
+  const result = await getOrCreatePolicySummary(policy).catch(() => null);
+  if (!result) return <p className={styles.aiText}>요약을 만들지 못했어요. 아래 정책 원문 값을 확인해 주세요.</p>;
+  return <p className={styles.aiText}>{result.summary}{result.isMock ? <span className={styles.mock}> (시험용 mock 요약)</span> : null}</p>;
 }
 
 async function Detail({ params }: { params: PageProps<"/policy/[id]">["params"] }) {
@@ -59,39 +65,59 @@ async function Detail({ params }: { params: PageProps<"/policy/[id]">["params"] 
   }
   if (!policy) return <LoadError>정책을 찾을 수 없습니다. <Link href="/policy">정책 목록으로</Link></LoadError>;
   const today = toKstDate(new Date());
-  const kinds = policyKinds(policy).map((k) => POLICY_KIND_LABELS[k]);
+  const [kind] = policyKinds(policy);
+  const ages = policy.minAge === null && policy.maxAge === null ? "나이 조건은 원문 확인" : `만 ${policy.minAge ?? "?"}~${policy.maxAge ?? "?"}세`;
   return (
     <>
-      <h2>{policy.title}</h2>
-      {kinds.length ? <p className={styles.meta}>{kinds.join(" · ")}</p> : null}
-      <Suspense fallback={<section className={hub.card}><p role="status">요약을 만드는 중…</p></section>}>
-        <Summary policy={policy} />
-      </Suspense>
-      <section className={hub.card} aria-labelledby="facts-title">
-        <h2 id="facts-title">정책 원문 값</h2>
-        <dl className={styles.facts}>
-          {rows(policy, today).filter(([, value]) => value).map(([label, value]) => (
-            <div key={label} className={styles.factRow}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className={styles.meta}>자격은 공고문 기준 확인 필요. HomeFit은 자격을 판정하지 않습니다.</p>
-        {policy.url ? <a href={policy.url} target="_blank" rel="noopener noreferrer">원문 보기 ↗ (새 창)</a> : <p className={styles.meta}>원문 링크 없음: 운영 기관에 문의</p>}
+      <section className={styles.headCard} aria-labelledby="policy-title">
+        {kind ? <span className={styles.badges}><span className={`${styles.badge} ${styles.badgeIgnored}`}>{KIND_LABELS[kind]}</span></span> : null}
+        <h1 id="policy-title" className={styles.title}>{policy.title}</h1>
+        <div className={styles.headFoot}>
+          <span className={styles.announced}>{policy.agency ?? "운영 기관 원문 확인"}</span>
+          {policy.url ? <a href={policy.url} target="_blank" rel="noopener noreferrer" className={styles.textLink}>정책 원문 보기<span className={styles.srOnly}> (새 창)</span><Icon name="chevron-right" size={18} /></a> : <span className={styles.help}>원문 링크가 없어요. 운영 기관에 문의해 주세요.</span>}
+        </div>
+      </section>
+      <section className={styles.card} aria-labelledby="policy-sum-title">
+        <div className={styles.cardHead}>
+          <h2 id="policy-sum-title" className={styles.cardTitle}>정책 핵심 요약</h2>
+          <span className={styles.source}>AI 요약<span className={styles.bar} aria-hidden="true">|</span>출처: 정책 원문</span>
+        </div>
+        <Suspense fallback={<p className={styles.aiText} role="status">요약을 만드는 중…</p>}>
+          <AiSummary policy={policy} />
+        </Suspense>
+        <Block question="무엇을 지원하나요" leadText={lead(policy.support, "지원 내용은 원문 확인")}>
+          <Kv label="지원 내용" value={policy.support} />
+          <Kv label="정책 설명" value={policy.description} />
+        </Block>
+        {/* 자격은 판정하지 않는다(PRD 9절) */}
+        <Block question="누가 신청할 수 있나요" leadText={ages}>
+          <Kv label="추가 자격" value={policy.extraQualification} />
+          <Kv label="참여 제한" value={policy.excluded} />
+          <Kv label="확인" value="HomeFit은 신청 자격을 판정하지 않아요. 원문에서 확인해 주세요." />
+        </Block>
+        <Block question="언제 신청하나요" leadText={period(policy, today)}>
+          <Kv label="사업 기간" value={policy.periodNote} />
+        </Block>
+        <Block question="어떻게 신청하나요" leadText="이 서비스에서는 신청하지 않아요">
+          <Kv label="신청 방법" value={policy.applyMethod} />
+          <Kv label="심사 방법" value={policy.screening} />
+          <Kv label="제출 서류" value={policy.documents} />
+        </Block>
       </section>
     </>
   );
 }
 
-// IA PL_090100_PG 정책 상세 (spec 006 v0.3 FR-007, 사용자 요청 2026-11-18)
+// IA PL_090100_PG 정책 상세 (spec 006 v0.3 FR-007, 사용자 요청 2026-11-18, spec 022 캔버스 v2-s3c-pc)
 export default function PolicyDetailPage({ params }: PageProps<"/policy/[id]">) {
   return (
-    <section aria-label="정책 상세">
-      <p><Link href="/policy">← 청년 주거지원 정책</Link></p>
+    <main className={styles.main}>
+      <nav aria-label="현재 위치" className={styles.crumb}>
+        <Link href="/">홈</Link><span aria-hidden="true">›</span><Link href="/policy">청년 주거지원 정책</Link><span aria-hidden="true">›</span><span aria-current="page">정책 상세</span>
+      </nav>
       <Suspense fallback={<Loading />}>
         <Detail params={params} />
       </Suspense>
-    </section>
+    </main>
   );
 }

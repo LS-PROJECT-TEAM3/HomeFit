@@ -1,0 +1,543 @@
+/* spec 022 FR-011 AI 도우미. PC 값은 캔버스 v2-know-*-pc, 휴대폰 값은 v2-know-*-phone 그대로. 색은 app/tokens.css 변수만 */
+
+.main {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 100vh;
+  min-height: 100dvh; /* 스크롤해 내용 시작을 맨 위에 맞출 때 아래가 비지 않게 */
+  margin: 0 auto;
+  padding: 20px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.results:empty { display: none; }
+
+.error {
+  margin: 0;
+  color: var(--status-negative);
+  font-weight: 600;
+}
+
+/* 검색창: 휴대폰은 탭 아래 카드, PC는 띠 안 */
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pc { display: none; }
+
+.phone {
+  padding: 28px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.searchLabel {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.searchRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 60px;
+  padding: 0 20px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 18px;
+}
+
+.searchButton {
+  min-height: 60px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.searchButton:disabled,
+.example:disabled { cursor: progress; opacity: 0.7; }
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.examplesLabel {
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.example {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--background-normal-normal);
+  color: var(--label-neutral);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.searchNote {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--label-neutral);
+}
+
+/* AI가 정리한 답 */
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 20px;
+  background: var(--primary-tint);
+}
+
+.answerTag {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-normal);
+}
+
+.answerText {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.answerNote {
+  margin: 0;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+/* 찾은 기록 카드 */
+.hitsTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.hitGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 20px 24px;
+  background: var(--background-elevated-normal);
+  border-left: 4px solid var(--primary-normal);
+}
+
+.hitRejected { border-left-color: var(--status-negative); }
+
+.hitTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.hitDate {
+  font-size: 14px;
+  color: var(--label-neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+.hitTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.hitSummary {
+  margin: 0;
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.approved,
+.rejected { font-size: 14px; color: var(--primary-normal); flex: none; }
+
+.rejected { color: var(--status-negative); }
+
+.textLink {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  min-height: 44px;
+  color: var(--label-normal);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+/* 상태 카드(결과 없음, AI 답 없음, 비어 있음) */
+.stateCard {
+  padding: 28px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.stateBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 560px;
+}
+
+.tag,
+.tagCaution {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--label-neutral);
+}
+
+.tagCaution { color: var(--status-cautionary); }
+
+.stateTitle,
+.stateTitleLg {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.stateTitleLg { font-size: 22px; }
+
+.stateText,
+.stateTextStrong {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--label-neutral);
+}
+
+.stateTextStrong { color: var(--label-normal); }
+
+.stateLink { margin-top: 8px; font-size: 16px; }
+
+/* AI 답이 없을 때 찾은 기록 줄 목록(know-fail-pc) */
+.rowsTitle {
+  font-family: inherit;
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.stateCard ul { margin: 0; padding: 0; list-style: none; }
+
+.hitRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.hitRowMain {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.hitNo {
+  flex: none;
+  width: 24px;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  color: var(--label-neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+.hitRowTitle { margin: 0; font-weight: 700; }
+
+.hitRowMeta {
+  margin: 0;
+  font-size: 14px;
+  color: var(--label-neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+.bar {
+  padding: 0 10px;
+  color: var(--line-normal-alternative);
+  font-weight: 400;
+}
+
+/* 처리 기록(know-log) */
+.logCard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 20px;
+  background: var(--background-elevated-normal);
+}
+
+.logCard ul { margin: 0; padding: 0; list-style: none; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  background: var(--background-normal-normal);
+  color: var(--label-neutral);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.chipOn {
+  background: var(--primary-normal);
+  color: var(--static-white);
+}
+
+.monthTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.logRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.logDate {
+  flex: none;
+  width: 56px;
+  font-size: 15px;
+  color: var(--label-neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+.logTitle {
+  flex: 1;
+  min-width: 0;
+  color: var(--label-normal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.logTitle:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.moreButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 28px;
+  border-radius: var(--radius-control);
+  background: var(--background-normal-alternative);
+  color: var(--label-normal);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* 공공데이터 출처(know-src) */
+.srcGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.src {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 24px;
+  background: var(--background-elevated-normal);
+}
+
+.srcName {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.srcMeta {
+  font-size: 14px;
+  color: var(--label-neutral);
+}
+
+.srcTerms {
+  margin-top: auto;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--label-normal);
+}
+
+.srcCaution { color: var(--status-cautionary); }
+
+.srcNotes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.srcNotes p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--label-neutral);
+}
+
+@media (min-width: 960px) {
+  .main {
+    padding: 40px var(--spacing-screen-padding-pc) 72px;
+    gap: 24px;
+  }
+
+  .results { gap: 24px; }
+
+  .phone { display: none; }
+
+  /* 띠 안 검색창(v2-know-poster-pc): 제목 아래 28px, 진초록 위 밝은 입력칸 + 노란 버튼 */
+  .pc {
+    display: flex;
+    gap: 0;
+    margin-top: 28px;
+  }
+
+  .pc .searchLabel {
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--inverse-label-alternative);
+  }
+
+  .pc .searchRow {
+    flex-direction: row;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .pc .searchInput {
+    min-height: 64px;
+    padding: 0 24px;
+    border: 0;
+    background: var(--background-normal-normal);
+    color: var(--primary-heavy);
+    font-size: 20px;
+  }
+
+  .pc .searchButton {
+    min-height: 64px;
+    padding: 0 40px;
+    background: var(--accent-callout);
+    color: var(--primary-heavy);
+    font-size: 19px;
+  }
+
+  .pc .examples {
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .pc .examplesLabel {
+    font-size: 15px;
+    color: var(--inverse-label-alternative);
+  }
+
+  .pc .example {
+    min-height: 36px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: var(--inverse-fill);
+    color: var(--inverse-label);
+    font-size: 15px;
+  }
+
+  .pc .searchNote {
+    margin-top: 14px;
+    color: var(--inverse-label-alternative);
+  }
+
+  .answer {
+    padding: 32px 36px;
+  }
+
+  .answerText { font-size: 19px; }
+
+  .hitGrid { grid-template-columns: 1fr 1fr; }
+
+  .stateCard { padding: 48px 56px; }
+
+  .logCard { padding: 32px 36px; }
+
+  .logRow {
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .srcGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

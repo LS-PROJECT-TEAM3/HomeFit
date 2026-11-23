@@ -1,18 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
+import { SUPPLY_TYPES } from "@/incident/notice-list";
+import { SavedNotice } from "@/app/_components/saved-notice";
 import type { ConditionFormInput } from "@/incident/condition-form";
 import type { PolicyCondition } from "@/incident/match";
-import { Fold } from "@/app/_components/fold";
+import { filledStatus, Fold } from "@/app/_components/fold";
+import { FieldLabel, UnitBox } from "@/app/_components/form-ui";
 import { SIDO_OPTIONS } from "@/watch/sido";
 import { saveConditions, type ConditionState } from "./actions";
 import { SigunguField } from "./sigungu-field";
 import styles from "@/app/_components/form.module.css";
 
 // 마이홈 실제 응답의 공급 유형 이름 (spec 001 Q6). "모두"가 기본값
-const SUPPLY_TYPES = ["국민임대", "행복주택", "영구임대", "공공임대", "전세임대", "매입임대"];
 // ERD policy_conditions.target_groups 값과 화면 이름 (GLOSSARY 대상)
-const TARGET_OPTIONS = [["youth", "청년·사회초년생"], ["newlywed", "신혼·신생아"], ["multichild", "다자녀"], ["elderly", "고령자"]] as const;
+const TARGET_OPTIONS = [["youth", "청년/사회초년생"], ["newlywed", "신혼/신생아"], ["multichild", "다자녀"], ["elderly", "고령자"]] as const;
 
 type Props = { initial: PolicyCondition | null; next: "/" | "stay"; submitLabel: string };
 
@@ -58,23 +61,24 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
     <form action={action} className={styles.form} noValidate>
       <input type="hidden" name="next" value={next} />
       {state.error ? <p className={styles.alert} role="alert">{state.error}</p> : null}
-      {state.saved ? <p className={styles.notice} role="status">저장했습니다.</p> : null}
+      {state.saved ? <SavedNotice /> : null}
 
+      {/* spec 022(캔버스 v2-set-cond-pc): 지역과 공급 유형 / 기본 조건 / 대상 세 묶음, 모두 펼쳐 둔다 */}
+      <Fold title="지역과 공급 유형" tip="고른 지역과 유형의 공고만 골라 보여 드려요." status={filledStatus([sidoCode, values.sigunguCode, picked.includes("ALL") ? "" : picked.join()])} open>
       <div className={styles.field}>
-        <label className={styles.label} htmlFor="sidoCode">시도 (필수)</label>
+        <FieldLabel htmlFor="sidoCode" label="시도" required />
         <select id="sidoCode" name="sidoCode" value={sidoCode} onChange={(e) => setSidoCode(e.target.value)} className={styles.input}
           aria-invalid={Boolean(errors.sidoCode)} aria-describedby="sidoCode-error">
-          <option value="">고르세요</option>
+          <option value="">선택해 주세요</option>
           {SIDO_OPTIONS.map((sido) => <option key={sido.code} value={sido.code}>{sido.name}</option>)}
         </select>
         <FieldError id="sidoCode-error" message={errors.sidoCode} />
       </div>
 
       {/* Q18 해결(spec 001 v0.3): 법정동코드 API의 시군구 목록 */}
-      <SigunguField sidoCode={sidoCode} initial={values.sigunguCode} error={errors.sigunguCode} />
+      <SigunguField sidoCode={sidoCode} initial={values.sigunguCode} error={errors.sigunguCode}
+        label={<>시군구<span className={styles.optional}>(선택)</span></>} />
 
-      {/* 사용자 요청(2026-11-18): 체크 상자가 많아 접고, 고른 것을 한 줄로 보인다 */}
-      <Fold title="공급 유형" status={picked.includes("ALL") ? "모두" : `${picked.length}개 고름`}>
       <fieldset className={styles.checks}>
         <legend className={styles.label}>공급 유형</legend>
         <label className={styles.check}>
@@ -85,40 +89,61 @@ function ConditionFields({ values, errors, state, action, pending, next, submitL
             <input type="checkbox" name="supplyTypes" value={type} defaultChecked={picked.includes(type)} /> {type}
           </label>
         ))}
+        <p className={styles.help}>여러 개 고를 수 있어요.</p>
       </fieldset>
       </Fold>
 
+      <Fold title="기본 조건" tip="공고를 고르는 데만 써요. 자격은 공고문 기준 확인 필요." status={filledStatus([values.maxMonthlyRent, values.age])} open>
+      <div className={styles.field}>
+        <FieldLabel htmlFor="maxMonthlyRent" label="월 임대료 상한" />
+        <UnitBox unit="원 이하">
+          <input id="maxMonthlyRent" name="maxMonthlyRent" inputMode="numeric" placeholder="예: 500,000"
+            defaultValue={values.maxMonthlyRent} className={styles.input}
+            aria-invalid={Boolean(errors.maxMonthlyRent)} aria-describedby="maxMonthlyRent-error" />
+        </UnitBox>
+        <FieldError id="maxMonthlyRent-error" message={errors.maxMonthlyRent} />
+      </div>
+
+      <div className={styles.field}>
+        <FieldLabel htmlFor="age" label="나이" />
+        <UnitBox unit="세">
+          <input id="age" name="age" inputMode="numeric" placeholder="예: 27" defaultValue={values.age}
+            className={styles.input} aria-invalid={Boolean(errors.age)} aria-describedby="age-help age-error" />
+        </UnitBox>
+        <p id="age-help" className={styles.help}>만 나이로 넣어 주세요</p>
+        <FieldError id="age-error" message={errors.age} />
+      </div>
+
+      </Fold>
+
       {/* spec 001 v0.6 대상: 공고 제목으로 거른다. 자격 판정이 아니다 (GLOSSARY 대상) */}
-      <Fold title="대상 (선택)" status={values.targetGroups.length ? TARGET_OPTIONS.filter(([v]) => values.targetGroups.includes(v)).map(([, l]) => l).join("·") : "모두"}>
+      <Fold title="대상" tip="해당되는지는 공고문에서 확인해 주세요." status={values.targetGroups.length ? `선택함 ${values.targetGroups.length}개` : "모두"} open>
       <fieldset className={styles.checks}>
-        <legend className={styles.label}>대상 (선택)</legend>
+        <legend className={styles.label}>대상<span className={styles.optional}>(선택)</span></legend>
         {TARGET_OPTIONS.map(([value, label]) => (
           <label key={value} className={styles.check}>
             <input type="checkbox" name="targetGroups" value={value} defaultChecked={values.targetGroups.includes(value)} /> {label}
           </label>
         ))}
-        <p className={styles.help}>고르면 다른 대상만 적힌 공고(예: 신혼·신생아 전세임대)를 숨깁니다. 비우면 모두 보입니다. 자격은 공고문에서 확인해 주세요.</p>
+        <p className={styles.help}>여러 개 고를 수 있어요. 고르면 다른 대상만 적힌 공고를 숨기고, 비우면 모두 보여요.</p>
       </fieldset>
       </Fold>
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="maxMonthlyRent">월 임대료 상한 (원, 선택)</label>
-        <input id="maxMonthlyRent" name="maxMonthlyRent" inputMode="numeric" placeholder="예: 300000"
-          defaultValue={values.maxMonthlyRent} className={styles.input}
-          aria-invalid={Boolean(errors.maxMonthlyRent)} aria-describedby="maxMonthlyRent-error" />
-        <FieldError id="maxMonthlyRent-error" message={errors.maxMonthlyRent} />
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="age">나이 (선택)</label>
-        <input id="age" name="age" inputMode="numeric" placeholder="예: 26" defaultValue={values.age}
-          className={styles.input} aria-invalid={Boolean(errors.age)} aria-describedby="age-error" />
-        <FieldError id="age-error" message={errors.age} />
-      </div>
-
-      <button type="submit" className={styles.primary} disabled={pending}>
-        {pending ? "저장 중…" : submitLabel}
-      </button>
+      {next === "/" ? (
+        // spec 022(v2-s2-open-pc): 첫 설정 2단계는 아래에 붙는 "이전 · 2 / 2 단계 · 다음" 줄
+        <div className={styles.stepBar}>
+          <span className={styles.stepLeft}><Link href="/onboarding?step=1" className={styles.assistive}>← 이전</Link><span className={styles.stepCount}>2 / 2 단계</span></span>
+          <button type="submit" className={styles.primary} disabled={pending}>{pending ? "저장 중…" : submitLabel}</button>
+        </div>
+      ) : (
+        <div className={styles.actions}>
+          <span className={styles.actionsNote}><span className={styles.req} aria-hidden="true">*</span> 필수 입력</span>
+          <button type="reset" className={styles.assistive}>취소</button>
+          <button type="submit" className={styles.primary} disabled={pending}>
+            {pending ? "저장 중…" : submitLabel}
+          </button>
+        </div>
+      )}
     </form>
   );
 }

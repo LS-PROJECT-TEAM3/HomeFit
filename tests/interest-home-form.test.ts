@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCostFields, parseInterestHomeForm } from "@/incident/interest-home-form";
+import { foldStatus, parseCostFields, parseInterestHomeForm } from "@/incident/interest-home-form";
 
 // spec 009 FR-001·002, 경계 E8
 const input = {
@@ -37,5 +37,16 @@ describe("parseCostFields (내 집 비용 칸)", () => {
   });
   it("숫자가 아니면 오류", () => {
     expect(parseCostFields({ energyCost: "abc", electricityKwh: "", transitFare: "", tripsPerDay: "", commuteDays: "" })).toMatchObject({ ok: false, errors: { energyCost: expect.any(String) } });
+  });
+});
+
+// spec 022 FR-011(집 비교 등록 창 보드): 칸 묶음 상태 글자. 색만이 아니라 글자로 (디자인 기본선 5)
+describe("foldStatus", () => {
+  it("필수 칸이 비면 몇 칸인지 알림", () => {
+    expect(foldStatus({ all: ["", "", "1", ""], required: ["", ""] })).toEqual({ text: "필수 2칸 비어 있어요", warn: true });
+  });
+  it("필수가 다 차면 채운 칸 수", () => {
+    expect(foldStatus({ all: ["a", "11", " ", "x", "y"], required: ["a", "11"] })).toEqual({ text: "입력함 4/5", warn: false });
+    expect(foldStatus({ all: ["", "", ""], required: [] })).toEqual({ text: "입력함 0/3", warn: false });
   });
 });

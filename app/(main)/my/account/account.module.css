@@ -1,0 +1,195 @@
+/* spec 022 FR-014 알림 설정. 값은 캔버스 v2-settings-alert-pc(DS Card + SettingRow + Toggle), 휴대폰 v2-set-slack-phone. 색은 app/tokens.css 변수만 */
+
+.card {
+  padding: 8px 20px 24px;
+  background: var(--background-elevated-normal);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 0;
+  border-top: 1px solid var(--line-normal-normal);
+}
+
+.row:first-child { border-top: 0; }
+
+.rowTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.rowDesc {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--label-neutral);
+  word-break: keep-all;
+}
+
+.rowBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.sub {
+  margin: -12px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--label-neutral);
+}
+
+/* 스위치(DS .hf-toggle) */
+.toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--label-normal);
+  font: inherit;
+  cursor: pointer;
+}
+
+.toggle:disabled { cursor: progress; opacity: 0.6; }
+
+.track {
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--line-solid-normal);
+}
+
+.knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--static-white);
+  transition: left 0.15s ease;
+}
+
+.toggleOn .track { background: var(--primary-normal); }
+.toggleOn .knob { left: 25px; }
+
+.toggleText {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* 입력 칸 */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.inputRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.input {
+  flex: 1 1 220px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line-solid-normal);
+  border-radius: var(--radius-control);
+  background: var(--background-elevated-normal);
+  color: var(--label-normal);
+  font: inherit;
+  font-size: 16px;
+}
+
+.help {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--label-neutral);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primary,
+.assistive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--primary-normal);
+  color: var(--static-white);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.assistive {
+  background: var(--background-normal-alternative);
+  color: var(--label-normal);
+}
+
+.primary:disabled,
+.assistive:disabled { cursor: not-allowed; opacity: 0.6; }
+
+.alert,
+.notice {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-control);
+  font-size: 15px;
+}
+
+.alert { background: var(--status-negative-tint); color: var(--status-negative); }
+.notice { background: var(--background-normal-alternative); color: var(--label-normal); }
+
+.toggle:focus-visible,
+.primary:focus-visible,
+.assistive:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (min-width: 960px) {
+  .card { padding: 8px 48px 40px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 48px;
+    padding: 36px 0;
+  }
+
+  .rowTitle { font-size: 21px; }
+  .rowDesc { margin-top: 6px; line-height: 1.65; }
+}

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { graphBounds, graphNeighbors, panBox, zoomBox, type PlacedNode, type ViewBox, type WikiGraph } from "@/chat/wiki-graph";
-import styles from "@/app/_components/hub.module.css";
+import { InfoTip } from "@/app/_components/info-tip";
+import styles from "../admin.module.css";
 import own from "./wiki-graph.module.css";
 
 /** 그래프에서 켤 쪽: 답의 출처 쪽들, 또는 사람이 고른 쪽 하나 */
@@ -157,10 +158,10 @@ function GraphLegend({ nodes }: { nodes: readonly PlacedNode[] }) {
 function PagePanel({ node, linked, onPick }: { node: PlacedNode; linked: string[]; onPick: (page: string) => void }) {
   return (
     <div className={own.panel} aria-live="polite">
-      <p className={styles.muted}>{node.kind} 쪽</p>
+      <p className={styles.help}>{node.kind} 쪽</p>
       <h3 className={own.panelTitle}>{node.page}</h3>
       <p className={own.summary}>{node.summary || "한 줄 요약이 없습니다."}</p>
-      <p className={styles.muted}>연결된 쪽 {linked.length}개{linked.length > MAX_LINKED ? ` (앞 ${MAX_LINKED}개)` : ""}</p>
+      <p className={styles.help}>연결된 쪽 {linked.length}개{linked.length > MAX_LINKED ? ` (앞 ${MAX_LINKED}개)` : ""}</p>
       <ul className={own.linked}>
         {linked.slice(0, MAX_LINKED).map((page) => (
           <li key={page}><button type="button" className={own.linkButton} onClick={() => onPick(page)}>{page}</button></li>
@@ -183,7 +184,7 @@ export function WikiGraphView({ graph, focus, onFocus }: { graph: WikiGraph | nu
   const active = focus.selected ? [focus.selected] : focus.pages;
   const [resetCount, setResetCount] = useState(0);
   const { svgRef, viewBox } = useZoom(nodes, active, resetCount);
-  if (!graph) return <section className={styles.card}><h2>위키 지도</h2><p role="alert">위키 그래프를 불러오지 못했습니다. 잠시 뒤 새로 고쳐 주세요. 질문은 위에서 그대로 할 수 있습니다.</p></section>;
+  if (!graph) return <section className={styles.card}><h2 className={styles.title}>위키 지도</h2><p role="alert" className={styles.help}>위키 그래프를 불러오지 못했습니다. 잠시 뒤 새로 고쳐 주세요. 질문은 위에서 그대로 할 수 있습니다.</p></section>;
   const hits = new Set(active);
   const near = new Set([...hits].flatMap((page) => [...(neighbors.get(page) ?? [])]).filter((page) => !hits.has(page)));
   const selected = focus.selected ? nodes.find((n) => n.page === focus.selected) : undefined;
@@ -191,11 +192,13 @@ export function WikiGraphView({ graph, focus, onFocus }: { graph: WikiGraph | nu
   return (
     <section className={`${styles.card} ${own.card}`} aria-labelledby="wiki-graph-title">
       <div className={own.head}>
-        <h2 id="wiki-graph-title">위키 지도</h2>
+        <span className={styles.head}>
+          <h2 id="wiki-graph-title" className={styles.title}>위키 지도</h2>
+          <InfoTip icon text="질문하면 답의 출처 쪽이 켜져요. 빈 곳을 끌면 지도가 움직이고 휠로 확대하거나 줄여요. 점을 누르면 그 쪽 설명이 나와요." label="위키 지도 설명 보기" />
+        </span>
         <button type="button" className={own.linkButton} onClick={() => { setResetCount((c) => c + 1); onFocus({ pages: [], selected: null }); }}>전체 보기</button>
       </div>
-      <p className={styles.muted} role="status">{statusText(graph, focus)}</p>
-      <p className={styles.muted}>빈 곳을 끌면 지도가 움직이고, 휠로 확대·축소합니다. 점을 누르면 그 쪽 설명이 나옵니다.</p>
+      <p className={styles.help} role="status">{statusText(graph, focus)}</p>
       <GraphCanvas graph={graph} hits={hits} near={near} fromAnswer={!focus.selected} onPick={pick} svgRef={svgRef} viewBox={viewBox} />
       <GraphLegend nodes={nodes} />
       {selected ? <PagePanel node={selected} linked={[...(neighbors.get(selected.page) ?? [])]} onPick={pick} /> : null}

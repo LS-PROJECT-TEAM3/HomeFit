@@ -83,3 +83,11 @@ export function parseInterestHomeForm(input: InterestHomeInput): Result<Interest
     value: { name, sigunguCode: input.sigunguCode, housingType: input.housingType as HousingType, exclusiveAreaM2: areaM2, ...money, monthlyRent: money.monthlyRent ?? 0, ...cost },
   };
 }
+
+/** spec 022 FR-011(등록 창 보드): 칸 묶음 상태. 필수가 비면 "필수 N칸 비어 있어요", 아니면 "입력함 n/m" */
+export function foldStatus({ all, required }: { all: readonly string[]; required: readonly string[] }): { text: string; warn: boolean } {
+  const empty = (v: string) => v.trim() === "";
+  const missing = required.filter(empty).length;
+  if (missing > 0) return { text: `필수 ${missing}칸 비어 있어요`, warn: true };
+  return { text: `입력함 ${all.filter((v) => !empty(v)).length}/${all.length}`, warn: false };
+}
