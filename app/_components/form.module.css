@@ -165,6 +165,7 @@
 
 /* 접는 칸 묶음(DS Fold: 머리 64px, 세리프 제목, "입력함 n/m", 꺾쇠) */
 .fold {
+  scroll-margin-top: 96px; /* 펼쳐 옮길 때 위쪽 메뉴·첫 설정 머리에 가리지 않게 */
   border: 1px solid var(--line-normal-neutral);
   border-radius: var(--radius-control);
   background: var(--background-elevated-normal);

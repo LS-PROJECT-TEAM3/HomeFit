@@ -8,7 +8,7 @@ import { electricityBreakdown, yearlyBills } from "@/incident/energy-estimate";
 import { currentUserId } from "@/lib/supabase/server";
 import { kstMonth } from "../compare/cost-view";
 import { BillChart } from "./bill-chart";
-import { about, BandFigure, PhoneSummary } from "./energy-figure";
+import { about, BandFigure, PhoneSummary, type EnergyFigure } from "./energy-figure";
 import { NoUsage } from "./energy-states";
 import { ENERGY_TABS } from "./tabs";
 import { UsageTierChart } from "./usage-tier-chart";
@@ -38,12 +38,17 @@ async function Electricity() {
   const b = electricityBreakdown(kwh, month);
   const totals = yearlyBills(kwh).map((m) => m.bill + Math.round(m.bill * 0.1)); // 부가세 포함
   const maxIdx = totals.indexOf(Math.max(...totals));
-  const props = { b, kwh, estimated: kind === "estimated" };
+  const figure: EnergyFigure = {
+    title: "이번 달 예상 전기요금", basis: kind === "estimated" ? "추정값" : "계산값", total: b.total,
+    tip: "기본요금과 전력량요금에 부가세 10%를 더했어요. 기후환경요금, 연료비조정요금, 전력기금 같은 부가 요금은 빠져 있어요.",
+    rows: [["예상 사용량", `${kwh.toLocaleString("ko-KR")}kWh`], ["전기요금", `약 ${about(b.bill)}원`], ["부가세 10%", `약 ${about(b.vat)}원`]],
+    callout: b.save30 > 0 ? `30kWh 줄이면 월 약 ${about(b.save30)}원 덜 나와요` : null,
+  };
   return (
     <>
-      {band(<BandFigure {...props} />)}
+      {band(<BandFigure figure={figure} />)}
       <main className={styles.main}>
-        <PhoneSummary {...props} />
+        <PhoneSummary figure={figure} />
         <section className={styles.card} aria-labelledby="tier-title">
           <span className={styles.cardTitleRow}>
             <h2 id="tier-title" className={styles.cardTitle}>누진 구간에서 내 위치</h2>

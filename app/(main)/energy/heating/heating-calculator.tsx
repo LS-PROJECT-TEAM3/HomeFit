@@ -44,8 +44,9 @@ export function HeatingCalculator() {
   return (
     <section className={styles.card} aria-labelledby="heating-title">
       <span className={styles.cardTitleRow}>
-        <h2 id="heating-title" className={styles.cardTitle}>이번 달 예상 난방비</h2>
-        <InfoTip icon text={tip} label="이번 달 예상 난방비 설명 보기" />
+        {/* 사용자 요청(2026-11-23): 위 띠가 "이번 달 예상 난방비"라 이 카드는 직접 계산으로 이름을 나눈다 */}
+        <h2 id="heating-title" className={styles.cardTitle}>사용량으로 직접 계산</h2>
+        <InfoTip icon text={tip} label="사용량으로 직접 계산 설명 보기" />
       </span>
       <div className={styles.heatInputs}>
         <div className={styles.field}>

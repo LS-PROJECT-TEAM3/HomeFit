@@ -7,7 +7,7 @@ import { currentUserId } from "@/lib/supabase/server";
 import { Fold } from "@/app/_components/fold";
 import { HomeForm } from "./home-form";
 import { loadMyHome, type MyMeasurement } from "./load";
-import { MeasurementDialog } from "./measurement-dialog";
+import { MeasurementFields } from "./measurement-fields";
 import styles from "../my.module.css";
 
 export const metadata = { title: "내 집 | HomeFit AI" };
@@ -55,13 +55,12 @@ async function HomeSections() {
     <>
       {/* spec 022(v2-set-home-pc): 바깥 카드·요약 없이 접는 칸만(왼쪽 탭이 제목 역할) */}
       <HomeForm initial={loaded.home} extra={loaded.home ? (
-        // 사용자 요청(2026-11-23): 저장 버튼 위, 다른 묶음처럼 접어 둔다. 측정값은 창에서 따로 저장
-        <Fold title="실내 온습도" tip="습도계로 잰 값과 날씨 예보로 결로 위험을 계산해요. 7일 넘은 값은 쓰지 않아요." status={latestText(loaded.measurements)}>
-          <MeasurementDialog />
+        // 사용자 요청(2026-11-23): 저장 버튼 위, 다른 묶음처럼 접어 두고 칸을 바로 보인다(설명 아이콘 없음). 측정값은 따로 저장
+        <Fold title="실내 온습도" status={latestText(loaded.measurements)}>
+          <MeasurementFields />
           <MeasurementList measurements={loaded.measurements} now={new Date()} />
         </Fold>
       ) : <p className={styles.note}>내 집을 먼저 저장해 주세요. 저장하면 실내 온습도를 넣을 수 있어요.</p>} />
-      <p className={styles.note}>누수나 건물 하자는 이 앱으로 알 수 없습니다. 결로/습도 위험만 알려 드립니다.</p>
     </>
   );
 }
