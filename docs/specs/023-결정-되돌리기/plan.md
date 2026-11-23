@@ -45,7 +45,7 @@ DB 함수(0023)의 동작:
 | 3 | 공고 되돌리기: `clearNoticeDecision` + 상세의 "팔로우 풀기"·"관심 없음 취소". 실패하면 상태 그대로 + 오류 문구 | 미리보기에서 버튼 모양·키보드·오류 문구 확인, 시험·tsc·lint 통과 |
 | 4 | 알림 되돌리기: `cancelApproval`·`cancelRejection` + `undo-panel`(승인 취소는 확인 창에 "일정과 체크한 내용이 지워져요") | 미리보기 확인, 전체 시험·tsc·lint·build 통과, 사람 QA 목록 |
 
-- [x] 1단계  - [x] 2단계  - [x] 3단계  - [ ] 4단계
+- [x] 1단계  - [x] 2단계  - [x] 3단계  - [x] 4단계
 
 ## 4. 테스트 전략
 - 순수 함수(`latestRejectReason`)는 Vitest. 실제 API·DB를 부르지 않는다

@@ -11,6 +11,7 @@ import { createClient, currentUserId } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import { latestRejectReason } from "@/incident/actions-history";
 import { DecisionPanel, type PlanName } from "./decision-panel";
+import { UndoApproval, UndoRejection } from "./undo-panel";
 import { HumidityFactsView } from "./humidity-facts";
 import { PlanFold } from "./plan-fold";
 import { RentFactsView } from "./rent-facts";
@@ -131,9 +132,10 @@ async function Detail({ params }: { params: PageProps<"/incidents/[id]">["params
         <div className={styles.doneBar} role="status">
           <b>일정 {detail.plan?.checklist.length ?? 0}개를 넣었어요</b>
           {detail.scheduleId ? <Link href={`/schedule/${detail.scheduleId}`} className={styles.textLink}>내 일정 보기<Icon name="chevron-right" size={18} /></Link> : null}
+          {detail.isMine ? <UndoApproval incidentId={detail.id} /> : null}
         </div>
       ) : null}
-      {detail.status === "rejected" ? <div className={styles.doneBar} role="status"><b>거절했어요. 일정은 바뀌지 않았어요.</b>{rejectReason ? <span>이유: {rejectReason}</span> : null}</div> : null}
+      {detail.status === "rejected" ? <div className={styles.doneBar} role="status"><b>거절했어요. 일정은 바뀌지 않았어요.</b>{rejectReason ? <span>이유: {rejectReason}</span> : null}{detail.isMine ? <UndoRejection incidentId={detail.id} /> : null}</div> : null}
       <header className={styles.header}>
         <div className={styles.headerMeta}>
           <span className={`${styles.badge} ${styles.badgeLarge} ${kind[1]}`}>{kind[0]}</span>
