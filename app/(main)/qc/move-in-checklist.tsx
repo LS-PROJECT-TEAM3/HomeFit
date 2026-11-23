@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { Icon } from "@/app/_components/icons";
 import { InfoTip } from "@/app/_components/info-tip";
-import { checkedCount, MOVE_IN_ITEMS, toStored, totalCount, type MoveInChecklist as Checklist } from "@/incident/move-in-checklist";
+import { checkedCount, checklistSnapshot, MOVE_IN_ITEMS, toStored, totalCount, type CustomItem, type MoveInChecklist as Checklist, type MoveInKey } from "@/incident/move-in-checklist";
+import { AddCustomItem } from "./add-custom-item";
+import { ChecklistItem } from "./checklist-item";
 import { saveMoveInChecklist } from "./checklist/actions";
 import styles from "./qc.module.css";
 
 // spec 019 FR-001 (PRD FR-29) → spec 022 FR-011(캔버스 v2-qc-check-pc): 관심 주택 한 곳의 입주 전 점검. 저장하면 그 관심 주택에 남는다.
-// 현경 결정(2026-11-21): 지금 데이터 그대로. 항목별 메모·"+ 항목 추가"는 추후 기능(plan.md)이라 메모는 집마다 하나
+// spec 024(PRD FR-29 v1.22): 항목별 메모와 이 집에만 생기는 내 항목("+ 항목 추가"). 집 전체 메모는 그대로
 
 export type CheckHome = { id: string; name: string; place: string; checklist: Checklist; note: string; savedAt: string };
 
@@ -69,48 +71,61 @@ function HomePicker({ homes, current }: { homes: CheckHome[]; current: CheckHome
 
 export function MoveInChecklist({ homes, current }: { homes: CheckHome[]; current: CheckHome }) {
   const [state, formAction, pending] = useActionState(saveMoveInChecklist, {});
-  const [checked, setChecked] = useState<Set<string>>(() => new Set(Object.keys(current.checklist.checked)));
+  // spec 024: 체크·항목 메모·내 항목을 한 상태로. 저장 실패 때도 입력은 그대로 남는다(E8)
+  const [list, setList] = useState<Checklist>(current.checklist);
   const [note, setNote] = useState(current.note);
-  const [savedKeys, setSavedKeys] = useState(() => [...checked].sort().join() + "|" + current.note);
-  const dirty = [...checked].sort().join() + "|" + note !== savedKeys;
+  // 2단계 리뷰: 키 순서와 상관없이 비교하고, 저장이 끝나면 "누른 순간"의 값을 저장된 값으로 둔다(저장 중에 고친 것은 변경으로 남김)
+  const snapshot = checklistSnapshot(list) + "|" + note.trim();
+  const [saved, setSaved] = useState(snapshot);
+  const [submitted, setSubmitted] = useState(snapshot);
+  const addButton = useRef<HTMLButtonElement>(null);
+  const dirty = snapshot !== saved;
   const [lastSaved, setLastSaved] = useState(current.savedAt);
   if (state.savedAt && state.savedAt !== lastSaved && !pending) {
     setLastSaved(state.savedAt);
-    setSavedKeys([...checked].sort().join() + "|" + note);
+    setSaved(submitted);
   }
-  const toggle = (key: string) => setChecked((prev) => {
-    const next = new Set(prev);
-    if (next.has(key)) next.delete(key);
-    else next.add(key);
-    return next;
+  const toggle = (key: MoveInKey) => setList((prev) => {
+    const checked = { ...prev.checked };
+    if (checked[key]) delete checked[key];
+    else checked[key] = true;
+    return { ...prev, checked };
   });
+  const setItemNote = (key: MoveInKey, value: string) => setList((prev) => ({ ...prev, notes: { ...prev.notes, [key]: value } }));
+  const changeCustom = (id: string, change: Partial<CustomItem>) =>
+    setList((prev) => ({ ...prev, custom: prev.custom.map((item) => (item.id === id ? { ...item, ...change } : item)) }));
+  const removeCustom = (id: string) => {
+    setList((prev) => ({ ...prev, custom: prev.custom.filter((item) => item.id !== id) }));
+    requestAnimationFrame(() => addButton.current?.focus()); // 지운 줄이 사라져도 키보드 위치를 잃지 않게
+  };
+  const addCustom = (item: { id: string; label: string }) => setList((prev) => ({ ...prev, custom: [...prev.custom, { ...item, checked: false, note: "" }] }));
+  const customLabels = list.custom.map((item) => item.label);
   return (
     <>
       <HomePicker homes={homes} current={current} />
       {/* data-snap-section: 항목을 누르면 "점검 항목" 영역이 메뉴·탭 아래에 맞춰진다(focus-scroll.tsx) */}
-      <form action={formAction} className={styles.checkForm} aria-label={`${current.name} 입주 전 점검`} data-snap-section>
+      <form action={formAction} onSubmit={() => setSubmitted(snapshot)} className={styles.checkForm} aria-label={`${current.name} 입주 전 점검`} data-snap-section>
         <input type="hidden" name="homeId" value={current.id} />
-        {/* spec 024: 저장 모양 JSON 하나로 보낸다. 항목 메모·내 항목은 2단계 화면 전까지 읽은 값을 그대로 돌려준다 */}
-        <input type="hidden" name="checklist" value={JSON.stringify(toStored({ ...current.checklist, checked: Object.fromEntries([...checked].map((key) => [key, true])) }))} />
+        {/* spec 024: 저장 모양 JSON 하나로 보낸다. 서버가 다시 검사한다 */}
+        <input type="hidden" name="checklist" value={JSON.stringify(toStored(list))} />
         <div className={styles.checkHead}>
           <h2 className={styles.cardTitle}>점검 항목</h2>
-          <span className={styles.checkCount}>확인한 항목<span className={styles.checkNumber}>{checked.size + current.checklist.custom.filter((item) => item.checked).length}<span className={styles.checkTotal}> / {totalCount(current.checklist)}</span></span></span>
+          <span className={styles.checkCount}>확인한 항목<span className={styles.checkNumber}>{checkedCount(list)}<span className={styles.checkTotal}> / {totalCount(list)}</span></span></span>
         </div>
         <ul className={styles.checkGrid}>
           {MOVE_IN_ITEMS.map((item) => {
             const [title, question] = item.label.split(": ");
-            const on = checked.has(item.key);
             return (
-              <li key={item.key} className={styles.checkItem}>
-                <label className={styles.checkLabel}>
-                  <input type="checkbox" name="checked" value={item.key} checked={on} onChange={() => toggle(item.key)} className={styles.srOnly} />
-                  <span className={`${styles.checkBox} ${on ? styles.checkBoxOn : ""}`} aria-hidden="true">{on ? <Icon name="tick" size={18} /> : null}</span>
-                  <span className={styles.checkTitle}>{title}</span>
-                </label>
-                <p className={styles.checkQuestion}>{question}</p>
-              </li>
+              <ChecklistItem key={item.key} title={title} question={question} checked={Boolean(list.checked[item.key])} note={list.notes[item.key] ?? ""}
+                onToggle={() => toggle(item.key)} onNote={(value) => setItemNote(item.key, value)} />
             );
           })}
+          {list.custom.map((item) => (
+            <ChecklistItem key={item.id} title={item.label} checked={item.checked} note={item.note}
+              onToggle={() => changeCustom(item.id, { checked: !item.checked })} onNote={(value) => changeCustom(item.id, { note: value })}
+              custom={{ others: customLabels, onRename: (label) => changeCustom(item.id, { label }), onRemove: () => removeCustom(item.id) }} />
+          ))}
+          <AddCustomItem existing={customLabels} onAdd={addCustom} buttonRef={addButton} />
           <li className={`${styles.checkItem} ${styles.checkNote}`} data-snap-section>
             <label htmlFor="move-in-note" className={styles.checkTitle}>메모</label>
             <textarea id="move-in-note" name="note" rows={3} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} className={`${styles.input} ${styles.textarea}`} placeholder="예: 북향이라 오후에 어두움, 욕실 실리콘 교체 필요 (500자 안)" />

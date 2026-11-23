@@ -39,11 +39,11 @@ describe("interestHomeSource", () => {
     // 월세 550,000 + 관리비 80,000 + 교통비 1,500×2×22=66,000
     expect(source.text).toContain("실질 주거비 696,000원");
     expect(source.text).toContain("미입력: 에너지비");
-    expect(source.text).toContain("입주 전 점검 2/7 확인(채광, 곰팡이)");
+    expect(source.text).toContain("입주 전 점검 2/12 확인(채광, 곰팡이)");
     expect(source.text).toContain("메모: 북향이라 어두움");
   });
   it("점검을 안 했으면 그렇게 적는다", () => {
-    expect(interestHomeSource({ ...home, checklist: { checked: {}, notes: {}, custom: [] }, note: null }, { index: 1, month: 11 }).text).toContain("입주 전 점검 0/7 확인");
+    expect(interestHomeSource({ ...home, checklist: { checked: {}, notes: {}, custom: [] }, note: null }, { index: 1, month: 11 }).text).toContain("입주 전 점검 0/12 확인");
   });
 });
 

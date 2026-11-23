@@ -1,14 +1,25 @@
 import { describe, expect, it } from "vitest";
 import {
-  MOVE_IN_ITEMS, checkCustomLabel, checkedCount, emptyChecklist, parseChecklist, parseChecklistForm, toStored, totalCount, type MoveInChecklist,
+  MOVE_IN_ITEMS, checkCustomLabel, checkedCount, emptyChecklist, parseChecklist, parseChecklistForm, toStored, totalCount, checklistSnapshot, type MoveInChecklist,
 } from "@/incident/move-in-checklist";
 
 // spec 019 FR-001·E2, spec 024 FR-001~006·E1~E6 (qa C-2401~2405)
 describe("MOVE_IN_ITEMS", () => {
-  it("뼈대 때의 7개 항목을 그대로 쓰고 키가 겹치지 않는다", () => {
-    expect(MOVE_IN_ITEMS).toHaveLength(7);
-    expect(new Set(MOVE_IN_ITEMS.map((i) => i.key)).size).toBe(7);
+  it("뼈대 때의 7개 항목을 앞에 그대로 두고 키가 겹치지 않는다", () => {
     expect(MOVE_IN_ITEMS[0].label).toBe("채광: 낮에 불을 끄고도 방이 밝은가");
+    expect(MOVE_IN_ITEMS.slice(0, 7).map((i) => i.key)).toEqual(["light", "noise", "smell", "mold", "water_pressure", "maintenance_fee", "window"]);
+    expect(new Set(MOVE_IN_ITEMS.map((i) => i.key)).size).toBe(MOVE_IN_ITEMS.length);
+  });
+  // spec 024 FR-007·SC-005 (qa C-2410)
+  it("FR-007: 기본 항목 12개, 더한 5개는 배수·난방·보일러·전기·콘센트·방범·누수 흔적", () => {
+    expect(MOVE_IN_ITEMS).toHaveLength(12);
+    expect(MOVE_IN_ITEMS.slice(7).map((i) => i.label.split(":")[0])).toEqual(["배수", "난방·보일러", "전기·콘센트", "방범", "누수 흔적"]);
+  });
+  it("FR-007: 예전 7개 체크는 그대로, 새 항목은 확인 안 함으로 시작", () => {
+    const old = parseChecklist({ light: true, window: true });
+    expect(old.checked).toEqual({ light: true, window: true });
+    expect(checkedCount(old)).toBe(2);
+    expect(totalCount(old)).toBe(12);
   });
 });
 
@@ -55,10 +66,10 @@ describe("toStored (저장할 모양)", () => {
 });
 
 describe("FR-006 확인 수", () => {
-  it("기본 2 + 내 항목 1 체크, 전체 7 + 내 항목 2", () => {
+  it("기본 2 + 내 항목 1 체크, 전체 12 + 내 항목 2", () => {
     const list: MoveInChecklist = { checked: { light: true, mold: true }, notes: {}, custom: [parking, { ...parking, id: "def456", label: "엘리베이터", checked: false }] };
     expect(checkedCount(list)).toBe(3);
-    expect(totalCount(list)).toBe(9);
+    expect(totalCount(list)).toBe(14);
   });
 });
 
@@ -77,6 +88,7 @@ describe("checkCustomLabel (내 항목 이름, E1~E3)", () => {
   it("E3: 같은 이름(앞뒤 공백 무시)이나 기본 항목 제목과 같으면 거절", () => {
     expect(checkCustomLabel("  주차 자리 ", existing)).toBe("이미 있는 항목이에요. 다른 이름을 적어 주세요.");
     expect(checkCustomLabel("소음", existing)).toBe("이미 있는 항목이에요. 다른 이름을 적어 주세요.");
+    expect(checkCustomLabel("배수", existing)).toBe("이미 있는 항목이에요. 다른 이름을 적어 주세요.");
   });
   it("정상 이름은 null", () => {
     expect(checkCustomLabel("엘리베이터", existing)).toBeNull();
@@ -117,5 +129,19 @@ describe("parseChecklistForm (화면이 보낸 값)", () => {
   });
   it("JSON이 아니면 새로고침 안내", () => {
     expect(parseChecklistForm({ checklist: "{망가짐", note: "" })).toEqual({ ok: false, error: "점검 내용을 읽지 못했습니다. 페이지를 새로고침한 뒤 다시 저장해 주세요." });
+  });
+});
+
+// 2단계 리뷰: "저장하지 않은 변경" 판단은 키 순서와 상관없어야 한다
+describe("checklistSnapshot", () => {
+  it("체크 키 순서가 달라도, 빈 메모가 있어도 같은 값", () => {
+    const a: MoveInChecklist = { checked: { mold: true, light: true }, notes: {}, custom: [parking] };
+    const b: MoveInChecklist = { checked: { light: true, mold: true }, notes: { noise: "  " }, custom: [parking] };
+    expect(checklistSnapshot(a)).toBe(checklistSnapshot(b));
+  });
+  it("내용이 다르면 다른 값", () => {
+    const a: MoveInChecklist = { checked: { light: true }, notes: {}, custom: [] };
+    expect(checklistSnapshot(a)).not.toBe(checklistSnapshot({ ...a, notes: { light: "밝음" } }));
+    expect(checklistSnapshot(a)).not.toBe(checklistSnapshot({ ...a, custom: [parking] }));
   });
 });

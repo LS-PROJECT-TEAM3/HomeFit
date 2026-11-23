@@ -11,6 +11,12 @@ export const MOVE_IN_ITEMS = [
   { key: "water_pressure", label: "수압: 싱크대·샤워기 물을 같이 틀어도 세게 나오는가" },
   { key: "maintenance_fee", label: "관리비: 포함 항목(인터넷·수도·청소)과 금액을 받았는가" },
   { key: "window", label: "창 종류: 홑유리인지 이중유리인지 (결로와 난방비에 영향)" },
+  // spec 024 FR-007 (사용자 결정 2026-11-23): 집을 볼 때 눈으로 확인하는 것 5개. 누수는 보이는 자국만, 예측하지 않는다(PRD 9절)
+  { key: "drain", label: "배수: 싱크대·세면대·욕실 물이 잘 빠지고 냄새가 올라오지 않는가" },
+  { key: "heating", label: "난방·보일러: 보일러가 잘 켜지고 바닥이 고르게 따뜻해지는가" },
+  { key: "electric", label: "전기·콘센트: 콘센트 수와 위치가 쓸 만하고 차단기(두꺼비집)가 정상인가" },
+  { key: "security", label: "방범: 현관·창문이 잘 잠기고, 저층이면 방범창이 있는가" },
+  { key: "leak", label: "누수 흔적: 천장·벽·창 아래에 물 자국이나 얼룩이 있는가" },
 ] as const;
 
 export type MoveInKey = (typeof MOVE_IN_ITEMS)[number]["key"];
@@ -69,6 +75,13 @@ export function toStored(list: MoveInChecklist): Record<string, unknown> {
     ...(Object.keys(notes).length ? { notes } : {}),
     ...(list.custom.length ? { custom: list.custom } : {}),
   };
+}
+
+/** 저장하지 않은 변경 판단용 비교 값. 키 순서·빈 메모와 상관없이 내용이 같으면 같다(2단계 리뷰) */
+export function checklistSnapshot(list: MoveInChecklist): string {
+  const base = MOVE_IN_ITEMS.map((item) => [Boolean(list.checked[item.key]), (list.notes[item.key] ?? "").trim()]);
+  const custom = list.custom.map((item) => [item.id, item.label, item.checked, item.note.trim()]);
+  return JSON.stringify([base, custom]);
 }
 
 /** FR-006: 확인한 수와 전체 수에 내 항목도 센다 */
