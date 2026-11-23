@@ -234,7 +234,7 @@ tr:last-child td { border-bottom: 0; }
     <div class="card"><h3>같은 변화는 한 번만</h3><p class="t">사람마다 같은 변화는 한 번만 알려요(중복 방지).</p></div>
     <div class="card"><h3>AI는 초안만</h3><p class="t">AI는 요약·대응안 초안·기록 찾기 답에만 써요. 비교·저장·권한 검사는 코드가 해요.</p></div>
   </div>
-  <p class="warn">AI 공급자: 개발과 현재 운영은 Gemini를 써요. 운영을 Claude API로 바꾸기로 했고, <b>전환이 끝나기 전에는 "Claude가 요약한다"고 말하지 않아요.</b></p>
+  <p class="warn">AI 공급자: 개발은 Gemini, 운영은 Claude(Haiku)를 써요(2026-11-23 운영 전환). <b>운영 화면에서 Claude가 답하는지는 리허설에서 확인한 뒤에만 "Claude가 요약한다"고 말해요.</b></p>
 </section>
 
 <!-- 10 시연 -->
@@ -331,7 +331,7 @@ tr:last-child td { border-bottom: 0; }
   <div class="grid g4">
     <div class="card"><div class="num">1</div><p class="t"><b>CLAUDE.md</b> 팀 작업 규칙</p></div>
     <div class="card"><div class="num">5</div><p class="t"><b>규칙 파일</b> harness·code·quality·design·git-security</p></div>
-    <div class="card"><div class="num">13</div><p class="t"><b>스킬</b> 기획 문서 7 + 인터뷰·용어 3 + 위키 3</p></div>
+    <div class="card"><div class="num">15</div><p class="t"><b>스킬</b> 기획 문서 7 + 인터뷰·용어 3 + 위키 3 + 디자인 2</p></div>
     <div class="card"><div class="num">4</div><p class="t"><b>검사</b> test·lint·build·tsc 커밋 전 모두 통과</p></div>
   </div>
   <div class="card"><h3>실패 → 규칙 → 재검사</h3><p class="t">빌드를 빼먹어 운영 빌드가 실패 → "커밋 전 넷 다 통과" 규칙을 계획 문서에 추가했어요.</p></div>
@@ -344,12 +344,12 @@ tr:last-child td { border-bottom: 0; }
   <h2>누가 무엇을 만들었나</h2>
   <table>
     <tr><th>이름</th><th>맡은 조각</th><th>합쳐진 PR</th></tr>
-    <tr><td>예림 dbdpfla98</td><td>기획 문서·기능 001~011·013~020, 조각 B·E</td><td>#1 하네스·문제정의, #2 IA, #4 기능 001~008, #8 집 비교, #11 시세 채점·수정 기록, #16 에너지비, #19 기능 013~020</td></tr>
-    <tr><td>현경 gaangstar</td><td>조각 A 위키·위키 챗봇</td><td>#15 위키와 위키 챗봇, #24 위키 넣기·실제 AI 확인, #28 위키 그래프·위키 넣기 묶음 8</td></tr>
+    <tr><td>예림 dbdpfla98</td><td>기획 문서·기능 001~011·013~020, 조각 B·E</td><td>#1 하네스·문제정의, #2 IA, #4 기능 001~008, #8 집 비교, #11 시세 채점·수정 기록, #16 에너지비, #19 기능 013~020, #32 챗봇 지시 방어, #44 웹 푸시 알림</td></tr>
+    <tr><td>현경 gaangstar</td><td>조각 A 위키·위키 챗봇</td><td>#15 위키와 위키 챗봇, #24 위키 넣기·실제 AI 확인, #28 위키 그래프·위키 넣기 묶음 8, #47 디자인 전체 수정</td></tr>
     <tr><td>선우 sunwood0803</td><td>조각 C1 제출 문서</td><td>#3 하네스 규칙, #5 제출 문서 3개, #10 커넥터·서브에이전트, #13 흐름 화면 문서, #17 QA·흐름 화면 갱신, #26 QA·디버그 기록 갱신, #39 흐름 화면 캡처·사람 QA 015~020</td></tr>
-    <tr><td>서윤 lilyoon333</td><td>조각 C2 README·시연·발표</td><td>#6 README, #7·#9·#14·#21·#29 시연 순서, #12·#18·#20·#25·#33 README 팀원 표, #22·#36 인터뷰 종합(팀 밖 설문), #27·#35·#38 발표 슬라이드, #30 README 기능 목록, #37 README 인터뷰 줄, #40 13장 DB 기록 수</td></tr>
+    <tr><td>서윤 lilyoon333</td><td>조각 C2 README·시연·발표</td><td>#6 README, #7·#9·#14·#21·#29·#42 시연 순서, #12·#18·#20·#25·#33 README 팀원 표, #22·#36 인터뷰 종합(팀 밖 설문), #27·#35·#38·#42 발표 슬라이드, #30 README 기능 목록, #37 README 인터뷰 줄, #40 13장 DB 기록 수</td></tr>
   </table>
-  <p class="sub">모두 합쳐진 PR 1개 이상과 리뷰 1개 이상이 있어요. PR 번호와 작성자는 GitHub 기록과 맞춰 봤어요(2026-11-19). 열린 PR은 #32(예림, 챗봇 지시 방어)이고 합쳐지면 더해요.</p>
+  <p class="sub">모두 합쳐진 PR 1개 이상과 리뷰 1개 이상이 있어요. PR 번호와 작성자는 GitHub 기록과 맞춰 봤어요(2026-11-23). 열린 PR은 #43(선우, qa.md 맞춤)과 서윤 #45·#48이고 합쳐지면 더해요.</p>
 </section>
 
 <!-- 18 다음 -->

@@ -1,7 +1,11 @@
 /* spec 022 첫 설정. PC 값은 캔버스 v2-s1-open-pc·v2-s2-open-pc(왼쪽 520px 안내 + 오른쪽 입력), 휴대폰은 v2-s1-phone. 색은 tokens 변수만 */
 .shell { min-height: 100dvh; display: flex; flex-direction: column; background: var(--background-normal-normal); }
 
+/* 사용자 요청(2026-11-23): 스크롤해도 로고 머리를 위에 고정한다 */
 .head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   height: 60px;
@@ -49,7 +53,7 @@
   .head { height: 68px; padding: 0 var(--spacing-screen-padding-pc); }
   .logo { font-size: 26px; }
   .body { flex-direction: row; align-items: stretch; min-height: calc(100dvh - 68px); }
-  .aside { position: sticky; top: 0; align-self: flex-start; width: 520px; flex: none; min-height: calc(100dvh - 68px); gap: 28px; padding: 64px 64px 96px; border-right: 1px solid var(--line-normal-neutral); border-bottom: 0; }
+  .aside { position: sticky; top: 68px; align-self: flex-start; width: 520px; flex: none; min-height: calc(100dvh - 68px); gap: 28px; padding: 64px 64px 96px; border-right: 1px solid var(--line-normal-neutral); border-bottom: 0; }
   .step { font-size: 22px; }
   .bar { width: 16px; }
   .title { font-size: 38px; }

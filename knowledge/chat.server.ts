@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { toKstDate } from "@/watch/kst";
 import { defectSource, interestHomeSource, policySource } from "@/knowledge/chat-sources";
 import { buildChatPrompt, CHAT_JSON_SCHEMA, CHAT_SYSTEM_PROMPT, parseChatAnswer, rankSources, sourceLabel, type ChatSource } from "@/knowledge/chat";
+import { rejectReasonByIncident } from "@/incident/actions-history";
 
 // spec 004 v0.3 FR-007: 챗봇 답. 내 처리 기록은 로그인 사용자 권한(RLS)으로, 예보는 내 집 시군구 것만 서버 권한으로 읽는다
 
@@ -32,11 +33,11 @@ async function alertSources(userId: string): Promise<ChatSource[]> {
   const ids = data.map((row) => row.id);
   const [plans, actions] = await Promise.all([
     supabase.from("response_plans").select("incident_id, checklist").in("incident_id", ids),
-    supabase.from("incident_actions").select("incident_id, action, reason").in("incident_id", ids),
+    supabase.from("incident_actions").select("incident_id, action, reason").in("incident_id", ids).order("created_at"),
   ]);
   if (plans.error || actions.error) throw new Error("처리 기록을 읽지 못했습니다.");
   const checklistOf = new Map(plans.data.map((p) => [p.incident_id, p.checklist as { label: string }[]]));
-  const rejectOf = new Map(actions.data.filter((a) => a.action === "reject").map((a) => [a.incident_id, a.reason]));
+  const rejectOf = rejectReasonByIncident(actions.data); // spec 023: 거절 취소 뒤 다시 거절하면 마지막 사유
   return data.map((row, i) => {
     const facts = row.facts as { title?: string; applyEnd?: string | null; surfaceC?: number; dewPointC?: number };
     const checklist = checklistOf.get(row.id);

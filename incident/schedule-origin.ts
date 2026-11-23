@@ -1,6 +1,9 @@
-/** spec 007 FR-004: 일정이 어디서 왔는지(알림 또는 공고)에 따라 출처 링크. ERD schedule_items v1.7 */
-export function scheduleOrigin(item: { incidentId: string | null; announcementId: string | null }): { href: string; label: string } | null {
+import { POLICY_SOURCE } from "./policy-schedule";
+
+/** spec 007 FR-004: 일정이 어디서 왔는지(알림 또는 공고)에 따라 출처 링크. ERD schedule_items v1.7. spec 026: 정책이면 정책 상세 */
+export function scheduleOrigin(item: { incidentId: string | null; announcementId: string | null; sourceCode?: string | null }): { href: string; label: string } | null {
   if (item.incidentId) return { href: `/incidents/${item.incidentId}`, label: "출처 알림 보기" };
+  if (item.announcementId && item.sourceCode === POLICY_SOURCE) return { href: `/policy/${encodeURIComponent(item.announcementId)}`, label: "출처 정책 보기" };
   if (item.announcementId) return { href: `/notices/${encodeURIComponent(item.announcementId)}`, label: "출처 공고 보기" };
   return null;
 }

@@ -9,6 +9,7 @@ import type { HumidityFacts } from "@/incident/humidity-detect";
 import { parseIncidentFilter, type IncidentFilter } from "@/incident/filter";
 import { listIncidents, myhomeCollectionStatus } from "@/incident/queries.server";
 import { toKstDate } from "@/watch/kst";
+import { PeriodPicker } from "./period-picker";
 import styles from "../notices/notices.module.css";
 
 export const metadata = { title: "알림 | HomeFit AI" };
@@ -22,7 +23,6 @@ const kst = (iso: string) => new Date(iso).toLocaleString("sv-SE", { timeZone: "
 const STATUS_OPTIONS = [
   ["all", "전체"], ["new", "새 알림"], ["pending", "승인 대기"], ["approved", "승인"], ["rejected", "거절"],
 ] as const;
-const PERIOD_OPTIONS = [["all", "전체 기간"], ["7d", "최근 7일"], ["30d", "최근 30일"]] as const;
 
 function formatTime(iso: string | null): string {
   if (!iso) return "아직 없음";
@@ -58,7 +58,7 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
   let result;
   try {
     const now = new Date();
-    result = { incidents: await listIncidents(filter, now), status: await myhomeCollectionStatus(), today: toKstDate(now) };
+    result = { incidents: await listIncidents(filter), status: await myhomeCollectionStatus(), today: toKstDate(now) };
   } catch {
     return <LoadError>알림을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</LoadError>;
   }
@@ -70,12 +70,11 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
       ) : null}
       {incidents.length === 0 ? (
         <section className={styles.emptyCard}>
-          {filter.status === "all" && filter.period === "all" ? (
+          {filter.status === "all" && filter.from === null && filter.to === null ? (
             <>
               {/* FR-015 (spec 001 v0.2): 처음 보이는 공고는 사건이 아니라 맞는 공고에 있다 */}
               <h2 className={styles.emptyTitle}>아직 새 알림이 없어요</h2>
-              <p className={styles.emptyText}>팔로우한 맞춤 공고와 내 집에 변화가 생기면 여기에 알려 드려요. 마지막 확인: {formatTime(status.lastSuccessAt)}</p>
-              <Link href="/notices" className={styles.emptyLink}>맞춤 공고 보기</Link>
+              <p className={styles.emptyText}>팔로우한 맞춤 공고와 내 집에 변화가 생기면 여기에 알려 드려요.<br />마지막 확인: {formatTime(status.lastSuccessAt)}</p>
             </>
           ) : <p className={styles.emptyText}>이 조건에 맞는 알림이 없어요.</p>}
         </section>
@@ -119,29 +118,28 @@ async function IncidentList({ filter }: { filter: IncidentFilter }) {
 }
 
 async function Filtered({ searchParams }: { searchParams: PageProps<"/incidents">["searchParams"] }) {
+  await connection(); // 오늘 날짜(7일/30일 바로 가기, 날짜 칸 최댓값)를 요청 때 계산한다
   const filter = parseIncidentFilter(await searchParams);
-  const tabHref = (status: string, period: string) => {
+  const today = toKstDate(new Date());
+  const tabHref = (status: string) => {
     const q = new URLSearchParams();
     if (status !== "all") q.set("status", status);
-    if (period !== "all") q.set("period", period);
+    if (filter.from) q.set("from", filter.from);
+    if (filter.to) q.set("to", filter.to);
     return q.size ? `/incidents?${q.toString()}` : "/incidents";
   };
   return (
     <>
-      {/* spec 004 v0.2: 상태로 거르기(기획안 Incident Center). 필터 값은 주소에 남는다(FR-008) */}
-      <nav className={`${styles.filters} ${styles.statusNav}`} aria-label="알림 상태">
-        {STATUS_OPTIONS.map(([value, label]) => (
-          <Link key={value} href={tabHref(value, filter.period)} className={`${styles.filter} ${filter.status === value ? styles.filterOn : ""}`} aria-current={filter.status === value ? "page" : undefined}>{label}</Link>
-        ))}
-      </nav>
-      <form className={styles.periodForm} method="get">
-        {filter.status !== "all" ? <input type="hidden" name="status" value={filter.status} /> : null}
-        <label htmlFor="period" className={styles.popLabel}>기간</label>
-        <select id="period" name="period" defaultValue={filter.period} className={`${styles.popInput} ${styles.periodSelect}`}>
-          {PERIOD_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-        </select>
-        <button type="submit" className={styles.selectButton}>적용</button>
-      </form>
+      {/* spec 004 v0.2: 상태로 거르기(기획안 Incident Center). 필터 값은 주소에 남는다(FR-008)
+          기간은 상태 칩과 같은 줄 오른쪽에 바로 가기(전체/7일/30일)와 시작일~끝일 날짜 칸 */}
+      <div className={styles.alertTools}>
+        <nav className={styles.filters} aria-label="알림 상태">
+          {STATUS_OPTIONS.map(([value, label]) => (
+            <Link key={value} href={tabHref(value)} className={`${styles.filter} ${filter.status === value ? styles.filterOn : ""}`} aria-current={filter.status === value ? "page" : undefined}>{label}</Link>
+          ))}
+        </nav>
+        <PeriodPicker status={filter.status} from={filter.from} to={filter.to} today={today} />
+      </div>
       <Suspense fallback={<Loading />}>
         <IncidentList filter={filter} />
       </Suspense>

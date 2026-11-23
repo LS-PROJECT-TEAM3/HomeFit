@@ -5,16 +5,19 @@ import { redirect } from "next/navigation";
 import { readCostForm } from "@/app/_components/cost-fields";
 import { parseHomeForm, parseMeasurementForm, type HomeFormInput, type MeasurementFormInput } from "@/incident/home-form";
 import { parseCostFields, type CostFieldsInput } from "@/incident/interest-home-form";
+import { parseGasFields, sidoOfSigungu, type GasFieldsInput } from "@/incident/gas-year";
 import { createClient, currentUserId } from "@/lib/supabase/server";
 
 export type HomeState = {
-  errors?: Partial<Record<"sigunguCode" | "housingType" | "exclusiveArea" | "windowType" | "contractType" | "deposit" | "monthlyRent" | "maintenanceFee" | "contractEndDate" | keyof CostFieldsInput, string>>;
+  errors?: Partial<Record<"sigunguCode" | "housingType" | "exclusiveArea" | "windowType" | "contractType" | "deposit" | "monthlyRent" | "maintenanceFee" | "contractEndDate" | "gasUsage" | "gasMonth" | "gasRegion" | keyof CostFieldsInput, string>>;
   error?: string;
   saved?: boolean;
   /** 저장하지 못했을 때 입력을 되살린다(React가 제출 뒤 폼을 비움) */
   values?: HomeFormInput;
   /** spec 009 FR-002 실질 주거비 칸 입력 */
   costs?: CostFieldsInput;
+  /** spec 025 FR-001 도시가스 칸 입력 */
+  gas?: GasFieldsInput;
 };
 
 export type MeasurementState = {
@@ -39,11 +42,16 @@ export async function saveHome(_prev: HomeState, formData: FormData): Promise<Ho
     maintenanceFee: text(formData, "maintenanceFee"), contractEndDate: text(formData, "contractEndDate"),
   };
   const costs = readCostForm(formData);
+  // spec 025: 도시가스 칸은 설정 화면에만 있다. 칸이 없는 폼(첫 설정)은 저장된 값을 건드리지 않는다
+  const gasIncluded = formData.has("gasIncluded");
+  const gas: GasFieldsInput = { usage: text(formData, "gasUsage"), month: text(formData, "gasMonth"), region: text(formData, "gasRegion") };
   const parsed = parseHomeForm(values);
   const parsedCosts = parseCostFields(costs);
-  if (!parsed.ok || !parsedCosts.ok) {
-    return { errors: { ...(parsed.ok ? {} : parsed.errors), ...(parsedCosts.ok ? {} : parsedCosts.errors) }, values, costs };
+  const parsedGas = gasIncluded && parsed.ok ? parseGasFields(gas, sidoOfSigungu(parsed.value.sigunguCode)) : null;
+  if (!parsed.ok || !parsedCosts.ok || (parsedGas && !parsedGas.ok)) {
+    return { errors: { ...(parsed.ok ? {} : parsed.errors), ...(parsedCosts.ok ? {} : parsedCosts.errors), ...(parsedGas && !parsedGas.ok ? parsedGas.errors : {}) }, values, costs, gas };
   }
+  const g = parsedGas?.ok ? parsedGas.value : undefined;
   const c = parsedCosts.value;
 
   const supabase = await createClient();
@@ -54,13 +62,15 @@ export async function saveHome(_prev: HomeState, formData: FormData): Promise<Ho
       contract_type: parsed.value.contractType, deposit: parsed.value.deposit, monthly_rent: parsed.value.monthlyRent,
       maintenance_fee: parsed.value.maintenanceFee, contract_end_date: parsed.value.contractEndDate,
       energy_cost: c.energyCost, electricity_kwh: c.electricityKwh, transit_fare: c.transitFare, trips_per_day: c.tripsPerDay, commute_days: c.commuteDays,
+      ...(parsedGas ? { gas_usage_mj: g?.mj ?? null, gas_bill_month: g?.month ?? null, gas_tariff_region: g?.region ?? null } : {}),
       created_by: userId, updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },
   );
-  if (error) return { error: "내 집 정보를 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.", values, costs };
+  if (error) return { error: "내 집 정보를 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.", values, costs, gas };
   revalidatePath("/my/home");
-  return { saved: true, values, costs };
+  revalidatePath("/energy/heating");
+  return { saved: true, values, costs, gas };
 }
 
 /** FR-002 (spec 003): 실내 온습도 측정값 쌓기. 내 집이 있어야 한다 */

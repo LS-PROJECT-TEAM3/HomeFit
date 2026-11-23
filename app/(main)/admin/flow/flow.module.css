@@ -10,22 +10,60 @@
   list-style: none;
 }
 
+.step { display: flex; align-items: stretch; }
+
+/* 단계 상자: 크기 고정(누르거나 상태가 바뀌어도 줄이 출렁이지 않게) */
+.stepBox { width: 156px; min-height: 92px; border-radius: var(--radius-control); font: inherit; text-align: left; cursor: pointer; }
+.stepBox[aria-pressed="true"] { background: var(--primary-tint); box-shadow: inset 0 -3px 0 var(--primary-normal); }
+.stepBox:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+
+/* 누른 단계 상자의 기록: 머리 + 이름/값 타일 격자. 높이를 잡아 두어 단계를 바꿔도 아래가 크게 밀리지 않게 */
+.chainHelp { margin: 0; font-size: 14px; color: var(--label-neutral); }
+.detailPanel { display: flex; flex-direction: column; gap: 14px; min-height: 200px; padding: 18px 20px; border: 1px solid var(--line-normal-normal); border-radius: var(--radius-control); background: var(--background-normal-normal); }
+.detailHead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line-normal-normal); }
+.detailTitle { font-size: 17px; }
+.detailState { padding: 2px 10px; border-radius: var(--radius-control); background: var(--background-elevated-normal); font-size: 14px; }
+.detailState .state { display: inline; font-size: 14px; }
+.detailCount { margin-left: auto; font-size: 14px; color: var(--label-neutral); font-variant-numeric: tabular-nums; }
+.detailCount b { color: var(--label-normal); }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.tile { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 10px 12px; border-radius: var(--radius-control); background: var(--background-elevated-normal); }
+.tile dt { font-size: 13px; color: var(--label-neutral); }
+.tile dd { margin: 0; font-size: 16px; font-weight: 700; color: var(--label-normal); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tileEmpty dd { font-weight: 400; color: var(--label-alternative); }
+.detailNone { margin: 0; font-size: 15px; color: var(--label-neutral); }
+@media (min-width: 960px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } .detailPanel { min-height: 300px; } }
+
+/* 시작 상자 → 실행 카드 연결: 왼쪽 초록 띠 + "○○의 실행 흐름" */
+.runLinked { border-left: 4px solid var(--primary-normal); }
+/* 실행마다 오류 줄 유무로 높이가 달라지지 않게 카드 높이를 잡아 둔다 */
+@media (min-width: 960px) { .runLinked > section { min-height: 720px; } }
+.runFrom { display: block; margin-bottom: 2px; font-family: var(--font-sans); font-size: 14px; font-weight: 700; color: var(--primary-normal); letter-spacing: 0; }
+
+/* 시작 상자 크기 고정 + 지금 보는 상자 아래 꼭지(아래 카드로 이어짐) */
+.starts .box { width: 156px; min-height: 84px; }
+a.box[aria-current="true"] { position: relative; }
+a.box[aria-current="true"]::after { content: ""; position: absolute; left: 50%; bottom: -11px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid var(--primary-normal); transform: translateX(-50%); }
+
 .box {
-  min-width: 120px;
-  padding: 12px;
-  background: var(--color-card);
+  min-width: 128px;
+  padding: 12px 14px;
+  background: var(--background-elevated-normal);
   border-radius: var(--radius-control);
+  color: var(--label-normal);
+  text-decoration: none;
 }
 
-.box summary {
-  cursor: pointer;
-  list-style: none;
-}
+/* 시작 상자: 누르면 그 출처의 최근 실행. 지금 보는 출처는 바탕을 채워 실패 테두리와 구분한다 */
+a.box { display: block; }
+a.box:hover { background: var(--background-normal-alternative); }
+a.box[aria-current="true"] { background: var(--primary-tint); box-shadow: inset 0 -3px 0 var(--primary-normal); }
+a.box:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
 
-.box summary::-webkit-details-marker {
-  display: none;
-}
-
+/* 상태 글자색(테두리와 함께) */
+.succeeded .state { color: var(--status-positive); font-weight: 700; }
+.failed .state { color: var(--status-negative); font-weight: 700; }
+.waiting .state { color: var(--status-cautionary); font-weight: 700; }
 
 .name {
   display: block;
@@ -91,10 +129,21 @@
   font-weight: 700;
 }
 
+/* 결과 필터(전체 / 실패만) */
+.filters { display: flex; gap: 8px; }
+.filter { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: var(--radius-control); background: var(--background-normal-alternative); color: var(--label-normal); font-size: 14px; font-weight: 600; text-decoration: none; }
+.filter[aria-current="page"] { background: var(--primary-normal); color: var(--static-white); }
+.filter:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+
+.raw summary { cursor: pointer; font-size: 14px; color: var(--label-neutral); text-decoration: underline; text-underline-offset: 4px; }
+.raw p { margin: 8px 0 0; font-size: 14px; color: var(--label-neutral); overflow-wrap: anywhere; }
+
 @media (max-width: 600px) {
   .chain {
     flex-direction: column;
   }
+
+  .step { flex-direction: column; }
 
   .arrow {
     flex-direction: row;
