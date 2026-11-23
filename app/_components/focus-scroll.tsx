@@ -7,7 +7,6 @@ import { lockChrome, setChromeHidden, topNavHeight } from "./chrome";
 // 위쪽 메뉴와 탭 줄 바로 아래에 맞춰지게 스크롤한다. 빈 여백을 누르면 움직이지 않는다.
 // 더 올라올 수 없는 아래쪽 영역(메모 등)은 브라우저가 끝까지만 내려가 화면 아래에 맞춰진다.
 // 영역이 화면보다 커서 누른 요소가 밀려 나가면, 그 요소만 보이게 조금 옮긴다
-// 사용자 요청(2026-11-23): data-no-snap 안의 조작(공고 여러 개 고르기처럼 연달아 누르는 것)은 옮기지 않는다
 
 const INTERACTIVE = "button, a[href], input, select, textarea, summary, label, [role='button'], [role='checkbox']";
 const GAP = 16; // 메뉴·탭 줄과 영역 사이 여백
@@ -37,7 +36,7 @@ function onUse(event: Event) {
   if (!(node instanceof Element)) return;
   if (event.type === "focusin" && !node.matches(":focus-visible")) return; // 키보드로 옮겨 갈 때만(마우스는 click에서)
   const control = node.closest(INTERACTIVE);
-  if (!control || control.closest("dialog, [data-topnav], [data-sticky-bar], [data-no-snap]")) return;
+  if (!control || control.closest("dialog, [data-topnav], [data-sticky-bar]")) return;
   // 표시한 영역이 먼저, 없으면 카드(section), 그다음 목록 칸(li)
   const area = control.closest("[data-snap-section]") ?? control.closest("section") ?? control.closest("li");
   if (!area || !area.closest("main")) return;
