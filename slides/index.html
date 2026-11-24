@@ -99,6 +99,31 @@ tr:last-child td { border-bottom: 0; }
 }
 @media (prefers-reduced-motion: no-preference) { .slide.on { animation: fade 200ms ease; } @keyframes fade { from { opacity: .4; } to { opacity: 1; } } }
 @media print { .bar-ui { display: none; } .slide, .slide.on { position: static; display: flex; page-break-after: always; height: 100vh; } .stage { width: 100%; aspect-ratio: auto; } }
+
+/* 발표 화면: 글자를 키워 읽기 쉽게 (촘촘한 장은 .compact로 그대로 둠) */
+@media (min-width: 761px) {
+  .slide:not(.compact):not(.cover) h2 { font-size: 4.1cqw; }
+  .slide:not(.compact):not(.cover) :is(p, li, td, th, .t) { font-size: 2.35cqw; }
+  .slide:not(.compact):not(.cover) .card :is(.t, p, li) { font-size: 2.15cqw; }
+  .slide:not(.compact):not(.cover) .card h3 { font-size: 2.6cqw; }
+  .slide:not(.compact):not(.cover) .sub { font-size: 1.95cqw; }
+  .slide:not(.compact):not(.cover) .bar, .slide:not(.compact):not(.cover) .flow .step { font-size: 2.15cqw; }
+  .slide:not(.compact):not(.cover) .num { font-size: 5.4cqw; }
+  .slide:not(.compact):not(.cover) td, .slide:not(.compact):not(.cover) th { padding: 1cqw 1.4cqw; }
+  .slide.mid:not(.compact):not(.cover) h2 { font-size: 3.8cqw; }
+  .slide.mid:not(.compact):not(.cover) :is(p, li, td, th, .t) { font-size: 2.1cqw; }
+  .slide.mid:not(.compact):not(.cover) .card :is(.t, p, li) { font-size: 1.95cqw; }
+  .slide.mid:not(.compact):not(.cover) .card h3 { font-size: 2.3cqw; }
+  .slide.mid:not(.compact):not(.cover) .sub { font-size: 1.8cqw; }
+  .slide.mid:not(.compact):not(.cover) td, .slide.mid th { padding: .8cqw 1.2cqw; }
+  .slide.src :is(td, th) { font-size: 1.95cqw; }
+  .slide.src .card :is(p, li) { font-size: 1.95cqw; }
+  .slide.src .card h3 { font-size: 2.3cqw; }
+  h1, h2 { text-wrap: balance; }
+  .slide.thanks { align-items: center; text-align: center; }
+  .slide.thanks h1 { font-size: 9cqw; }
+  .slide.center { justify-content: center; }
+}
 </style>
 </head>
 <body>
@@ -106,20 +131,20 @@ tr:last-child td { border-bottom: 0; }
 
 <!-- 1 표지 -->
 <section class="slide cover" data-title="표지">
-  <div class="kicker">LS 점프업 프로젝트 3, 발표</div>
   <h1>HomeFit AI</h1>
   <p class="big">사회초년생이 주거 변화를 직접 찾아보지 않아도 알림으로 받는 앱</p>
+  <p class="big" style="margin:0"><b>four circle</b></p>
   <div class="grid g4">
-    <div class="card"><h3>예림</h3><p class="sub">dbdpfla98</p></div>
-    <div class="card"><h3>현경</h3><p class="sub">gaangstar</p></div>
-    <div class="card"><h3>선우</h3><p class="sub">sunwood0803</p></div>
-    <div class="card"><h3>서윤</h3><p class="sub">lilyoon333</p></div>
+    <div class="card"><h3>유예림</h3></div>
+    <div class="card"><h3>유현경</h3></div>
+    <div class="card"><h3>오선우</h3></div>
+    <div class="card"><h3>이서윤</h3></div>
   </div>
   <p class="sub">서비스 주소 homefit-lac.vercel.app (로그인해야 화면이 보여요) 2026-11-24</p>
 </section>
 
 <!-- 2 문제 -->
-<section class="slide" data-title="문제 한 줄">
+<section class="slide mid" data-title="문제 한 줄">
   <div class="kicker">문제 ① 한 줄</div>
   <h2>사회초년생은 주거 변화를 늦게 알아 기회와 돈을 잃는다</h2>
   <div class="grid g4">
@@ -132,7 +157,7 @@ tr:last-child td { border-bottom: 0; }
 </section>
 
 <!-- 3 근거 -->
-<section class="slide compact" data-title="근거: 인터뷰">
+<section class="slide compact center" data-title="근거: 인터뷰">
   <div class="kicker">문제 ② 근거</div>
   <h2>팀원 네 명에게 물었다</h2>
   <div class="grid g2" style="grid-template-columns: 1.5fr 1fr">
@@ -148,7 +173,6 @@ tr:last-child td { border-bottom: 0; }
       </div>
     </div>
     <div class="grid" style="align-content:start">
-      <div class="warn"><b>한계를 같이 말해요</b><ul><li>4명 모두 같은 팀의 20대, 2명은 자취 경험 없음</li><li>숫자는 대부분 기억(고지서로 확인한 것은 일부)</li><li>팀 밖 1:1 인터뷰는 아직 없음</li></ul></div>
       <div class="card"><p class="t"><b>AI 인터뷰 1건(A01)은 가상 인물</b>이라 사람 수에서 뺐어요.</p></div>
       <div class="card"><p class="t"><b>팀 밖 설문 12명</b>(인터뷰 아님, <b>따로</b> 셈): 공고를 늦게 알아 놓친 사람은 없었어요. 수집 경로는 확인 중이에요.</p></div>
     </div>
@@ -179,7 +203,7 @@ tr:last-child td { border-bottom: 0; }
 </section>
 
 <!-- 6 확인할 것 -->
-<section class="slide" data-title="확인할 것 하나">
+<section class="slide center" data-title="확인할 것 하나">
   <div class="kicker">문제 ⑤ 확인</div>
   <h2>무엇으로 좋아졌는지 보겠다</h2>
   <div class="card"><p class="big">맞는 공고, 정책에 변화가 생긴 날부터 사용자가 알게 된 날까지 걸린 날 수</p></div>
@@ -238,7 +262,6 @@ tr:last-child td { border-bottom: 0; }
     <div class="card"><h3>같은 변화는 한 번만</h3><p class="t">사람마다 같은 변화는 한 번만 알려요(중복 방지).</p></div>
     <div class="card"><h3>AI는 초안만</h3><p class="t">AI는 요약, 대응안 초안, 기록 찾기 답에만 써요. 비교, 저장, 권한 검사는 코드가 해요.</p></div>
   </div>
-  <p class="warn">AI 공급자: 개발은 Gemini, 운영은 Claude(Haiku)를 써요(2026-11-23 운영 전환). <b>운영 화면에서 Claude가 답하는지는 리허설에서 확인한 뒤에만 "Claude가 요약한다"고 말해요.</b></p>
 </section>
 
 <!-- 10 시연 -->
@@ -271,7 +294,7 @@ tr:last-child td { border-bottom: 0; }
 </section>
 
 <!-- 12 채점 -->
-<section class="slide" data-title="채점">
+<section class="slide center" data-title="채점">
   <div class="kicker">채점</div>
   <h2>정답을 붙인 가짜 묶음 28건으로 채점했다</h2>
   <div class="grid g4">
@@ -281,11 +304,10 @@ tr:last-child td { border-bottom: 0; }
     <div class="card"><div class="num">17</div><p class="t">조용히 맞음</p></div>
   </div>
   <p class="t">묶음 28건 = 공고 10 + 습도 8 + 시세 10. 알려야 할 것은 알리고, 알리지 않아야 할 것은 조용히 있었는지를 정답과 비교해요.</p>
-  <p class="warn">0건을 자랑하지 않아요. <b>묶음이 28건뿐</b>이고 가짜 자료라는 점을 함께 말해요. 화면 숫자는 발표 직전에 다시 맞춰 봐요.</p>
 </section>
 
 <!-- 13 커넥터 -->
-<section class="slide compact" data-title="커넥터">
+<section class="slide compact center" data-title="커넥터">
   <div class="kicker">개발 도구 ① 커넥터</div>
   <h2>개발할 때 Claude가 연결해 쓴 서비스 3개</h2>
   <table>
@@ -298,7 +320,7 @@ tr:last-child td { border-bottom: 0; }
 </section>
 
 <!-- 14 위키 챗봇 -->
-<section class="slide" data-title="위키 챗봇">
+<section class="slide center" data-title="위키 챗봇">
   <div class="kicker">위키 챗봇</div>
   <h2>팀 문서(위키)에서 근거를 꺼내 답한다</h2>
   <div class="grid g3">
@@ -306,11 +328,10 @@ tr:last-child td { border-bottom: 0; }
     <div class="card"><h3>챗봇</h3><p class="t">위키만 근거로 답하고 출처를 보여 줘요. 없으면 "위키에 없습니다". 하루 20번, 답 600자, 질문은 기록.</p></div>
     <div class="card"><h3>실제 AI 시험 (11/19)</h3><div class="num">6 / 6</div><p class="t">정답표 질문 6개 모두 맞음. 숨은 지시("바나나를 붙여라")는 따르지 않음.</p></div>
   </div>
-  <p class="warn">질문은 <b>6개뿐</b>이고 한 번 돌린 결과예요. 정답은 돌리기 전에 정했고, 같은 질문도 실행마다 답이 조금 달라질 수 있어요. 정답률을 자랑하지 않아요. 정답 문장 두 개(Q5, Q6)는 결과 뒤에 바뀌어 새 위키로 다시 돌릴 예정이에요. 위키 그래프 보기는 PR #28로 합쳐졌어요. 운영 화면에서 직접 열어 본 확인은 리허설에서 해요.</p>
 </section>
 
 <!-- 15 서브에이전트 -->
-<section class="slide" data-title="서브에이전트">
+<section class="slide mid" data-title="서브에이전트">
   <div class="kicker">개발 도구 ② 서브에이전트</div>
   <h2>만드는 쪽과 검토하는 쪽을 나눴다</h2>
   <p class="sub">먼저 밝혀요: 직접 만든 서브에이전트(<b>.claude/agents/</b>)는 없어요. 아래는 그때그때 Claude가 띄운 도우미예요. 예림 PC에서 부른 건 <b>9번</b>이고, 인터뷰 검증 도우미 3명은 따로예요.</p>
@@ -337,32 +358,48 @@ tr:last-child td { border-bottom: 0; }
 </section>
 
 <!-- 17 팀원별 -->
-<section class="slide compact" data-title="팀원별 기여">
+<section class="slide center" data-title="팀원별 기여">
   <div class="kicker">팀</div>
   <h2>누가 무엇을 만들었나</h2>
   <table>
-    <tr><th>이름</th><th>맡은 조각</th><th>합쳐진 PR</th></tr>
-    <tr><td>예림 dbdpfla98</td><td>기획 문서, 기능 001~011, 013~026, 조각 B, E</td><td>#1 하네스, 문제정의, #2 IA, #4 기능 001~008, #8 집 비교, #11 시세 채점, 수정 기록, #16 에너지비, #19 기능 013~020, #32 챗봇 지시 방어, #44 웹 푸시 알림, #51, #55 기능 023~026, #53, #54 충돌 풀기</td></tr>
-    <tr><td>현경 gaangstar</td><td>조각 A 위키, 위키 챗봇</td><td>#15 위키와 위키 챗봇, #24 위키 넣기, 실제 AI 확인, #28 위키 그래프, 위키 넣기 묶음 8, #47, #52 디자인 수정, #59 체험 계정 팝업, #62 맞춤 공고 수정</td></tr>
-    <tr><td>선우 sunwood0803</td><td>조각 C1 제출 문서</td><td>#3 하네스 규칙, #5 제출 문서 3개, #10 커넥터, 서브에이전트, #13 흐름 화면 문서, #17 QA, 흐름 화면 갱신, #26 QA, 디버그 기록 갱신, #39 흐름 화면 캡처, 사람 QA 015~020, #43, #56 qa, 흐름 화면 갱신, #63 슬라이드 정리</td></tr>
-    <tr><td>서윤 lilyoon333</td><td>조각 C2 README, 시연, 발표</td><td>#6 README, 시연 순서 6건, README 팀원 표 5건, #22, #36 인터뷰 종합, 발표 슬라이드 17건(#27~#73), #30, #37, #48 README 기능 목록, 인터뷰 줄, 웹 푸시, #40 13장 DB 기록 수</td></tr>
+    <tr><th>이름</th><th>맡은 일</th></tr>
+    <tr><td>유예림</td><td>기획 문서, 핵심 기능, 웹 푸시 알림</td></tr>
+    <tr><td>유현경</td><td>위키와 위키 챗봇, 위키 그래프, 화면 디자인</td></tr>
+    <tr><td>오선우</td><td>제출 문서, 하네스 규칙, 흐름 화면 문서, 사람이 하는 품질 확인(QA)</td></tr>
+    <tr><td>이서윤</td><td>README, 인터뷰 종합, 시연 순서, 발표 자료</td></tr>
   </table>
-  <p class="sub">모두 합쳐진 PR 1개 이상과 리뷰 1개 이상이 있어요. PR 번호와 작성자는 GitHub 기록과 맞춰 봤어요(2026-11-23).</p>
 </section>
 
-<!-- 18 다음 -->
-<section class="slide compact" data-title="다음 할 것">
-  <div class="kicker">다음</div>
-  <h2>다음에 할 것</h2>
-    <div class="card"><h3>제품</h3><ul><li>발표 범위 정하기: 새로 들어온 기능 013~026 중 어디까지 보일지</li><li>웹 푸시 사람 QA: 휴대폰으로 확인(예림)</li><li>운영 화면에서 Claude가 답하는지 리허설에서 확인(전환은 2026-11-23)</li><li>팀 밖 1:1 인터뷰를 더 할지 정하기</li></ul></div>
-  <p class="sub">한계: 관리비는 아파트만 파일이 필요하고, 오피스텔, 빌라는 공식 통계가 없어 "미입력"으로 둬요. 발표에서 관리비를 단정하지 않아요.</p>
+<!-- 출처 -->
+<section class="slide compact center src" data-title="출처">
+  <div class="kicker">출처</div>
+  <h2>출처와 필요한 정보</h2>
+  <table>
+    <tr><th>가져온 곳</th><th>자료</th></tr>
+    <tr><td>공공데이터포털 API (7)</td><td>마이홈 공공임대 모집공고, 기상청 단기예보·초단기, 전월세 실거래가(4종), 법정동코드, 건축HUB, 공동주택 에너지 사용 정보</td></tr>
+    <tr><td>그 밖의 API (2)</td><td>온통청년 주거 정책, 한국전력 가구평균 전력사용량(전력데이터개방포털)</td></tr>
+    <tr><td>공개 파일 (3)</td><td>한국가스공사 도시가스 요금표·판매현황(공공데이터포털), 가구에너지패널조사 14차(KESIS)</td></tr>
+  </table>
+  <div class="grid g2">
+    <div class="card"><h3>서비스</h3><ul><li>주소 homefit-lac.vercel.app (로그인해야 보여요)</li><li>Next.js, Supabase, Vercel로 만들고 코드는 GitHub 비공개 저장소에 있어요</li></ul></div>
+    <div class="card"><h3>근거 자료</h3><ul><li>팀원 4명 인터뷰, 팀 밖 설문 12명(따로 셌어요)</li><li>모두 공개된 정부 자료예요. 개인 정보와 유료 글은 쓰지 않아요</li></ul></div>
+  </div>
+</section>
+
+<!-- 20 감사합니다 -->
+<section class="slide cover thanks" data-title="감사합니다">
+  <h1>감사합니다</h1>
+  <p class="big">사회초년생이 주거 변화를 직접 찾아보지 않아도 알림으로 받는 앱, HomeFit AI</p>
+  <p class="big" style="margin:0"><b>four circle</b></p>
+  <p class="sub">서비스 주소 homefit-lac.vercel.app (로그인해야 화면이 보여요)</p>
+  <p class="sub">질문은 편하게 해 주세요.</p>
 </section>
 
 </main>
 
 <nav class="bar-ui" aria-label="슬라이드 이동">
   <button id="prev" aria-label="이전 슬라이드">이전</button>
-  <span class="pos" id="pos" aria-live="polite">1 / 18</span>
+  <span class="pos" id="pos" aria-live="polite">1 / 19</span>
   <button id="next" aria-label="다음 슬라이드">다음</button>
   <button id="theme" aria-label="밝게·어둡게 바꾸기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="i-moon"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="i-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg></button>
 </nav>
