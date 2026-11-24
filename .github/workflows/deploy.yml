@@ -1,0 +1,23 @@
+name: Deploy slides to Vercel
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SLIDES_PROJECT_ID }}
+
+on:
+  push:
+    branches: [main]
+    # 발표 슬라이드가 바뀔 때만 배포한다
+    paths:
+      - "slides/**"
+      - ".github/workflows/deploy.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 빌드가 필요 없는 정적 폴더(slides/)만 올린다
+      - name: Deploy slides
+        run: npx --yes vercel@65.17.0 deploy slides --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
