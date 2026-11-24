@@ -18,6 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Hobby 팀은 커밋 작성자가 팀원이 아니면 배포를 막는다. git 정보를 지워서 토큰 주인 명의로 올린다
+      - name: Remove git metadata
+        run: rm -rf .git
+
       # 빌드가 필요 없는 정적 폴더(slides/)만 올린다
       - name: Deploy slides
         run: npx --yes vercel@65.17.0 deploy slides --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
