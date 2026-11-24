@@ -121,7 +121,12 @@ tr:last-child td { border-bottom: 0; }
   .slide.src .card h3 { font-size: 2.3cqw; }
   h1, h2 { text-wrap: balance; }
   .slide.thanks { align-items: center; text-align: center; }
-  .slide.thanks h1 { font-size: 9cqw; }
+  .slide.thanks h1 { font-size: 9cqw; }  .slide.thanks .thanks-line { font-size: 2.5cqw; white-space: nowrap; margin: 0; }
+  .slide.thanks .thanks-row { display: flex; justify-content: center; align-items: center; gap: 0; margin-top: 1.4cqw; color: var(--c-muted); font-size: 1.7cqw; white-space: nowrap; }
+  .slide.thanks .thanks-row span { padding: 0 1.6cqw; }
+  .slide.thanks .thanks-row span + span { border-left: 2px solid var(--c-border); }
+  .slide.thanks .thanks-row b { color: var(--c-text); }
+
   .slide.center { justify-content: center; }
 }
 </style>
@@ -389,10 +394,12 @@ tr:last-child td { border-bottom: 0; }
 <!-- 20 감사합니다 -->
 <section class="slide cover thanks" data-title="감사합니다">
   <h1>감사합니다</h1>
-  <p class="big">사회초년생이 주거 변화를 직접 찾아보지 않아도 알림으로 받는 앱, HomeFit AI</p>
-  <p class="big" style="margin:0"><b>four circle</b></p>
-  <p class="sub">서비스 주소 homefit-lac.vercel.app (로그인해야 화면이 보여요)</p>
-  <p class="sub">질문은 편하게 해 주세요.</p>
+  <p class="big thanks-line">사회초년생이 주거 변화를 직접 찾아보지 않아도 알림으로 받는 앱, HomeFit AI</p>
+  <div class="thanks-row">
+    <span><b>four circle</b></span>
+    <span>서비스 주소 homefit-lac.vercel.app (로그인해야 화면이 보여요)</span>
+    <span>질문은 편하게 해 주세요.</span>
+  </div>
 </section>
 
 </main>
