@@ -116,6 +116,12 @@ tr:last-child td { border-bottom: 0; }
   .slide.mid:not(.compact):not(.cover) .card h3 { font-size: 2.3cqw; }
   .slide.mid:not(.compact):not(.cover) .sub { font-size: 1.8cqw; }
   .slide.mid:not(.compact):not(.cover) td, .slide.mid th { padding: .8cqw 1.2cqw; }
+  .slide.src :is(td, th) { font-size: 1.95cqw; }
+  .slide.src .card :is(p, li) { font-size: 1.95cqw; }
+  .slide.src .card h3 { font-size: 2.3cqw; }
+  h1, h2 { text-wrap: balance; }
+  .slide.thanks { align-items: center; text-align: center; }
+  .slide.thanks h1 { font-size: 9cqw; }
   .slide.center { justify-content: center; }
 }
 </style>
@@ -366,7 +372,7 @@ tr:last-child td { border-bottom: 0; }
 </section>
 
 <!-- 출처 -->
-<section class="slide compact" data-title="출처">
+<section class="slide compact center src" data-title="출처">
   <div class="kicker">출처</div>
   <h2>출처와 필요한 정보</h2>
   <table>
@@ -389,11 +395,17 @@ tr:last-child td { border-bottom: 0; }
   <p class="sub">한계: 관리비는 아파트만 파일이 필요하고, 오피스텔, 빌라는 공식 통계가 없어 "미입력"으로 둬요. 발표에서 관리비를 단정하지 않아요.</p>
 </section>
 
+<!-- 20 감사합니다 -->
+<section class="slide cover thanks" data-title="감사합니다">
+  <h1>감사합니다</h1>
+  <p class="sub">질문은 편하게 해 주세요.</p>
+</section>
+
 </main>
 
 <nav class="bar-ui" aria-label="슬라이드 이동">
   <button id="prev" aria-label="이전 슬라이드">이전</button>
-  <span class="pos" id="pos" aria-live="polite">1 / 18</span>
+  <span class="pos" id="pos" aria-live="polite">1 / 20</span>
   <button id="next" aria-label="다음 슬라이드">다음</button>
   <button id="theme" aria-label="밝게·어둡게 바꾸기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="i-moon"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="i-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg></button>
 </nav>
